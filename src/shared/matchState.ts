@@ -4,7 +4,8 @@
 
 import { ModeId, TeamId } from "./modes";
 
-export type Phase = "Playing" | "Results" | "Voting";
+// Warmup is the gap between matches: players warm up in the warm-up arena and vote.
+export type Phase = "Warmup" | "Playing" | "Results";
 export type FlagStatus = "Home" | "Taken" | "Dropped";
 
 export interface MatchStateValues {
@@ -21,7 +22,7 @@ export interface MatchStateValues {
 	BlueScore: number;
 	RedFlag: FlagStatus;
 	BlueFlag: FlagStatus;
-	// JSON-encoded VoteOption[] and number[] during the Voting phase.
+	// JSON-encoded VoteOption[] and number[] during the Warmup phase.
 	VoteOptions: string;
 	VoteCounts: string;
 	// JSON-encoded ControlPointState[] in Domination and Hardpoint.

@@ -37,12 +37,12 @@ let menuOpen = false;
 let menuContent: Frame;
 
 // Panels shown in the menu's content area, one at a time. The map vote takes the area over
-// during the Voting phase.
+// during the warm-up.
 const panels = new Map<string, GuiObject>();
 let openPanel: string | undefined;
 
 function refreshPanels() {
-	const voting = getMatchState("Phase") === "Voting";
+	const voting = getMatchState("Phase") === "Warmup";
 	for (const [id, panel] of panels) panel.Visible = !voting && id === openPanel;
 }
 
@@ -102,8 +102,9 @@ function refresh() {
 	const mapName = getMatchState("MapName") ?? "";
 	matchInfo.Text = mode ? `${MODE_NAMES[mode]}  ·  ${mapName}` : "";
 
-	playButton.Visible = phase === "Playing";
+	playButton.Visible = phase === "Playing" || phase === "Warmup";
 	if (phase === "Playing") status.Text = "MATCH IN PROGRESS";
+	else if (phase === "Warmup") status.Text = "WARMING UP: NEXT MATCH SOON";
 	else if (phase === "Results") status.Text = "MATCH ENDING";
 	else status.Text = "NEXT MATCH STARTING SOON";
 }

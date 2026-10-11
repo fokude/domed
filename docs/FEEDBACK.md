@@ -24,7 +24,9 @@ playing against their interest. Roblox's audience is young, which makes this mat
 
 **Multi-kills** (each within 4 seconds of the last) escalate the headline (DOUBLE DOME, TRIPLE
 DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch each step.
-**Streaks** (kills without dying) call out milestones at 3, 5, 10 and 15. Body shots, shield
+**Streaks** (kills without dying) call out milestones at 3, 5, 10 and 15. Training dummy kills
+(on the Test Range and in the warm-up) escalate multi-kills but earn no XP popup and don't
+count toward streaks, so practice can't carry a streak into a match. Body shots, shield
 breaks and perk pickups each have their own cue.
 
 ## Why this design

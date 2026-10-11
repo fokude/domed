@@ -1,11 +1,19 @@
-// Vote cards in the menu between matches. Click a card or press 1-3.
+// Map vote during the warm-up between matches: cards in the menu, and a compact list on screen
+// for players in the warm-up arena. Click a card or press 1-3.
 
-import { getMatchState, getMatchStateJson, onMatchStateChanged, VoteOption } from "shared/matchState";
+import {
+	DEPLOYED_ATTRIBUTE,
+	getMatchState,
+	getMatchStateJson,
+	onMatchStateChanged,
+	VoteOption,
+} from "shared/matchState";
 import { MODE_NAMES } from "shared/modes";
 import { Remotes } from "shared/remotes";
 import { getMenuContent } from "./menu";
 import { create } from "./ui";
 
+const Players = game.GetService("Players");
 const UserInputService = game.GetService("UserInputService");
 
 const WHITE = new Color3(1, 1, 1);
@@ -18,13 +26,21 @@ interface Card {
 	votes: TextLabel;
 }
 
+interface ListRow {
+	frame: Frame;
+	votes: TextLabel;
+}
+
 let panel: Frame;
 let cardRow: Frame;
 let cards: Card[] = [];
+let list: Frame;
+let listGui: ScreenGui;
+let rows: ListRow[] = [];
 let choice: number | undefined;
 
 function vote(index: number) {
-	if (getMatchState("Phase") !== "Voting" || index >= cards.size()) return;
+	if (getMatchState("Phase") !== "Warmup" || index >= cards.size()) return;
 	choice = index;
 	Remotes.CastVote.FireServer(index);
 	refreshCounts();
@@ -36,6 +52,11 @@ function refreshCounts() {
 		const count = counts[index] ?? 0;
 		card.votes.Text = `${count} ${count === 1 ? "VOTE" : "VOTES"}`;
 		card.stroke.Enabled = index === choice;
+	});
+	rows.forEach((row, index) => {
+		const count = counts[index] ?? 0;
+		row.votes.Text = tostring(count);
+		row.frame.BackgroundTransparency = index === choice ? 0.05 : 0.45;
 	});
 }
 
@@ -120,6 +141,82 @@ function buildCard(option: VoteOption, index: number): Card {
 	return { stroke, votes };
 }
 
+// One row per option in the on-screen list: key, map and mode, votes.
+function buildRow(option: VoteOption, index: number): ListRow {
+	const theme = Color3.fromHex(option.themeColor);
+	const frame = create(
+		"Frame",
+		{ LayoutOrder: index, Size: new UDim2(1, 0, 0, 34), BackgroundColor3: PANEL, BorderSizePixel: 0 },
+		list,
+	);
+	create("UICorner", { CornerRadius: new UDim(0, 6) }, frame);
+	create("Frame", { Size: new UDim2(0, 4, 1, 0), BackgroundColor3: theme, BorderSizePixel: 0 }, frame);
+	const text = { BackgroundTransparency: 1, Font: Enum.Font.GothamBold, TextSize: 15, TextColor3: WHITE };
+	create(
+		"TextLabel",
+		{
+			...text,
+			Position: UDim2.fromOffset(14, 0),
+			Size: new UDim2(1, -60, 1, 0),
+			TextXAlignment: Enum.TextXAlignment.Left,
+			TextTruncate: Enum.TextTruncate.AtEnd,
+			Text: `[${index + 1}]  ${option.mapName.upper()}  ·  ${MODE_NAMES[option.mode]}`,
+		},
+		frame,
+	);
+	const votes = create(
+		"TextLabel",
+		{
+			...text,
+			AnchorPoint: new Vector2(1, 0),
+			Position: new UDim2(1, -12, 0, 0),
+			Size: new UDim2(0, 40, 1, 0),
+			Font: Enum.Font.GothamBlack,
+			TextXAlignment: Enum.TextXAlignment.Right,
+		},
+		frame,
+	);
+	return { frame, votes };
+}
+
+function rebuildList(options: VoteOption[]) {
+	list.ClearAllChildren();
+	create("UIListLayout", { Padding: new UDim(0, 6), SortOrder: Enum.SortOrder.LayoutOrder }, list);
+	create(
+		"TextLabel",
+		{
+			LayoutOrder: -1,
+			Size: new UDim2(1, 0, 0, 20),
+			BackgroundTransparency: 1,
+			Font: Enum.Font.GothamBlack,
+			TextSize: 15,
+			TextColor3: MUTED,
+			TextXAlignment: Enum.TextXAlignment.Left,
+			Text: "NEXT MAP: PRESS 1-3 TO VOTE",
+		},
+		list,
+	);
+	rows = options.map(buildRow);
+}
+
+function buildList() {
+	listGui = create(
+		"ScreenGui",
+		{ Name: "WarmupVote", ResetOnSpawn: false, IgnoreGuiInset: true, Enabled: false },
+		Players.LocalPlayer.WaitForChild("PlayerGui"),
+	);
+	list = create(
+		"Frame",
+		{
+			AnchorPoint: new Vector2(0, 0.5),
+			Position: new UDim2(0, 24, 0.45, 0),
+			Size: UDim2.fromOffset(340, 140),
+			BackgroundTransparency: 1,
+		},
+		listGui,
+	);
+}
+
 function rebuildCards() {
 	cardRow.ClearAllChildren();
 	create(
@@ -132,15 +229,20 @@ function rebuildCards() {
 		cardRow,
 	);
 	choice = undefined;
-	cards = getMatchStateJson<VoteOption[]>("VoteOptions", []).map(buildCard);
+	const options = getMatchStateJson<VoteOption[]>("VoteOptions", []);
+	cards = options.map(buildCard);
+	rebuildList(options);
 	refreshCounts();
 }
 
 function refreshPhase() {
-	panel.Visible = getMatchState("Phase") === "Voting";
+	const warmup = getMatchState("Phase") === "Warmup";
+	panel.Visible = warmup;
+	listGui.Enabled = warmup && Players.LocalPlayer.GetAttribute(DEPLOYED_ATTRIBUTE) === true;
 }
 
 export function initMapVote() {
+	buildList();
 	panel = create("Frame", { Size: UDim2.fromScale(1, 1), BackgroundTransparency: 1 }, getMenuContent());
 	create(
 		"TextLabel",
@@ -164,6 +266,7 @@ export function initMapVote() {
 	onMatchStateChanged(["VoteOptions"], rebuildCards);
 	onMatchStateChanged(["VoteCounts"], refreshCounts);
 	onMatchStateChanged(["Phase"], refreshPhase);
+	Players.LocalPlayer.GetAttributeChangedSignal(DEPLOYED_ATTRIBUTE).Connect(refreshPhase);
 	rebuildCards();
 	refreshPhase();
 

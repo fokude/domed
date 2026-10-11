@@ -86,8 +86,8 @@ function refresh() {
 	const target = getMatchState("ScoreTarget") ?? 0;
 	if (phase === "Results") {
 		subtitle.Text = "MATCH OVER";
-	} else if (phase === "Voting") {
-		subtitle.Text = "VOTING FOR NEXT MAP";
+	} else if (phase === "Warmup") {
+		subtitle.Text = "WARM-UP  ·  PRESS 1, 2 OR 3 TO VOTE FOR THE NEXT MAP";
 	} else if (mode) {
 		const goal =
 			mode === "CTF"

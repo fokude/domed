@@ -152,11 +152,13 @@ function headBurst(position: Vector3) {
 	task.delay(1, () => anchor.Destroy());
 }
 
-function onKill() {
+// Practice kills (training dummies) escalate multi-kills, so they can be tried out, but earn no
+// XP and don't count toward streaks.
+function onKill(practice: boolean) {
 	const now = os.clock();
 	multiKill = now - lastKillAt <= MULTI_KILL_WINDOW ? multiKill + 1 : 1;
 	lastKillAt = now;
-	streak += 1;
+	if (!practice) streak += 1;
 
 	const step = math.min(multiKill, MULTI_KILL_NAMES.size()) - 1;
 	const pitch = math.min(1 + step * PITCH_STEP, PITCH_CAP);
@@ -166,14 +168,15 @@ function onKill() {
 	showHeadline(MULTI_KILL_NAMES[step], multiKill > 1 ? MULTI_GOLD : KILL_RED);
 	crosshairBurst(multiKill > 1 ? MULTI_GOLD : KILL_RED);
 	edgeFlash(KILL_RED);
+	if (practice) return;
 	xpPopup(XpConfig.kill);
 
 	const callout = STREAK_CALLOUTS.get(streak);
 	if (callout !== undefined) showStreak(callout);
 }
 
-function onHitConfirm(kind: HitKind) {
-	if (kind === "kill") onKill();
+function onHitConfirm(kind: HitKind, practice: boolean) {
+	if (kind === "kill") onKill(practice);
 	else if (kind === "body") playSound("bodyHit");
 	else {
 		playSound("shieldBreak");

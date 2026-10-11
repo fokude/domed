@@ -124,7 +124,8 @@ function clearPerks(player: Player) {
 }
 
 function tick() {
-	if (getMatchState("Phase") !== "Playing") return;
+	const phase = getMatchState("Phase");
+	if (phase !== "Playing" && phase !== "Warmup") return;
 	const now = os.clock();
 	for (const orb of orbs) {
 		if (now < orb.availableAt) continue;

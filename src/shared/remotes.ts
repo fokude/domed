@@ -17,7 +17,8 @@ export type HitKind = "kill" | "body" | "shield";
 export const Remotes = {
 	Fire: remote<(origin: Vector3, hitPosition: Vector3, hitPart: BasePart | undefined) => void>("Fire"),
 	ShotFired: remote<(shooter: Player, origin: Vector3, hitPosition: Vector3) => void>("ShotFired"),
-	HitConfirm: remote<(kind: HitKind) => void>("HitConfirm"),
+	// `practice` is true for hits on training dummies, which earn no XP and don't count toward streaks.
+	HitConfirm: remote<(kind: HitKind, practice: boolean) => void>("HitConfirm"),
 	Knockback: remote<(impulse: Vector3) => void>("Knockback"),
 	// Either player may have left by the time a client receives this.
 	KillFeed: remote<(killer?: Player, victim?: Player) => void>("KillFeed"),

@@ -128,7 +128,7 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 		if (reason !== undefined) return reject(shooter, reason);
 		const kind = hitDummy(victimCharacter, hitPart.Name === "Head");
 		if (kind === undefined) return;
-		Remotes.HitConfirm.FireClient(shooter, kind);
+		Remotes.HitConfirm.FireClient(shooter, kind, true);
 		if (kind === "kill") Remotes.HeadBurst.FireAllClients(hitPart.Position);
 		return;
 	}
@@ -146,19 +146,19 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 		// A shield absorbs the headshot and breaks, pushing the target back like a body shot.
 		const knockback = WeaponConfig.bodyShotKnockback;
 		Remotes.Knockback.FireClient(victim, shotVector.Unit.mul(knockback).add(new Vector3(0, knockback * 0.35, 0)));
-		Remotes.HitConfirm.FireClient(shooter, "shield");
+		Remotes.HitConfirm.FireClient(shooter, "shield", false);
 	} else if (hitPart.Name === "Head") {
 		victimHumanoid.Health = 0;
 		incrementStat(shooter, "Kills");
 		recordKill(shooter, shotVector.Magnitude);
-		Remotes.HitConfirm.FireClient(shooter, "kill");
+		Remotes.HitConfirm.FireClient(shooter, "kill", false);
 		Remotes.KillFeed.FireAllClients(shooter, victim);
 		Remotes.HeadBurst.FireAllClients(hitPart.Position);
 		rules.onKill(shooter, victim);
 	} else {
 		const knockback = WeaponConfig.bodyShotKnockback;
 		Remotes.Knockback.FireClient(victim, shotVector.Unit.mul(knockback).add(new Vector3(0, knockback * 0.35, 0)));
-		Remotes.HitConfirm.FireClient(shooter, "body");
+		Remotes.HitConfirm.FireClient(shooter, "body", false);
 	}
 }
 

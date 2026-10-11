@@ -48,7 +48,7 @@ Type these in chat during a Studio playtest. They're ignored on live servers.
 | Command               | Does                                                                           |
 | --------------------- | ------------------------------------------------------------------------------ |
 | `/map <MapId> [mode]` | Switch to that map right away, e.g. `/map InfernalSpire`                       |
-| `/end`                | End the match, then show results and the map vote                              |
+| `/end`                | End the match, then show results and start the warm-up                         |
 | `/openness`           | Measure the current map's openness and spawn exposure (see docs/MAP_DESIGN.md) |
 
 `/map TestRange [mode]` loads the test map, for trying every feature solo: training dummies

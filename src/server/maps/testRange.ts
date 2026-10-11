@@ -2,7 +2,7 @@
 // /map TestRange [mode]; it never appears in rotation or votes. Stations: training dummies to
 // shoot (kill feedback, multi-kills, shields), all four perks on short respawns, two control
 // points for Domination and Hardpoint, a bhop strip and jump pads. Floor lines are every 10
-// studs for judging distances.
+// studs for judging distances. The warm-up map reuses its stations.
 
 import {
 	block,
@@ -21,6 +21,12 @@ import { MapBuilder } from "./types";
 const FLOOR_SIZE = 240;
 // Seconds before perk orbs come back here, so each can be tried repeatedly.
 const PERK_RESPAWN = 5;
+export const RANGE_LIGHTING = {
+	clockTime: 13,
+	brightness: 2,
+	ambient: Color3.fromRGB(110, 110, 120),
+	outdoorAmbient: Color3.fromRGB(130, 130, 140),
+};
 const FIRING_LINE_X = -30;
 
 const Floor: Style = { color: Color3.fromRGB(150, 155, 165), material: Enum.Material.Concrete };
@@ -50,7 +56,7 @@ function label(parent: Instance, position: Vector3, text: string) {
 	textLabel.Parent = gui;
 }
 
-function buildFloor(map: Model) {
+export function buildFloor(map: Model) {
 	slab(map, Vector3.zero, new Vector3(FLOOR_SIZE, 4, FLOOR_SIZE), Floor, "Floor");
 	const half = FLOOR_SIZE / 2;
 	for (let offset = -half + 10; offset < half; offset += 10) {
@@ -60,7 +66,7 @@ function buildFloor(map: Model) {
 }
 
 // Long straight with a marker every 20 studs for judging bhop speed.
-function buildStrip(map: Model) {
+export function buildStrip(map: Model) {
 	for (let x = -100; x <= 100; x += 20) {
 		slab(map, new Vector3(x, 0.1, 80), new Vector3(0.6, 0.1, 20), Marker, "StripMarker");
 		label(map, new Vector3(x, 4, 92), tostring(x + 100));
@@ -68,7 +74,7 @@ function buildStrip(map: Model) {
 	label(map, new Vector3(0, 10, 80), "BHOP STRIP");
 }
 
-function buildPads(map: Model) {
+export function buildPads(map: Model) {
 	jumpPad(map, new Vector3(30, 0, -40), new Vector3(30, 30, -40), 0, Pad);
 	label(map, new Vector3(30, 8, -40), "PAD: straight up");
 
@@ -78,7 +84,7 @@ function buildPads(map: Model) {
 }
 
 // Dummies stand west of the firing line, facing it.
-function buildGallery(map: Model) {
+export function buildGallery(map: Model) {
 	slab(map, new Vector3(FIRING_LINE_X, 0.1, 0), new Vector3(0.6, 0.1, 180), Marker, "FiringLine");
 	label(map, new Vector3(FIRING_LINE_X, 8, 0), "SHOOTING GALLERY: shoot from this line");
 
@@ -103,10 +109,10 @@ function buildGallery(map: Model) {
 	label(map, new Vector3(-73, 9, -83), "MULTI-KILL CLUSTER");
 }
 
-function buildPerks(map: Model) {
+export function buildPerks(map: Model, respawn: number) {
 	const perks = ["SuperJump", "Shield", "Overcharge", "Radar"] as const;
-	perks.forEach((perk, index) => perkMarker(map, new Vector3(60, 0, -20 + index * 20), perk, PERK_RESPAWN));
-	label(map, new Vector3(60, 10, 10), `PERKS: respawn every ${PERK_RESPAWN}s`);
+	perks.forEach((perk, index) => perkMarker(map, new Vector3(60, 0, -20 + index * 20), perk, respawn));
+	label(map, new Vector3(60, 10, 10), `PERKS: respawn every ${respawn}s`);
 }
 
 // Two points for testing Domination captures and Hardpoint rotation alone.
@@ -133,7 +139,7 @@ export const TestRange: MapBuilder = {
 		buildStrip(map);
 		buildPads(map);
 		buildGallery(map);
-		buildPerks(map);
+		buildPerks(map, PERK_RESPAWN);
 		buildPoints(map);
 
 		for (const x of [-10, 10]) {
@@ -142,11 +148,6 @@ export const TestRange: MapBuilder = {
 			}
 		}
 
-		setMapLighting(map, {
-			clockTime: 13,
-			brightness: 2,
-			ambient: Color3.fromRGB(110, 110, 120),
-			outdoorAmbient: Color3.fromRGB(130, 130, 140),
-		});
+		setMapLighting(map, RANGE_LIGHTING);
 	},
 };

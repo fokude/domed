@@ -1,12 +1,12 @@
-// Runs matches back to back: load a map, play the mode until someone wins or time runs out,
-// show results, then send everyone to the menu to vote on the next map.
+// Runs matches back to back: warm up in the warm-up arena while voting on the next map, load
+// that map, play the mode until someone wins or time runs out, show results, and repeat.
 
 import { MatchConfig, ModeMinPlayers } from "shared/config";
 import { DEPLOYED_ATTRIBUTE, setMatchState } from "shared/matchState";
 import { ModeId } from "shared/modes";
 import { Remotes } from "shared/remotes";
 import { getStandings } from "shared/standings";
-import { setCombatArena, setCombatRules } from "../combat";
+import { CombatRules, setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
 import { logMatchFinished, logOnboardingStep } from "../analytics";
 import { startDummies, stopDummies } from "../dummies";
@@ -14,11 +14,13 @@ import { startPerks, stopPerks } from "../perks";
 import { recordMatchEnd, startMatchXp } from "../progression";
 import { getMapModel, listMaps } from "../maps/library";
 import { LoadedMap, loadMap } from "../maps/loader";
+import { WARMUP_MAP_ID } from "../maps/warmup";
 import {
 	closeSpawning,
 	deploy,
 	deployAll,
 	forgetPlayer,
+	pickSafestSpawn,
 	returnAllToMenu,
 	setDeathHandler,
 	setDeployHandler,
@@ -70,6 +72,15 @@ function playableOptions(): MatchOption[] {
 	const suitable = working.filter((option) => playerCount >= ModeMinPlayers[option.mode]);
 	if (suitable.size() > 0) return suitable;
 	return working.size() > 0 ? working : allMatchOptions();
+}
+
+// Players can't hurt each other in the warm-up; only training dummies take hits.
+class WarmupRules implements CombatRules {
+	canDamage() {
+		return false;
+	}
+
+	onKill() {}
 }
 
 function waitForPlayers() {
@@ -145,11 +156,50 @@ function showResults(result: MatchResult) {
 	task.wait(MatchConfig.resultsTime);
 }
 
-function voteForNext(previous: MatchOption): MatchOption {
+// The gap between matches: everyone is dropped into the warm-up arena to try movement and aim
+// on training dummies while voting on the next map. Returns the vote's winner.
+function warmUp(previous: MatchOption | undefined): MatchOption {
+	const map = loadMap(getMapModel(WARMUP_MAP_ID)!);
+	currentMap = map;
+	startPerks(map);
+	startDummies(map);
+	const spawns = map.spawns.map((spawn) => spawn.cframe);
+
+	setCombatArena(map.arena);
+	setKillHeight(map.killHeight);
+	setSpawnPicker((player) => pickSafestSpawn(player, spawns, () => true));
+	setDeathHandler(() => {});
+	setDeployHandler(() => {});
+	setRespawnTime(MatchConfig.respawnTime);
+	setMatchState("RespawnTime", MatchConfig.respawnTime);
+	setMatchState("Phase", "Warmup");
+	setMatchState("MapName", map.info.name);
+	setMatchState("EndsAt", Workspace.GetServerTimeNow() + MatchConfig.warmupTime);
+	deployAll();
+	setCombatRules(new WarmupRules());
+
 	const choices = pickVoteOptions(playableOptions(), previous);
-	setMatchState("Phase", "Voting");
-	setMatchState("EndsAt", Workspace.GetServerTimeNow() + MatchConfig.intermissionTime);
-	return runVote(choices, MatchConfig.intermissionTime, () => forcedOption !== undefined);
+	const winner = runVote(choices, MatchConfig.warmupTime, () => forcedOption !== undefined);
+	leaveWarmup();
+	return winner;
+}
+
+function leaveWarmup() {
+	setCombatRules(undefined);
+	closeSpawning();
+	pcall(stopPerks);
+	pcall(stopDummies);
+	returnAllToMenu();
+}
+
+// Warms up, falling back to a random option if the warm-up arena fails to load, so a broken
+// warm-up can't stall the server.
+function warmUpSafely(previous: MatchOption | undefined): MatchOption {
+	const [ok, result] = pcall(() => warmUp(previous));
+	if (ok) return result;
+	warn(`Warm-up failed: ${result}`);
+	leaveWarmup();
+	return randomOption();
 }
 
 function runMatch(option: MatchOption) {
@@ -218,24 +268,21 @@ export function startMatchLoop() {
 	startVoting();
 
 	task.spawn(() => {
-		// Matches only run while someone is here, so the first player doesn't join mid-timer.
-		waitForPlayers();
-		let option = randomOption();
+		// Nothing runs on an empty server, so the first player arrives to a fresh warm-up.
+		let previous: MatchOption | undefined;
 		for (;;) {
-			if (Players.GetPlayers().size() === 0) {
-				waitForPlayers();
-				option = forcedOption ?? randomOption();
-			}
-			if (!runMatchSafely(option)) {
-				forcedOption = undefined;
-				option = randomOption();
-				task.wait(1);
-				continue;
-			}
-			if (!forcedOption) option = voteForNext(option);
-			// A dev command during the match or the vote overrides the vote.
+			waitForPlayers();
+			// A dev command during the match skips the warm-up; one during the warm-up overrides
+			// the vote.
+			let option = forcedOption ?? warmUpSafely(previous);
 			option = forcedOption ?? option;
 			forcedOption = undefined;
+			if (runMatchSafely(option)) {
+				previous = option;
+			} else {
+				previous = undefined;
+				task.wait(1);
+			}
 		}
 	});
 }
