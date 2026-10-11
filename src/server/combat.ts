@@ -9,7 +9,7 @@ import { WeaponConfig } from "shared/config";
 import { railCooldown } from "shared/perks";
 import { Remotes } from "shared/remotes";
 import { hitDummy, isDummy } from "./dummies";
-import { consumeShield } from "./perks";
+import { hitShield } from "./perks";
 import { recordKill } from "./progression";
 import { incrementStat } from "./stats";
 
@@ -142,12 +142,13 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	const reason = implausibleHit(character, victimCharacter, hitPart, origin, hitPosition);
 	if (reason !== undefined) return reject(shooter, reason);
 
-	if (hitPart.Name === "Head" && consumeShield(victim)) {
-		// A shield absorbs the headshot and breaks, pushing the target back like a body shot.
+	const isHead = hitPart.Name === "Head";
+	if (hitShield(victim, isHead) === "broken") {
+		// A breaking shield absorbs the hit, pushing the target back like a body shot.
 		const knockback = WeaponConfig.bodyShotKnockback;
 		Remotes.Knockback.FireClient(victim, shotVector.Unit.mul(knockback).add(new Vector3(0, knockback * 0.35, 0)));
 		Remotes.HitConfirm.FireClient(shooter, "shield", false);
-	} else if (hitPart.Name === "Head") {
+	} else if (isHead) {
 		victimHumanoid.Health = 0;
 		incrementStat(shooter, "Kills");
 		recordKill(shooter, shotVector.Magnitude);

@@ -2,8 +2,10 @@
 // can be shot like players, triggering the shooter's real kill feedback. They give no XP or
 // stats. Each respawns shortly after it dies.
 
+import { PerkConfig } from "shared/config";
 import { HitKind } from "shared/remotes";
 import { DummySpawn, LoadedMap } from "./maps/loader";
+import { shieldTransparency } from "./perks";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
@@ -16,7 +18,8 @@ interface Dummy {
 	spawn: DummySpawn;
 	model: Model;
 	root: BasePart;
-	shielded: boolean;
+	// Shield hits left, as for players; 0 without a shield.
+	shieldHits: number;
 	alive: boolean;
 	startedAt: number;
 	lastPosition: Vector3;
@@ -77,7 +80,7 @@ function spawnDummy(spawn: DummySpawn) {
 		spawn,
 		model,
 		root,
-		shielded: spawn.shielded,
+		shieldHits: spawn.shielded ? PerkConfig.shieldHits : 0,
 		alive: true,
 		startedAt: os.clock(),
 		lastPosition: root.Position,
@@ -107,12 +110,18 @@ export function isDummy(model: Model): boolean {
 export function hitDummy(model: Model, isHead: boolean): HitKind | undefined {
 	const dummy = dummies.get(model);
 	if (!dummy || !dummy.alive) return undefined;
-	if (!isHead) return "body";
-	if (dummy.shielded) {
-		dummy.shielded = false;
-		model.FindFirstChild(SHIELD_BUBBLE)?.Destroy();
-		return "shield";
+	// Shields work as on players: a headshot breaks one, body shots wear it down.
+	if (dummy.shieldHits > 0) {
+		dummy.shieldHits = isHead ? 0 : dummy.shieldHits - 1;
+		const bubble = model.FindFirstChild(SHIELD_BUBBLE);
+		if (dummy.shieldHits === 0) {
+			bubble?.Destroy();
+			return "shield";
+		}
+		if (bubble?.IsA("BasePart")) bubble.Transparency = shieldTransparency(dummy.shieldHits);
+		return "body";
 	}
+	if (!isHead) return "body";
 
 	dummy.alive = false;
 	dummy.root.Anchored = false;

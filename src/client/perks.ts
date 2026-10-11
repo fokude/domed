@@ -48,7 +48,8 @@ function updateRadar(active: boolean) {
 function activePerks(): [PerkId, string][] {
 	const lines: [PerkId, string][] = [];
 	if (player.GetAttribute(PerkAttribute.SuperJump) === true) lines.push(["SuperJump", "SUPER JUMP READY"]);
-	if (player.GetAttribute(PerkAttribute.Shield) === true) lines.push(["Shield", "SHIELD"]);
+	const shieldHits = player.GetAttribute(PerkAttribute.Shield);
+	if (typeIs(shieldHits, "number") && shieldHits > 0) lines.push(["Shield", `SHIELD ${shieldHits}`]);
 	const overcharge = timeLeft(player, PerkAttribute.OverchargeUntil);
 	if (overcharge > 0) lines.push(["Overcharge", `OVERCHARGE ${math.ceil(overcharge)}`]);
 	const radar = timeLeft(player, PerkAttribute.RadarUntil);

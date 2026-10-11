@@ -105,8 +105,9 @@ function grant(player: Player, perk: PerkId) {
 		player.SetAttribute(PerkAttribute.OverchargeUntil, now + PerkConfig.overchargeDuration);
 	else if (perk === "Radar") player.SetAttribute(PerkAttribute.RadarUntil, now + PerkConfig.radarDuration);
 	else {
-		player.SetAttribute(PerkAttribute.Shield, true);
+		player.SetAttribute(PerkAttribute.Shield, PerkConfig.shieldHits);
 		if (player.Character) addShieldBubble(player.Character);
+		fadeShieldBubble(player, PerkConfig.shieldHits);
 	}
 	Remotes.PerkTaken.FireAllClients(player, perk);
 }
@@ -145,12 +146,33 @@ function tick() {
 	}
 }
 
-// Uses up a player's shield if they have one. Returns whether it absorbed the hit.
-export function consumeShield(player: Player): boolean {
-	if (player.GetAttribute(PerkAttribute.Shield) !== true) return false;
-	player.SetAttribute(PerkAttribute.Shield, undefined);
-	player.Character?.FindFirstChild(SHIELD_BUBBLE)?.Destroy();
-	return true;
+// The bubble fades as the shield weakens, so attackers can see it's about to break.
+export function shieldTransparency(hitsLeft: number): number {
+	return (1 - hitsLeft / PerkConfig.shieldHits) * 0.6;
+}
+
+function fadeShieldBubble(player: Player, hitsLeft: number) {
+	const bubble = player.Character?.FindFirstChild(SHIELD_BUBBLE);
+	if (bubble?.IsA("BasePart")) bubble.Transparency = shieldTransparency(hitsLeft);
+}
+
+// "absorbed": the shield took the hit and holds. "broken": it took the hit and broke.
+export type ShieldHit = "absorbed" | "broken";
+
+// Applies a hit to a player's shield, if they have one. A headshot breaks it outright; body
+// shots wear it down until it breaks.
+export function hitShield(player: Player, isHead: boolean): ShieldHit | undefined {
+	const hits = player.GetAttribute(PerkAttribute.Shield);
+	if (!typeIs(hits, "number") || hits <= 0) return undefined;
+	const left = isHead ? 0 : hits - 1;
+	if (left <= 0) {
+		player.SetAttribute(PerkAttribute.Shield, undefined);
+		player.Character?.FindFirstChild(SHIELD_BUBBLE)?.Destroy();
+		return "broken";
+	}
+	player.SetAttribute(PerkAttribute.Shield, left);
+	fadeShieldBubble(player, left);
+	return "absorbed";
 }
 
 // Places the map's orbs for a new match.

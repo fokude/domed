@@ -70,6 +70,9 @@ export const PerkConfig = {
 	// Seconds before a taken orb comes back. Stronger perks take longer.
 	respawn: { SuperJump: 25, Shield: 40, Radar: 45, Overcharge: 60 },
 	superJumpVelocity: 110,
+	// Hits a shield takes before breaking. A headshot always breaks it at once; body shots wear
+	// it down, so a shielded player can't shrug off fire indefinitely.
+	shieldHits: 3,
 	overchargeDuration: 10,
 	// Fraction of the normal rail cooldown while overcharged.
 	overchargeCooldownScale: 0.5,

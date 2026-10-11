@@ -16,8 +16,8 @@ export const PERK_INFO: Record<PerkId, { name: string; color: Color3 }> = {
 	Radar: { name: "RADAR", color: Color3.fromRGB(255, 80, 200) },
 };
 
-// Player attributes holding perk effects. SuperJump and Shield are true while held; the others
-// hold the server time their effect ends.
+// Player attributes holding perk effects. SuperJump is true while held, Shield holds the hits it
+// has left, and the others hold the server time their effect ends.
 export const PerkAttribute = {
 	SuperJump: "PerkSuperJump",
 	Shield: "PerkShield",

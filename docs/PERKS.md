@@ -5,14 +5,20 @@ Glowing orbs at fixed spots on each map, each granting a one-time or short effec
 feed), `shared/perks.ts` (definitions, Overcharge cooldown); tuning in `PerkConfig` in
 `src/shared/config.ts`.
 
-| Perk       | Effect                                   | Respawn | Counterplay                             |
-| ---------- | ---------------------------------------- | ------- | --------------------------------------- |
-| Super Jump | The next double jump launches far higher | 25 s    | None needed: pure movement              |
-| Shield     | Absorbs one headshot, then breaks        | 40 s    | A visible bubble around the player      |
-| Radar      | Outlines enemies through walls for 4 s   | 45 s    | Shooting still needs real line of sight |
-| Overcharge | Rail recharges twice as fast for 10 s    | 60 s    | The player's beams turn gold            |
+| Perk       | Effect                                   | Respawn | Counterplay                               |
+| ---------- | ---------------------------------------- | ------- | ----------------------------------------- |
+| Super Jump | The next double jump launches far higher | 25 s    | None needed: pure movement                |
+| Shield     | Absorbs one headshot or three hits       | 40 s    | A visible bubble that fades as it weakens |
+| Radar      | Outlines enemies through walls for 4 s   | 45 s    | Shooting still needs real line of sight   |
+| Overcharge | Rail recharges twice as fast for 10 s    | 60 s    | The player's beams turn gold              |
 
 Every pickup is announced in the kill feed. Perks are lost on death.
+
+The Shield breaks on the first headshot, or after three hits of any kind. It first absorbed
+one headshot and ignored body shots, which played like god mode: headshots are hard, so a
+shielded player could shrug off fire for a long time. Counting body shots means sustained
+pressure always breaks it, and the fading bubble shows how close it is. Rejected: needing
+three headshots, which would make the Shield even stronger.
 
 ## Why perks
 
