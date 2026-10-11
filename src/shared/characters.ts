@@ -6,6 +6,11 @@ export function isAlive(character: Model): boolean {
 }
 
 // The player's HumanoidRootPart, if they have a living character.
+// Horizontal speed, the number on the speedometer.
+export function flatSpeed(velocity: Vector3): number {
+	return math.floor(new Vector3(velocity.X, 0, velocity.Z).Magnitude);
+}
+
 export function getLiveRoot(player: Player): BasePart | undefined {
 	const character = player.Character;
 	const root = character?.FindFirstChild("HumanoidRootPart");

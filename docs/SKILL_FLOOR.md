@@ -54,8 +54,8 @@ features against it.
 
 None of these change one-shot headshots or air strafing. Ranked by expected value:
 
-1. **Bots** to fill near-empty servers and give early wins: Fortnite's lesson. Already on
-   the roadmap.
+1. **Bots** to fill near-empty servers and give early wins: Fortnite's lesson. Shipped for
+   free-for-all; see BOTS.md.
 2. **Death recap.** Shipped, with the killer outlined until respawn. A moment after dying, show who killed you, from how far and how fast they
    were moving. It turns a "random death" into "they were bhopping at 90 from 140 studs":
    fair, and something to aspire to.

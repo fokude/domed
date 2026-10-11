@@ -10,6 +10,7 @@ import { CombatRules, setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
 import { logMatchFinished, logOnboardingStep } from "../analytics";
 import { onProfileLoaded } from "../data/profiles";
+import { startBots, startBotSystem, stopBots } from "../bots";
 import { startDummies, stopDummies } from "../dummies";
 import { startPerks, stopPerks } from "../perks";
 import { recordMatchEnd, startMatchXp } from "../progression";
@@ -114,6 +115,8 @@ function startMatch(option: MatchOption): GameMode {
 	startDummies(map);
 	const mode = MODE_FACTORIES[option.mode]!(map);
 	currentMode = mode;
+	// Bots only play free-for-all, which is what near-empty servers run (see docs/BOTS.md).
+	if (mode.id === "Deathmatch") startBots(map);
 
 	setCombatArena(map.arena);
 	setKillHeight(map.killHeight);
@@ -214,6 +217,7 @@ function runMatch(option: MatchOption) {
 	closeSpawning();
 	stopPerks();
 	stopDummies();
+	stopBots();
 	if (!forcedOption) {
 		const participants = Players.GetPlayers().filter((player) => player.GetAttribute(DEPLOYED_ATTRIBUTE) === true);
 		recordMatchEnd(participants, result.winners);
@@ -254,6 +258,7 @@ function runMatchSafely(option: MatchOption): boolean {
 	setCombatRules(undefined);
 	pcall(stopPerks);
 	pcall(stopDummies);
+	pcall(stopBots);
 	closeSpawning();
 	const mode = currentMode;
 	if (mode) pcall(() => mode.stop());
@@ -276,6 +281,7 @@ export function startMatchLoop() {
 	});
 	startVoting();
 	startFriendTracking();
+	startBotSystem();
 
 	task.spawn(() => {
 		// Nothing runs on an empty server, so the first player arrives to a fresh warm-up.

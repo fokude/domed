@@ -49,6 +49,7 @@ Update these in the same commit as the change they describe:
 - docs/FEEDBACK.md: kill feedback and sounds, and the reasoning behind them.
 - docs/WEAPON.md: railgun tuning and the reasoning behind it.
 - docs/SETTINGS.md: player settings, their options and defaults, and the reasoning behind them.
+- docs/BOTS.md: bots, their behavior and tuning, and the reasoning behind them.
 - docs/SKILL_FLOOR.md: research on keeping a hard game sticky without lowering its floor.
   Check features that affect new players against it, and update its tables as ideas ship.
 - docs/MAP_DESIGN.md: researched layout principles and targets. Check new or changed maps

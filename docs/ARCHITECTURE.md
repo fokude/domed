@@ -34,6 +34,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `movementCheck.ts`    | Flagging and kicking speed hacks and teleports                                           |
 | `perks.ts`            | Perk orbs, granting effects, shields                                                     |
 | `dummies.ts`          | Training dummies on the Test Range and in the warm-up: movement patterns, hits, respawns |
+| `bots.ts`             | Bots that fill near-empty free-for-all matches (see BOTS.md)                             |
 | `analytics.ts`        | Onboarding funnel and custom events for the Creator Dashboard                            |
 | `stats.ts`            | Kills and deaths on the leaderboard                                                      |
 | `data/profiles.ts`    | Loading and saving player profiles with ProfileStore                                     |

@@ -87,6 +87,23 @@ export const WeaponConfig = {
 	bodyShotKnockback: 70,
 };
 
+// Bots fill near-empty free-for-all matches (see server/bots.ts and docs/BOTS.md).
+export const BotConfig = {
+	// Bots join until this many players and bots are in the match, and leave as players join.
+	fillTo: 4,
+	// Seconds between spotting a target and the first shot.
+	reactionTime: 0.6,
+	// Bots fire this much slower than players.
+	cooldownScale: 1.3,
+	// Aim error radius in studs: a base, plus more per stud of distance and per unit of the
+	// target's speed. Headshot odds are roughly (head radius / error radius) squared.
+	baseSpread: 0.5,
+	spreadPerStud: 0.012,
+	spreadPerSpeed: 0.015,
+	// How far bots look for targets.
+	sightRange: 250,
+};
+
 export const MatchConfig = {
 	respawnTime: 1.5,
 	// Objective modes (CTF, Domination, Hardpoint) respawn slower, so killing defenders opens

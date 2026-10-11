@@ -50,6 +50,7 @@ Type these in chat during a Studio playtest. They're ignored on live servers.
 | `/map <MapId> [mode]` | Switch to that map right away, e.g. `/map InfernalSpire`                       |
 | `/end`                | End the match, then show results and start the warm-up                         |
 | `/openness`           | Measure the current map's openness and spawn exposure (see docs/MAP_DESIGN.md) |
+| `/bots [count]`       | Fill free-for-all to this many players and bots; no count restores the default |
 
 `/map TestRange [mode]` loads the test map, for trying every feature solo: training dummies
 that move like players (static, strafing, circling, fast, hopping, shielded, and a cluster for

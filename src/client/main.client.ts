@@ -2,7 +2,7 @@
 
 import { MatchConfig } from "shared/config";
 import { getMatchState } from "shared/matchState";
-import { Remotes } from "shared/remotes";
+import { Combatant, Remotes } from "shared/remotes";
 import { initDeathRecap } from "./deathRecap";
 import { addKill, hideRespawnCountdown, HudColors, initHud, showBanner, showRespawnCountdown } from "./hud";
 import { initKillFeedback } from "./killFeedback";
@@ -62,9 +62,13 @@ player.CharacterAdded.Connect((character) => {
 	});
 });
 
+function combatantName(combatant: Combatant | undefined): string {
+	return typeIs(combatant, "string") ? combatant : (combatant?.DisplayName ?? "?");
+}
+
 Remotes.KillFeed.OnClientEvent.Connect((killer, victim) => {
-	const killerName = killer?.DisplayName ?? "?";
-	const victimName = victim?.DisplayName ?? "?";
+	const killerName = combatantName(killer);
+	const victimName = combatantName(victim);
 	addKill(killerName, victimName);
 	if (victim === player) showBanner(`DOMED BY ${killerName}`, HudColors.Red, currentRespawnTime());
 });

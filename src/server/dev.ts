@@ -2,7 +2,9 @@
 //   /map <MapId> [mode]   switch to that map right away
 //   /end                            end the match, then show results and the vote
 //   /openness                       measure the current map's openness and spawn exposure
+//   /bots [count]                   fill free-for-all to this many players and bots, or the default
 
+import { setBotFill } from "./bots";
 import { allMatchOptions, endMatch, forceMatch, getCurrentMap } from "./match/controller";
 import { measureOpenness } from "./maps/openness";
 
@@ -41,11 +43,12 @@ function onChatted(message: string) {
 	if (command === "/map") switchMap(mapId, mode);
 	else if (command === "/end") endMatch();
 	else if (command === "/openness") task.spawn(reportOpenness);
+	else if (command === "/bots") setBotFill(tonumber(mapId));
 }
 
 export function startDevCommands() {
 	if (!RunService.IsStudio()) return;
-	print("[dev] Chat commands: /map <MapId> [mode], /end, /openness");
+	print("[dev] Chat commands: /map <MapId> [mode], /end, /openness, /bots [count]");
 	const watch = (player: Player) => player.Chatted.Connect(onChatted);
 	Players.PlayerAdded.Connect(watch);
 	Players.GetPlayers().forEach(watch);

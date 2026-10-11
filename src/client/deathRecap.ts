@@ -19,9 +19,8 @@ function describe(cause: DeathCause, distance: number, killerSpeed: number): str
 	return `${how}  ·  THEY WERE MOVING AT ${killerSpeed}`;
 }
 
-function outlineKiller(killer: Player, seconds: number) {
-	const character = killer.Character;
-	if (!character || character.FindFirstChild(KILLER_HIGHLIGHT)) return;
+function outlineKiller(character: Model, seconds: number) {
+	if (!character.Parent || character.FindFirstChild(KILLER_HIGHLIGHT)) return;
 	const highlight = new Instance("Highlight");
 	highlight.Name = KILLER_HIGHLIGHT;
 	highlight.FillTransparency = 1;
@@ -37,8 +36,8 @@ function outlineKiller(killer: Player, seconds: number) {
 }
 
 export function initDeathRecap() {
-	Remotes.DeathRecap.OnClientEvent.Connect((killer, cause, distance, killerSpeed) => {
+	Remotes.DeathRecap.OnClientEvent.Connect((killerCharacter, cause, distance, killerSpeed) => {
 		showDeathDetail(describe(cause, distance, killerSpeed));
-		if (killer) outlineKiller(killer, getMatchState("RespawnTime") ?? MatchConfig.respawnTime);
+		if (killerCharacter) outlineKiller(killerCharacter, getMatchState("RespawnTime") ?? MatchConfig.respawnTime);
 	});
 }

@@ -5,10 +5,11 @@
 // line of sight). With fast movement and tiny head hitboxes, server-side raycasts would
 // miss constantly because of latency.
 
-import { getLiveRoot } from "shared/characters";
+import { flatSpeed, getLiveRoot } from "shared/characters";
 import { WeaponConfig } from "shared/config";
 import { railCooldown } from "shared/perks";
 import { DeathCause, Remotes } from "shared/remotes";
+import { getBotName, isBot, killBot, livingBotHeads, pushBot } from "./bots";
 import { hitDummy, isDummy, livingDummyHeads } from "./dummies";
 import { hitShield } from "./perks";
 import { recordKill } from "./progression";
@@ -43,8 +44,9 @@ export interface CombatRules {
 let rules: CombatRules | undefined;
 const lastShotAt = new Map<Player, number>();
 const rejections = new Map<Player, number>();
-// The last body shot that pushed each player, for knockback kill credit.
-const lastPush = new Map<Player, { shooter: Player; character: Model; at: number; distance: number }>();
+// The last body shot that pushed each player or bot (keyed by its character), for knockback
+// kill credit.
+const lastPush = new Map<Player | Model, { shooter: Player; character: Model; at: number; distance: number }>();
 
 const lineOfSightParams = new RaycastParams();
 lineOfSightParams.FilterType = Enum.RaycastFilterType.Include;
@@ -103,14 +105,9 @@ function implausibleHit(
 	return undefined;
 }
 
-// Horizontal speed, the number on the speedometer.
-export function flatSpeed(player: Player): number {
-	const velocity = getLiveRoot(player)?.AssemblyLinearVelocity ?? Vector3.zero;
-	return math.floor(new Vector3(velocity.X, 0, velocity.Z).Magnitude);
-}
-
 export function sendDeathRecap(victim: Player, killer: Player, cause: DeathCause, distance: number) {
-	Remotes.DeathRecap.FireClient(victim, killer, cause, math.floor(distance), flatSpeed(killer));
+	const speed = flatSpeed(getLiveRoot(killer)?.AssemblyLinearVelocity ?? Vector3.zero);
+	Remotes.DeathRecap.FireClient(victim, killer.Character, cause, math.floor(distance), speed);
 }
 
 function distanceToSegment(point: Vector3, from: Vector3, to: Vector3): number {
@@ -124,7 +121,7 @@ function distanceToSegment(point: Vector3, from: Vector3, to: Vector3): number {
 // reminder that only heads count. Purely cosmetic, so it uses server positions without lag
 // allowance. See docs/SKILL_FLOOR.md.
 function checkNearMiss(shooter: Player, origin: Vector3, hitPosition: Vector3, currentRules: CombatRules) {
-	const heads = livingDummyHeads();
+	const heads = [...livingDummyHeads(), ...livingBotHeads()];
 	for (const other of Players.GetPlayers()) {
 		const otherCharacter = other.Character;
 		const otherHumanoid = otherCharacter?.FindFirstChildOfClass("Humanoid");
@@ -178,6 +175,27 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 		return;
 	}
 
+	// Bots take hits through the same validation as players, and count as real kills.
+	if (isBot(victimCharacter)) {
+		const reason = implausibleHit(character, victimCharacter, hitPart, origin, hitPosition);
+		if (reason !== undefined) return reject(shooter, reason);
+		if (hitPart.Name === "Head") {
+			if (!killBot(victimCharacter)) return;
+			Remotes.HeadBurst.FireAllClients(hitPart.Position);
+			awardKill(shooter, victimCharacter, rules, "headshot", shotVector.Magnitude);
+		} else {
+			pushBot(victimCharacter, shotVector);
+			lastPush.set(victimCharacter, {
+				shooter,
+				character: victimCharacter,
+				at: os.clock(),
+				distance: shotVector.Magnitude,
+			});
+			Remotes.HitConfirm.FireClient(shooter, "body", false);
+		}
+		return;
+	}
+
 	const victim = Players.GetPlayerFromCharacter(victimCharacter);
 	if (!victim || victim === shooter || !rules.canDamage(shooter, victim)) return;
 
@@ -208,26 +226,39 @@ function push(shooter: Player, victim: Player, victimCharacter: Model, shotVecto
 	lastPush.set(victim, { shooter, character: victimCharacter, at: os.clock(), distance: shotVector.Magnitude });
 }
 
-// Everything a kill earns: stats, XP, feedback, the kill feed, the victim's recap, and the mode's
-// scoring. Only headshots count toward the longest-headshot record.
-function awardKill(shooter: Player, victim: Player, currentRules: CombatRules, cause: DeathCause, distance: number) {
+// Everything a kill earns: stats, XP, feedback, the kill feed, and for player victims their
+// recap and the mode's scoring (bots stay out of ratings). Only headshots on players count
+// toward the longest-headshot record. `victim` is a player, or a bot's character.
+function awardKill(
+	shooter: Player,
+	victim: Player | Model,
+	currentRules: CombatRules,
+	cause: DeathCause,
+	distance: number,
+) {
 	lastPush.delete(victim);
 	incrementStat(shooter, "Kills");
-	recordKill(shooter, cause === "headshot" ? distance : undefined);
 	Remotes.HitConfirm.FireClient(shooter, "kill", false);
-	Remotes.KillFeed.FireAllClients(shooter, victim);
-	sendDeathRecap(victim, shooter, cause, distance);
-	currentRules.onKill(shooter, victim);
+	if (victim.IsA("Player")) {
+		recordKill(shooter, cause === "headshot" ? distance : undefined);
+		Remotes.KillFeed.FireAllClients(shooter, victim);
+		sendDeathRecap(victim, shooter, cause, distance);
+		currentRules.onKill(shooter, victim);
+	} else {
+		recordKill(shooter, undefined);
+		Remotes.KillFeed.FireAllClients(shooter, getBotName(victim));
+	}
 }
 
-// Called when a hazard or the void kills a player. Credits whoever knocked them there with a
-// body shot in the last few seconds, as long as they could hurt each other.
-export function creditEnvironmentalKill(victim: Player, character: Model) {
+// Called when a hazard or the void kills a player or a bot (`victim` is the bot's character).
+// Credits whoever knocked them there with a body shot in the last few seconds, as long as they
+// could hurt each other.
+export function creditEnvironmentalKill(victim: Player | Model, character: Model) {
 	const pushed = lastPush.get(victim);
 	lastPush.delete(victim);
 	if (!pushed || !rules || pushed.character !== character) return;
 	if (os.clock() - pushed.at > KNOCKBACK_CREDIT_SECONDS || pushed.shooter.Parent !== Players) return;
-	if (!rules.canDamage(pushed.shooter, victim)) return;
+	if (victim.IsA("Player") && !rules.canDamage(pushed.shooter, victim)) return;
 	awardKill(pushed.shooter, victim, rules, "knockback", pushed.distance);
 }
 

@@ -3,6 +3,7 @@
 
 import { getLiveRoot } from "shared/characters";
 import { MapTag } from "shared/mapMarkers";
+import { isBot, killBot, livingBotRoots } from "./bots";
 import { creditEnvironmentalKill } from "./combat";
 
 const CollectionService = game.GetService("CollectionService");
@@ -15,6 +16,10 @@ let killHeight = -math.huge;
 function killCharacterOf(part: BasePart) {
 	const character = part.Parent;
 	if (!character?.IsA("Model")) return;
+	if (isBot(character)) {
+		if (killBot(character)) creditEnvironmentalKill(character, character);
+		return;
+	}
 	const player = Players.GetPlayerFromCharacter(character);
 	const humanoid = character.FindFirstChildOfClass("Humanoid");
 	if (!player || !humanoid || humanoid.Health <= 0) return;
@@ -40,6 +45,9 @@ export function startHazards() {
 			for (const player of Players.GetPlayers()) {
 				const root = getLiveRoot(player);
 				if (root && root.Position.Y < killHeight) killCharacterOf(root);
+			}
+			for (const root of livingBotRoots()) {
+				if (root.Position.Y < killHeight) killCharacterOf(root);
 			}
 		}
 	});

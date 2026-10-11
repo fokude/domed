@@ -13,26 +13,29 @@ function remote<T extends Callback>(name: string) {
 }
 
 export type HitKind = "kill" | "body" | "shield";
+// Someone in a fight: a player, or a bot by display name.
+export type Combatant = Player | string;
 export type PersonalBestRecord = "topSpeed" | "longestHeadshot";
 // How a player was killed, for their death recap.
 export type DeathCause = "headshot" | "knockback";
 
 export const Remotes = {
 	Fire: remote<(origin: Vector3, hitPosition: Vector3, hitPart: BasePart | undefined) => void>("Fire"),
-	ShotFired: remote<(shooter: Player, origin: Vector3, hitPosition: Vector3) => void>("ShotFired"),
+	// The shooter is undefined for bots.
+	ShotFired: remote<(shooter: Player | undefined, origin: Vector3, hitPosition: Vector3) => void>("ShotFired"),
 	// `practice` is true for hits on training dummies, which earn no XP and don't count toward streaks.
 	HitConfirm: remote<(kind: HitKind, practice: boolean) => void>("HitConfirm"),
 	Knockback: remote<(impulse: Vector3) => void>("Knockback"),
 	// Either player may have left by the time a client receives this.
-	KillFeed: remote<(killer?: Player, victim?: Player) => void>("KillFeed"),
+	KillFeed: remote<(killer?: Combatant, victim?: Combatant) => void>("KillFeed"),
 	// Client reports that the player has seen an onboarding step.
 	MarkOnboarding: remote<(key: OnboardingKey) => void>("MarkOnboarding"),
 	// Sent to each player as a match ends: XP earned this match, and the level they're now on.
 	MatchXp: remote<(earned: number, level: number, leveledUp: boolean) => void>("MatchXp"),
 	// Sent to a player who was just killed: how, from how far, and how fast the killer was moving.
-	// The killer may have left by the time it arrives.
+	// The killer's character (a player's or a bot's) may be gone by the time it arrives.
 	DeathRecap:
-		remote<(killer: Player | undefined, cause: DeathCause, distance: number, killerSpeed: number) => void>(
+		remote<(killerCharacter: Model | undefined, cause: DeathCause, distance: number, killerSpeed: number) => void>(
 			"DeathRecap",
 		),
 	// Sent to a shooter whose miss passed close to a head they could have hit.

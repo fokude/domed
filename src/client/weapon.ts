@@ -96,8 +96,10 @@ function fire() {
 	Remotes.Fire.FireServer(origin, hitPosition, hitPart);
 }
 
-function onShotFired(shooter: Player, origin: Vector3, hitPosition: Vector3) {
+function onShotFired(shooter: Player | undefined, origin: Vector3, hitPosition: Vector3) {
 	if (shooter === player) return;
+	// Bots (no shooter) are always enemies.
+	if (!shooter) return drawBeam(origin.sub(new Vector3(0, 0.5, 0)), hitPosition, ENEMY_BEAM_COLOR);
 	const color = shooter.Team ? shooter.TeamColor.Color : ENEMY_BEAM_COLOR;
 	drawBeam(origin.sub(new Vector3(0, 0.5, 0)), hitPosition, beamColor(shooter, color));
 }

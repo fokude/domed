@@ -49,14 +49,27 @@ function livingCharacterPositions(exclude: Player, isThreat: (other: Player) => 
 	return positions;
 }
 
+// Other things that count as threats when picking spawns, such as bots.
+const threatSources: (() => Vector3[])[] = [];
+
+export function addThreatSource(source: () => Vector3[]) {
+	threatSources.push(source);
+}
+
 // Picks the spawn whose nearest threat is furthest away, so players don't spawn into a fight.
 export function pickSafestSpawn(
 	player: Player,
 	candidates: CFrame[],
 	isThreat: (other: Player) => boolean,
 ): CFrame | undefined {
-	if (candidates.size() === 0) return undefined;
 	const threats = livingCharacterPositions(player, isThreat);
+	for (const source of threatSources) for (const position of source()) threats.push(position);
+	return pickSpawnAwayFrom(candidates, threats);
+}
+
+// Picks the candidate whose nearest threat is furthest away, or a random one with no threats.
+export function pickSpawnAwayFrom(candidates: CFrame[], threats: Vector3[]): CFrame | undefined {
+	if (candidates.size() === 0) return undefined;
 	if (threats.size() === 0) return candidates[math.random(0, candidates.size() - 1)];
 
 	let best = candidates[0];
