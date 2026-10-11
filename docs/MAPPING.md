@@ -4,6 +4,22 @@ Maps are Roblox Models built in Studio. Gameplay code never refers to specific p
 tagged **marker** parts and **attributes** when the map loads. Anything else in the model is
 yours to shape however you like.
 
+## Designing for DOMED
+
+One headshot kills and players move fast, so whoever sees whom first usually wins. Layout
+decides whether that feels skillful or unfair.
+
+- **Control sightlines.** Most of the map should be broken up by walls, corners and height
+  changes. Long open lines should be rare lanes players choose to cross, not the default.
+- **Give players somewhere to build speed out of sight.** Trenches, halls and side routes
+  let players gain momentum safely and arrive at a fight already fast.
+- **Use height.** Ramps, pits and raised platforms break up sightlines and reward movement.
+  A power position should be strong but exposed.
+- **Make loops, not dead ends.** Every route should connect back so players never have to
+  stop and turn around.
+- **Hide spawns.** No spawn should be visible from a long sightline.
+- **Leave room to strafe.** Corridors narrower than about 12 studs make air strafing awkward.
+
 ## Where maps live
 
 Each map is a file in `maps/`, for example `maps/InfernalSpire.rbxmx`. Rojo syncs the folder
@@ -25,26 +41,26 @@ already set up.
 
 Set these on the map Model itself.
 
-| Attribute | Type | Meaning |
-|---|---|---|
-| `DisplayName` | string | Name shown to players |
-| `Tagline` | string | One line shown in the map vote |
-| `Modes` | string | Comma-separated: `Deathmatch`, `CTF` |
-| `Gravity` | number | Workspace gravity while this map is loaded (default 196.2) |
-| `KillHeight` | number | Players below this Y die, for lava and drops into the void |
-| `ThemeColor` | Color3 | Accent color of the map's card in the vote |
+| Attribute     | Type   | Meaning                                                    |
+| ------------- | ------ | ---------------------------------------------------------- |
+| `DisplayName` | string | Name shown to players                                      |
+| `Tagline`     | string | One line shown in the map vote                             |
+| `Modes`       | string | Comma-separated: `Deathmatch`, `CTF`                       |
+| `Gravity`     | number | Workspace gravity while this map is loaded (default 196.2) |
+| `KillHeight`  | number | Players below this Y die, for lava and drops into the void |
+| `ThemeColor`  | Color3 | Accent color of the map's card in the vote                 |
 
 ## Markers
 
 Add tags in the **Tag Editor** (View, then Tags) or the Properties panel.
 
-| Tag | On | Meaning |
-|---|---|---|
-| `Spawn` | Part | Player spawns standing on the part's bottom face, facing its front. Optional `Team` attribute (`Red` or `Blue`); team spawns are also used in deathmatch |
-| `FlagBase` | Part | Where a team's flag sits in CTF. Needs a `Team` attribute |
-| `JumpPad` | Part | Launches players. Needs an ObjectValue child named `Target` pointing at a `PadTarget` part. Optional `ArcHeight` attribute (default 8) |
-| `PadTarget` | Part | Where a jump pad lands players. Place it at foot level |
-| `Hazard` | Part | Kills on touch, like lava. Make it non-collidable so players sink into it |
+| Tag         | On   | Meaning                                                                                                                                                  |
+| ----------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Spawn`     | Part | Player spawns standing on the part's bottom face, facing its front. Optional `Team` attribute (`Red` or `Blue`); team spawns are also used in deathmatch |
+| `FlagBase`  | Part | Where a team's flag sits in CTF. Needs a `Team` attribute                                                                                                |
+| `JumpPad`   | Part | Launches players. Needs an ObjectValue child named `Target` pointing at a `PadTarget` part. Optional `ArcHeight` attribute (default 8)                   |
+| `PadTarget` | Part | Where a jump pad lands players. Place it at foot level                                                                                                   |
+| `Hazard`    | Part | Kills on touch, like lava. Make it non-collidable so players sink into it                                                                                |
 
 `Spawn`, `FlagBase` and `PadTarget` parts are removed when the map loads, so they can be as
 visible as you like while editing. Jump pad strength is computed from the pad, the target and
