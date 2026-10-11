@@ -158,7 +158,7 @@ export const InfernalSpire: MapBuilder = {
 		setMapInfo(arena, {
 			name: "Infernal Spire",
 			tagline: "Climb the citadel. Don't touch the lava.",
-			modes: ["Deathmatch"],
+			modes: ["Deathmatch", "TeamDeathmatch"],
 			gravity: 196.2,
 			killHeight: -2,
 			themeColor: Color3.fromRGB(255, 100, 30),

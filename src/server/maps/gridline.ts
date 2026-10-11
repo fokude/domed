@@ -334,7 +334,7 @@ export const Gridline: MapBuilder = {
 		setMapInfo(map, {
 			name: "Gridline",
 			tagline: "Ride the trench. Own the sunset.",
-			modes: ["CTF", "Deathmatch"],
+			modes: ["CTF", "Deathmatch", "TeamDeathmatch"],
 			gravity: 196.2,
 			killHeight: -30,
 			themeColor: Color3.fromRGB(255, 60, 200),

@@ -195,7 +195,7 @@ export const HalcyonStation: MapBuilder = {
 		setMapInfo(map, {
 			name: "Halcyon Station",
 			tagline: "Low gravity. Long falls.",
-			modes: ["CTF", "Deathmatch"],
+			modes: ["CTF", "Deathmatch", "TeamDeathmatch"],
 			gravity: 120,
 			killHeight: -60,
 			themeColor: Color3.fromRGB(90, 230, 220),

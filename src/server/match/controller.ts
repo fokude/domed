@@ -23,6 +23,7 @@ import {
 import { resetStats } from "../stats";
 import { CaptureTheFlag } from "./modes/ctf";
 import { Deathmatch } from "./modes/deathmatch";
+import { TeamDeathmatch } from "./modes/teamDeathmatch";
 import { GameMode, MatchResult } from "./modes/types";
 import { pickVoteOptions, runVote, startVoting } from "./voting";
 
@@ -33,6 +34,7 @@ const POLL_INTERVAL = 0.25;
 
 const MODE_FACTORIES: Partial<Record<ModeId, (map: LoadedMap) => GameMode>> = {
 	Deathmatch: (map) => new Deathmatch(map),
+	TeamDeathmatch: (map) => new TeamDeathmatch(map),
 	CTF: (map) => new CaptureTheFlag(map),
 };
 

@@ -45,6 +45,11 @@ export const DeathmatchConfig = {
 	killTarget: 40,
 };
 
+export const TeamDeathmatchConfig = {
+	timeLimit: 600,
+	killTarget: 50,
+};
+
 export const CtfConfig = {
 	timeLimit: 900,
 	captureTarget: 3,

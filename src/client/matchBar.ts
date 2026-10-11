@@ -1,4 +1,4 @@
-// Timer and score strip at the top of the screen. In CTF it shows team scores either side of
+// Timer and score strip at the top of the screen. In team modes it shows team scores either side of
 // the timer, with each flag's status underneath.
 
 import { FlagStatus, getMatchState, onMatchStateChanged } from "shared/matchState";
@@ -74,10 +74,11 @@ function buildTeamBox(parent: Frame, team: TeamId, side: number): TeamBox {
 function refresh() {
 	const mode = getMatchState("Mode");
 	const phase = getMatchState("Phase");
-	const isCtf = mode === "CTF" && phase === "Playing";
+	const isTeamMode = (mode === "CTF" || mode === "TeamDeathmatch") && phase === "Playing";
 
 	for (const [team, box] of teamBoxes) {
-		box.frame.Visible = isCtf;
+		box.frame.Visible = isTeamMode;
+		box.flag.Visible = mode === "CTF";
 		box.score.Text = tostring(getMatchState(team === "Red" ? "RedScore" : "BlueScore") ?? 0);
 		box.flag.Text = FLAG_LABELS[getMatchState(team === "Red" ? "RedFlag" : "BlueFlag") ?? "Home"];
 	}

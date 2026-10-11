@@ -288,7 +288,7 @@ export const Bastion: MapBuilder = {
 		setMapInfo(map, {
 			name: "Bastion",
 			tagline: "Circle the fortress. Breach the floors.",
-			modes: ["Deathmatch"],
+			modes: ["Deathmatch", "TeamDeathmatch"],
 			gravity: 196.2,
 			killHeight: -20,
 			themeColor: Color3.fromRGB(255, 140, 40),

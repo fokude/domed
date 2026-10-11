@@ -35,7 +35,8 @@ decides who is deployed, where they spawn, and when they respawn.
 
 Each mode is a class implementing `GameMode` (`server/match/modes/types.ts`). It sets
 combat rules (who can damage whom), picks spawns, reacts to deaths, and reports when a win
-condition is met. Deathmatch and CTF live alongside it.
+condition is met. Deathmatch, Team Deathmatch and CTF live alongside it; the team modes share
+`TeamRoster` (`server/match/teams.ts`) for teams, balancing, scores and spawns.
 
 ## Movement
 
