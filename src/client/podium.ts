@@ -1,6 +1,7 @@
 // Top-three podium: a compact live version at the top of the screen, and a full-screen
 // version shown during the intermission after a match.
 
+import { getMatchState, onMatchStateChanged } from "shared/matchState";
 import { getStandings, Standing } from "shared/standings";
 import { create } from "./ui";
 
@@ -101,9 +102,11 @@ function buildLiveSlot(parent: Frame, rank: number): LiveSlot {
 
 function refreshLive() {
 	const standings = getStandings(Players.GetPlayers());
+	// Individual rankings matter in free-for-all; team modes show team scores instead.
+	const freeForAll = getMatchState("Mode") === "Deathmatch";
 	liveSlots.forEach((slot, rank) => {
 		const standing = standings[rank];
-		slot.frame.Visible = standing !== undefined;
+		slot.frame.Visible = freeForAll && standing !== undefined;
 		if (!standing) return;
 		slot.name.Text = standing.name;
 		slot.kills.Text = tostring(standing.kills);
@@ -283,5 +286,6 @@ export function initPodium() {
 	Players.PlayerAdded.Connect(watchPlayer);
 	// The leaving player is still listed during PlayerRemoving, so refresh after it's gone.
 	Players.PlayerRemoving.Connect(() => task.defer(refreshLive));
+	onMatchStateChanged(["Mode"], refreshLive);
 	refreshLive();
 }
