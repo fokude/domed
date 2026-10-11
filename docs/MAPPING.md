@@ -41,15 +41,16 @@ Set these on the map Model itself.
 
 Add tags in the **Tag Editor** (View, then Tags) or the Properties panel.
 
-| Tag         | On   | Meaning                                                                                                                                                  |
-| ----------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Spawn`     | Part | Player spawns standing on the part's bottom face, facing its front. Optional `Team` attribute (`Red` or `Blue`); team spawns are also used in deathmatch |
-| `FlagBase`  | Part | Where a team's flag sits in CTF. Needs a `Team` attribute                                                                                                |
-| `JumpPad`   | Part | Launches players. Needs an ObjectValue child named `Target` pointing at a `PadTarget` part. Optional `ArcHeight` attribute (default 8)                   |
-| `PadTarget` | Part | Where a jump pad lands players. Place it at foot level                                                                                                   |
-| `Hazard`    | Part | Kills on touch, like lava. Make it non-collidable so players sink into it                                                                                |
+| Tag            | On   | Meaning                                                                                                                                                                                                                 |
+| -------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Spawn`        | Part | Player spawns standing on the part's bottom face, facing its front. Optional `Team` attribute (`Red` or `Blue`); team spawns are also used in deathmatch                                                                |
+| `FlagBase`     | Part | Where a team's flag sits in CTF. Needs a `Team` attribute                                                                                                                                                               |
+| `JumpPad`      | Part | Launches players. Needs an ObjectValue child named `Target` pointing at a `PadTarget` part. Optional `ArcHeight` attribute (default 8)                                                                                  |
+| `PadTarget`    | Part | Where a jump pad lands players. Place it at foot level                                                                                                                                                                  |
+| `Hazard`       | Part | Kills on touch, like lava. Make it non-collidable so players sink into it                                                                                                                                               |
+| `ControlPoint` | Part | A Domination or Hardpoint zone, centered where the part stands. Needs a `Label` attribute (`A`, `B`, ...); optional `Radius` (default 12). Put points on the center line or in mirrored pairs so neither team is closer |
 
-`Spawn`, `FlagBase` and `PadTarget` parts are removed when the map loads, so they can be as
+`Spawn`, `FlagBase`, `PadTarget` and `ControlPoint` parts are removed when the map loads, so they can be as
 visible as you like while editing. Jump pad strength is computed from the pad, the target and
 the map's gravity, so move either end freely. A player standing still lands on the target;
 players keep their own momentum on top of the pad's push, so fast players carry further.

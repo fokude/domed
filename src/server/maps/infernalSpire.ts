@@ -3,6 +3,7 @@
 
 import {
 	block,
+	controlPointMarker,
 	cylinder,
 	flames,
 	hazard,
@@ -158,11 +159,16 @@ export const InfernalSpire: MapBuilder = {
 		setMapInfo(arena, {
 			name: "Infernal Spire",
 			tagline: "Climb the citadel. Don't touch the lava.",
-			modes: ["Deathmatch", "TeamDeathmatch"],
+			modes: ["Deathmatch", "TeamDeathmatch", "Domination", "Hardpoint"],
 			gravity: 196.2,
 			killHeight: -2,
 			themeColor: Color3.fromRGB(255, 100, 30),
 		});
+
+		// Domination and Hardpoint zones, on the center line so neither side is closer.
+		controlPointMarker(arena, new Vector3(-22, TIER_TOPS[0], 0), "A", 8);
+		controlPointMarker(arena, new Vector3(0, TIER_TOPS[2], 0), "B", 8);
+		controlPointMarker(arena, new Vector3(22, TIER_TOPS[0], 0), "C", 8);
 		hazard(slab(arena, Vector3.zero, new Vector3(320, 4, 320), Lava, "Lava"));
 		buildRampart(arena);
 		buildSpire(arena);

@@ -4,6 +4,7 @@
 
 import { TEAM_COLORS, TeamId } from "shared/modes";
 import {
+	controlPointMarker,
 	cylinder,
 	flagBaseMarker,
 	jumpPad,
@@ -195,11 +196,16 @@ export const HalcyonStation: MapBuilder = {
 		setMapInfo(map, {
 			name: "Halcyon Station",
 			tagline: "Low gravity. Long falls.",
-			modes: ["CTF", "Deathmatch", "TeamDeathmatch"],
+			modes: ["CTF", "Deathmatch", "TeamDeathmatch", "Domination", "Hardpoint"],
 			gravity: 120,
 			killHeight: -60,
 			themeColor: Color3.fromRGB(90, 230, 220),
 		});
+
+		// Domination and Hardpoint zones, on the center line so neither side is closer.
+		controlPointMarker(map, new Vector3(-30, 0, 0), "A", 9);
+		controlPointMarker(map, Vector3.zero, "B", 18);
+		controlPointMarker(map, new Vector3(30, 0, 0), "C", 9);
 
 		buildBay(map, "Red", 1);
 		buildBay(map, "Blue", -1);

@@ -210,6 +210,14 @@ export function jumpPad(parent: Instance, position: Vector3, target: Vector3, ar
 	return pad;
 }
 
+// Domination and Hardpoint zone centered on `position` (floor level).
+export function controlPointMarker(parent: Instance, position: Vector3, label: string, radius = 12): Part {
+	const marker = slab(parent, position.add(new Vector3(0, 1, 0)), new Vector3(4, 1, 4), MarkerStyle, "ControlPoint");
+	marker.SetAttribute(MapAttribute.Label, label);
+	if (radius !== 12) marker.SetAttribute(MapAttribute.Radius, radius);
+	return tag(marker, MapTag.ControlPoint);
+}
+
 export interface MapInfo {
 	name: string;
 	tagline: string;

@@ -2,7 +2,7 @@
 // writes; clients read and listen. Attributes also reach players who join mid-match, which
 // one-off remote events would miss.
 
-import { ModeId } from "./modes";
+import { ModeId, TeamId } from "./modes";
 
 export type Phase = "Playing" | "Results" | "Voting";
 export type FlagStatus = "Home" | "Taken" | "Dropped";
@@ -22,6 +22,19 @@ export interface MatchStateValues {
 	// JSON-encoded VoteOption[] and number[] during the Voting phase.
 	VoteOptions: string;
 	VoteCounts: string;
+	// JSON-encoded ControlPointState[] in Domination and Hardpoint.
+	ControlPoints: string;
+}
+
+export interface ControlPointState {
+	label: string;
+	owner?: TeamId;
+	// Team currently capturing, and how far along (0 to 1).
+	capturing?: TeamId;
+	progress: number;
+	contested: boolean;
+	// In Hardpoint only one point is active at a time.
+	active: boolean;
 }
 
 export interface VoteOption {

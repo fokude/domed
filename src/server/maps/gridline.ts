@@ -6,6 +6,7 @@
 import { TEAM_COLORS, TeamId } from "shared/modes";
 import {
 	block,
+	controlPointMarker,
 	cylinder,
 	flagBaseMarker,
 	jumpPad,
@@ -334,11 +335,16 @@ export const Gridline: MapBuilder = {
 		setMapInfo(map, {
 			name: "Gridline",
 			tagline: "Ride the trench. Own the sunset.",
-			modes: ["CTF", "Deathmatch", "TeamDeathmatch"],
+			modes: ["CTF", "Deathmatch", "TeamDeathmatch", "Domination", "Hardpoint"],
 			gravity: 196.2,
 			killHeight: -30,
 			themeColor: Color3.fromRGB(255, 60, 200),
 		});
+
+		// Domination and Hardpoint zones, on the center line so neither side is closer.
+		controlPointMarker(map, new Vector3(-54, 0, 0), "A", 12);
+		controlPointMarker(map, new Vector3(0, ROOF_HEIGHT, 0), "B", 10);
+		controlPointMarker(map, new Vector3(54, 0, 0), "C", 12);
 
 		buildGround(map);
 		buildLandscape(map);

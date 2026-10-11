@@ -24,11 +24,20 @@ export interface SpawnPoint {
 	team?: TeamId;
 }
 
+export interface ControlPoint {
+	label: string;
+	// Floor-level center of the zone.
+	position: Vector3;
+	radius: number;
+}
+
 export interface LoadedMap {
 	info: MapInfo;
 	arena: Model;
 	spawns: SpawnPoint[];
 	flagBases: Map<TeamId, Vector3>;
+	// Sorted by label.
+	controlPoints: ControlPoint[];
 	killHeight: number;
 }
 
@@ -129,6 +138,20 @@ function collectSpawns(arena: Model): SpawnPoint[] {
 	return spawns;
 }
 
+function collectControlPoints(arena: Model): ControlPoint[] {
+	const points: ControlPoint[] = [];
+	for (const marker of tagged(arena, MapTag.ControlPoint)) {
+		if (!marker.IsA("BasePart")) continue;
+		points.push({
+			label: attribute(marker, MapAttribute.Label, "string", "?"),
+			position: feetPosition(marker),
+			radius: attribute(marker, MapAttribute.Radius, "number", 12),
+		});
+	}
+	points.sort((a, b) => a.label < b.label);
+	return points;
+}
+
 function collectFlagBases(arena: Model): Map<TeamId, Vector3> {
 	const bases = new Map<TeamId, Vector3>();
 	for (const marker of tagged(arena, MapTag.FlagBase)) {
@@ -156,7 +179,8 @@ export function loadMap(source: Model): LoadedMap {
 	setUpJumpPads(arena);
 	const spawns = collectSpawns(arena);
 	const flagBases = collectFlagBases(arena);
-	for (const tag of [MapTag.Spawn, MapTag.FlagBase, MapTag.PadTarget]) {
+	const controlPoints = collectControlPoints(arena);
+	for (const tag of [MapTag.Spawn, MapTag.FlagBase, MapTag.PadTarget, MapTag.ControlPoint]) {
 		tagged(arena, tag).forEach((marker) => marker.Destroy());
 	}
 
@@ -166,6 +190,7 @@ export function loadMap(source: Model): LoadedMap {
 		arena,
 		spawns,
 		flagBases,
+		controlPoints,
 		killHeight: attribute(arena, MapAttribute.KillHeight, "number", DEFAULT_KILL_HEIGHT),
 	};
 }

@@ -50,6 +50,20 @@ export const TeamDeathmatchConfig = {
 	killTarget: 50,
 };
 
+export const DominationConfig = {
+	timeLimit: 600,
+	scoreTarget: 200,
+	// Seconds for one player to capture a point; each extra teammate (up to 3) speeds it up.
+	captureTime: 6,
+};
+
+export const HardpointConfig = {
+	timeLimit: 600,
+	scoreTarget: 150,
+	// Seconds before the hardpoint moves to the next location.
+	rotateEvery: 60,
+};
+
 export const CtfConfig = {
 	timeLimit: 900,
 	captureTarget: 3,

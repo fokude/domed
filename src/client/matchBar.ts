@@ -74,7 +74,7 @@ function buildTeamBox(parent: Frame, team: TeamId, side: number): TeamBox {
 function refresh() {
 	const mode = getMatchState("Mode");
 	const phase = getMatchState("Phase");
-	const isTeamMode = (mode === "CTF" || mode === "TeamDeathmatch") && phase === "Playing";
+	const isTeamMode = mode !== undefined && mode !== "Deathmatch" && phase === "Playing";
 
 	for (const [team, box] of teamBoxes) {
 		box.frame.Visible = isTeamMode;
@@ -89,7 +89,12 @@ function refresh() {
 	} else if (phase === "Voting") {
 		subtitle.Text = "VOTING FOR NEXT MAP";
 	} else if (mode) {
-		const goal = mode === "CTF" ? `${target} CAPTURES` : `${target} KILLS`;
+		const goal =
+			mode === "CTF"
+				? `${target} CAPTURES`
+				: mode === "Deathmatch" || mode === "TeamDeathmatch"
+					? `${target} KILLS`
+					: `${target} POINTS`;
 		subtitle.Text = `${MODE_NAMES[mode]}  ·  ${getMatchState("MapName") ?? ""}  ·  FIRST TO ${goal}`;
 	}
 }

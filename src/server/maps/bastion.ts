@@ -10,6 +10,7 @@
 
 import { TEAM_COLORS, TeamId } from "shared/modes";
 import {
+	controlPointMarker,
 	cylinder,
 	flagBaseMarker,
 	jumpPad,
@@ -410,11 +411,16 @@ export const Bastion: MapBuilder = {
 		setMapInfo(map, {
 			name: "Bastion",
 			tagline: "Two fortresses, one tower. Take the aqueduct, the plaza or the canal.",
-			modes: ["CTF", "TeamDeathmatch", "Deathmatch"],
+			modes: ["CTF", "TeamDeathmatch", "Deathmatch", "Domination", "Hardpoint"],
 			gravity: 196.2,
 			killHeight: -30,
 			themeColor: Color3.fromRGB(255, 140, 40),
 		});
+
+		// Domination and Hardpoint zones, on the center line so neither side is closer.
+		controlPointMarker(map, new Vector3(AQUEDUCT_X, UPPER, 0), "A", 12);
+		controlPointMarker(map, new Vector3(0, TOWER, 0), "B", 10);
+		controlPointMarker(map, new Vector3(CANAL_X, CANAL, 0), "C", 12);
 
 		buildGround(map);
 		buildBoundary(map);

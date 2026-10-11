@@ -7,6 +7,7 @@ export const MapTag = {
 	JumpPad: "JumpPad",
 	PadTarget: "PadTarget",
 	Hazard: "Hazard",
+	ControlPoint: "ControlPoint",
 } as const;
 
 export const MapAttribute = {
@@ -24,6 +25,9 @@ export const MapAttribute = {
 	Team: "Team",
 	// On jump pads: how far above the higher end the arc peaks.
 	ArcHeight: "ArcHeight",
+	// On ControlPoint markers: the point's letter, and the zone radius in studs.
+	Label: "Label",
+	Radius: "Radius",
 	// Set on jump pads by the loader, read by the client.
 	Launch: "Launch",
 } as const;

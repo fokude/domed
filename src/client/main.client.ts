@@ -7,6 +7,7 @@ import { initMapVote } from "./mapVote";
 import { initMatchBar } from "./matchBar";
 import { initMenu } from "./menu";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
+import { initObjectives } from "./objectives";
 import { initPodium, showMatchEnd } from "./podium";
 import { initSpeedometer, setSpeed } from "./speedometer";
 import { initTeammates } from "./teammates";
@@ -24,6 +25,7 @@ StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Health, false);
 
 initHud();
 initMatchBar();
+initObjectives();
 initPodium();
 initSpeedometer();
 initMovement();

@@ -21,6 +21,7 @@ import {
 	setSpawnPicker,
 } from "../spawning";
 import { resetStats } from "../stats";
+import { ControlPointMode } from "./modes/controlPoints";
 import { CaptureTheFlag } from "./modes/ctf";
 import { Deathmatch } from "./modes/deathmatch";
 import { TeamDeathmatch } from "./modes/teamDeathmatch";
@@ -36,6 +37,8 @@ const MODE_FACTORIES: Partial<Record<ModeId, (map: LoadedMap) => GameMode>> = {
 	Deathmatch: (map) => new Deathmatch(map),
 	TeamDeathmatch: (map) => new TeamDeathmatch(map),
 	CTF: (map) => new CaptureTheFlag(map),
+	Domination: (map) => new ControlPointMode(map, "Domination"),
+	Hardpoint: (map) => new ControlPointMode(map, "Hardpoint"),
 };
 
 export interface MatchOption {
