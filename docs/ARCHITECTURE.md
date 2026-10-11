@@ -45,6 +45,10 @@ toward `WalkSpeed` and make bunny hopping impossible. Air acceleration follows H
 `PM_AirAccelerate`: only velocity along the input direction is capped, so strafing while
 turning gains speed. Landing and jumping again within `bhopWindow` keeps that speed.
 
+The same module adds the rest of the kit: double jump, wall jump, wall slide, slide (which
+also overrides the Humanoid on the ground) and a UT-style double-tap dodge. Each has an
+`...Enabled` switch in `MovementConfig` so moves can be trialled and cut.
+
 Because the module sets velocity directly, it has to handle walls itself: a spherecast
 removes the into-wall component of velocity so the player slides, and if physics reports a
 much lower speed than intended, the module assumes something blocked the player and adopts

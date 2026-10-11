@@ -23,6 +23,27 @@ export const MovementConfig = {
 	wallJumpVelocity: 50,
 	maxWallJumps: 3,
 
+	// Wall slide: holding toward a wall while falling caps the fall speed.
+	wallSlideEnabled: true,
+	wallSlideFallSpeed: 10,
+
+	// Slide: Ctrl or C while running fast. Keeps momentum; jumping out carries it into a hop.
+	slideEnabled: true,
+	slideMinSpeed: 18,
+	slideStartSpeed: 38,
+	// Fraction of slide speed lost per second.
+	slideFriction: 0.9,
+	slideMaxTime: 1.2,
+	slideCooldown: 0.4,
+	slideCameraDrop: 1.8,
+
+	// Dodge: double-tap a movement key on the ground for a burst in that direction.
+	dodgeEnabled: true,
+	dodgeSpeed: 48,
+	dodgeVelocity: 22,
+	dodgeCooldown: 0.6,
+	dodgeDoubleTapWindow: 0.25,
+
 	// Roblox FieldOfView is vertical; 80 is roughly 110 horizontal at 16:9.
 	baseFov: 80,
 	speedFovBoost: 12,

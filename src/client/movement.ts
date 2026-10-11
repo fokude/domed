@@ -1,8 +1,9 @@
-// Quake-style movement layered on top of the default Humanoid.
+// Movement layered on top of the default Humanoid: Quake-style air strafing and bunny
+// hopping, double jump, wall jump, wall slide, slide, and UT-style dodge.
 //
-// On the ground the Humanoid moves the character as usual. While airborne this module
-// owns horizontal velocity: the Humanoid's built-in air control would otherwise drag
-// the player back toward WalkSpeed and make bunny hopping impossible.
+// On the ground the Humanoid moves the character as usual, except while sliding. While
+// airborne this module owns horizontal velocity: the Humanoid's built-in air control would
+// otherwise drag the player back toward WalkSpeed and make bunny hopping impossible.
 
 import { MovementConfig as Config, CtfConfig } from "shared/config";
 import { CARRYING_FLAG_ATTRIBUTE } from "shared/matchState";
@@ -22,6 +23,14 @@ const PAD_PROBE_DEPTH = 5;
 const SCROLL_JUMP_BUFFER = 0.1;
 // If physics leaves us below this fraction of our intended speed, something blocked us.
 const BLOCKED_SPEED_RATIO = 0.3;
+const SLIDE_KEYS: Enum.KeyCode[] = [Enum.KeyCode.LeftControl, Enum.KeyCode.C];
+// Dodge direction per key, as [forward, right] relative to the camera.
+const DODGE_DIRECTIONS = new Map<Enum.KeyCode, [number, number]>([
+	[Enum.KeyCode.W, [1, 0]],
+	[Enum.KeyCode.S, [-1, 0]],
+	[Enum.KeyCode.D, [0, 1]],
+	[Enum.KeyCode.A, [0, -1]],
+]);
 
 const player = Players.LocalPlayer;
 
@@ -44,6 +53,13 @@ padProbeParams.FilterType = Enum.RaycastFilterType.Include;
 padProbeParams.FilterDescendantsInstances = [];
 let lastScrollAt = -math.huge;
 
+let sliding = false;
+let slideVelocity = Vector3.zero;
+let slideStartedAt = 0;
+let lastSlideEndedAt = -math.huge;
+let lastDodgeAt = -math.huge;
+const lastTapAt = new Map<Enum.KeyCode, number>();
+
 const wallProbeParams = new RaycastParams();
 wallProbeParams.FilterType = Enum.RaycastFilterType.Exclude;
 
@@ -62,6 +78,10 @@ function isJumpHeld(): boolean {
 		UserInputService.IsKeyDown(Enum.KeyCode.Space) ||
 		UserInputService.IsGamepadButtonDown(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonA)
 	);
+}
+
+function isSlideHeld(): boolean {
+	return SLIDE_KEYS.some((key) => UserInputService.IsKeyDown(key));
 }
 
 function wantsToJump(): boolean {
@@ -109,6 +129,38 @@ function clipToWalls(velocity: Vector3, rootPart: BasePart, dt: number): Vector3
 	return intoWall < 0 ? velocity.sub(normal.mul(intoWall)) : velocity;
 }
 
+function startSlide(currentHumanoid: Humanoid, horizontal: Vector3): boolean {
+	if (!Config.slideEnabled || sliding || os.clock() - lastSlideEndedAt < Config.slideCooldown) return false;
+	const speed = horizontal.Magnitude;
+	if (speed < Config.slideMinSpeed) return false;
+
+	sliding = true;
+	slideStartedAt = os.clock();
+	slideVelocity = horizontal.Unit.mul(math.max(speed, Config.slideStartSpeed));
+	currentHumanoid.CameraOffset = new Vector3(0, -Config.slideCameraDrop, 0);
+	return true;
+}
+
+function endSlide() {
+	if (!sliding) return;
+	sliding = false;
+	lastSlideEndedAt = os.clock();
+	if (humanoid) humanoid.CameraOffset = Vector3.zero;
+}
+
+// A grounded slide keeps momentum with light friction instead of the Humanoid's instant stop.
+function updateSlide(currentHumanoid: Humanoid, rootPart: BasePart, actualVelocity: Vector3, dt: number) {
+	currentHumanoid.Move(Vector3.zero);
+	const slowed = slideVelocity.mul(math.max(0, 1 - Config.slideFriction * dt));
+	slideVelocity = clipToWalls(slowed, rootPart, dt);
+	if (slideVelocity.Magnitude < Config.walkSpeed * 0.75 || os.clock() - slideStartedAt > Config.slideMaxTime) {
+		endSlide();
+		return;
+	}
+	airVelocity = slideVelocity;
+	rootPart.AssemblyLinearVelocity = new Vector3(slideVelocity.X, actualVelocity.Y, slideVelocity.Z);
+}
+
 function onPreSimulation(dt: number) {
 	const body = getLiveBody();
 	if (!body) return;
@@ -125,11 +177,15 @@ function onPreSimulation(dt: number) {
 			lastWallNormal = undefined;
 			// Re-jump on the landing frame itself; waiting for the Humanoid's own auto-jump
 			// leaves us on the ground long enough for friction to eat the hop.
+			// Holding slide on landing turns air speed straight into a slide.
 			if (wantsToJump()) currentHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
+			else if (isSlideHeld()) startSlide(currentHumanoid, airVelocity);
 		}
 		groundTime += dt;
+		if (sliding) updateSlide(currentHumanoid, rootPart, actualVelocity, dt);
 		return;
 	}
+	endSlide();
 
 	// The control script has already set this frame's MoveDirection. Read it as our wish
 	// direction, then zero it so the Humanoid's air control doesn't fight our velocity.
@@ -161,7 +217,14 @@ function onPreSimulation(dt: number) {
 		airVelocity = actualFlat;
 	}
 
-	rootPart.AssemblyLinearVelocity = new Vector3(airVelocity.X, actualVelocity.Y, airVelocity.Z);
+	// Wall slide: holding into a wall while falling caps the fall speed.
+	let verticalVelocity = actualVelocity.Y;
+	if (Config.wallSlideEnabled && verticalVelocity < -Config.wallSlideFallSpeed) {
+		const wall = findWall(rootPart);
+		if (wall && flatten(wishDirection).Dot(wall) < -0.5) verticalVelocity = -Config.wallSlideFallSpeed;
+	}
+
+	rootPart.AssemblyLinearVelocity = new Vector3(airVelocity.X, verticalVelocity, airVelocity.Z);
 }
 
 function onRenderStepped(dt: number) {
@@ -203,9 +266,40 @@ function tryWallJump(rootPart: BasePart): boolean {
 	return true;
 }
 
+// Double-tapping a movement key on the ground dodges that way, relative to the camera.
+function tryDodge(key: Enum.KeyCode) {
+	const now = os.clock();
+	const lastTap = lastTapAt.get(key) ?? -math.huge;
+	lastTapAt.set(key, now);
+	if (!Config.dodgeEnabled || now - lastTap > Config.dodgeDoubleTapWindow) return;
+	if (now - lastDodgeAt < Config.dodgeCooldown) return;
+
+	const body = getLiveBody();
+	const camera = Workspace.CurrentCamera;
+	const offsets = DODGE_DIRECTIONS.get(key);
+	if (!body || !camera || !offsets || isAirborne(body[0])) return;
+
+	const forward = flatten(camera.CFrame.LookVector).Unit;
+	const right = flatten(camera.CFrame.RightVector).Unit;
+	const direction = forward.mul(offsets[0]).add(right.mul(offsets[1]));
+	lastDodgeAt = now;
+	lastTapAt.delete(key);
+	endSlide();
+	launchCharacter(direction.mul(Config.dodgeSpeed).add(new Vector3(0, Config.dodgeVelocity, 0)), false);
+}
+
 function onInputBegan(input: InputObject) {
-	const isJumpKey = input.KeyCode === Enum.KeyCode.Space || input.KeyCode === Enum.KeyCode.ButtonA;
-	if (!isJumpKey || UserInputService.GetFocusedTextBox()) return;
+	if (UserInputService.GetFocusedTextBox()) return;
+	if (DODGE_DIRECTIONS.has(input.KeyCode)) {
+		tryDodge(input.KeyCode);
+		return;
+	}
+	if (SLIDE_KEYS.includes(input.KeyCode)) {
+		const body = getLiveBody();
+		if (body && !isAirborne(body[0])) startSlide(body[0], flatten(body[1].AssemblyLinearVelocity));
+		return;
+	}
+	if (input.KeyCode !== Enum.KeyCode.Space && input.KeyCode !== Enum.KeyCode.ButtonA) return;
 
 	const body = getLiveBody();
 	if (!body) return;
@@ -231,6 +325,10 @@ function onInputChanged(input: InputObject, gameProcessed: boolean) {
 	if (body && !isAirborne(body[0])) body[0].ChangeState(Enum.HumanoidStateType.Jumping);
 }
 
+function onInputEnded(input: InputObject) {
+	if (SLIDE_KEYS.includes(input.KeyCode)) endSlide();
+}
+
 function onCharacterAdded(newCharacter: Model) {
 	humanoid = newCharacter.WaitForChild("Humanoid") as Humanoid;
 	root = newCharacter.WaitForChild("HumanoidRootPart") as BasePart;
@@ -243,6 +341,8 @@ function onCharacterAdded(newCharacter: Model) {
 	doubleJumpUsed = false;
 	wallJumpsUsed = 0;
 	lastWallNormal = undefined;
+	sliding = false;
+	lastTapAt.clear();
 }
 
 function trackJumpPad(pad: Instance) {
@@ -306,5 +406,6 @@ export function initMovement() {
 	RunService.PreSimulation.Connect(onPreSimulation);
 	RunService.RenderStepped.Connect(onRenderStepped);
 	UserInputService.InputBegan.Connect(onInputBegan);
+	UserInputService.InputEnded.Connect(onInputEnded);
 	UserInputService.InputChanged.Connect(onInputChanged);
 }
