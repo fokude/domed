@@ -66,9 +66,11 @@ function showHeadline(text: string, color: Color3) {
 	});
 }
 
-function showStreak(text: string) {
+// Callouts under the headline: streak milestones and personal bests.
+function showStreak(text: string, color = STREAK_PURPLE) {
 	const token = ++streakToken;
 	streakLabel.Text = text;
+	streakLabel.TextColor3 = color;
 	streakLabel.TextTransparency = 0;
 	task.delay(1.6, () => {
 		if (streakToken === token) tween(streakLabel, 0.4, { TextTransparency: 1 });
@@ -254,6 +256,10 @@ export function initKillFeedback() {
 	Remotes.HeadBurst.OnClientEvent.Connect(headBurst);
 	Remotes.KillFeed.OnClientEvent.Connect((_, victim) => {
 		if (victim === player) playSound("death");
+	});
+	Remotes.PersonalBest.OnClientEvent.Connect((record, value) => {
+		playSound("personalBest");
+		showStreak(record === "topSpeed" ? `NEW TOP SPEED: ${value}` : `LONGEST HEADSHOT: ${value} STUDS`, MULTI_GOLD);
 	});
 	Remotes.PerkTaken.OnClientEvent.Connect((taker) => {
 		if (taker === player) playSound("perkPickup");

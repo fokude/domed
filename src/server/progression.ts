@@ -23,6 +23,15 @@ const OBJECTIVE_XP: Record<Objective, number> = {
 	hardpointSecond: XpConfig.hardpointSecond,
 };
 
+// Records below these aren't announced when beaten: a new player's first runs and kills would
+// otherwise announce a "record" every few seconds.
+const MIN_ANNOUNCED_SPEED = MovementConfig.hopBoostMaxSpeed;
+const MIN_ANNOUNCED_HEADSHOT = 50;
+
+// A new top speed is announced once the player stops accelerating, with the peak, rather than
+// on every rising sample. Holds the record being set and whether it beat an announced level.
+const risingSpeed = new Map<Player, { speed: number; announce: boolean }>();
+
 // XP earned by each player in the current match, for the per-match cap and the summary.
 const matchXp = new Map<Player, number>();
 
@@ -42,10 +51,15 @@ export function startMatchXp() {
 }
 
 export function recordKill(shooter: Player, distance: number) {
+	const previous = getProfile(shooter)?.stats.longestHeadshot;
+	const studs = math.floor(distance);
 	updateProfile(shooter, (data) => {
 		data.stats.kills += 1;
-		data.stats.longestHeadshot = math.max(data.stats.longestHeadshot, math.floor(distance));
+		data.stats.longestHeadshot = math.max(data.stats.longestHeadshot, studs);
 	});
+	if (previous !== undefined && previous >= MIN_ANNOUNCED_HEADSHOT && studs > previous) {
+		Remotes.PersonalBest.FireClient(shooter, "longestHeadshot", studs);
+	}
 	awardXp(shooter, XpConfig.kill);
 	logOnboardingStep(shooter, "firstKill");
 }
@@ -96,7 +110,19 @@ function sampleSpeeds() {
 		const velocity = root.AssemblyLinearVelocity;
 		const speed = math.floor(new Vector3(velocity.X, 0, velocity.Z).Magnitude);
 		const best = getProfile(player)?.stats.topSpeed;
-		if (best === undefined || speed <= best || speed > MAX_CREDIBLE_SPEED) continue;
+		const rising = risingSpeed.get(player);
+		if (best === undefined || speed <= best || speed > MAX_CREDIBLE_SPEED) {
+			// Speed stopped climbing: announce the record just set.
+			if (rising) {
+				risingSpeed.delete(player);
+				if (rising.announce) Remotes.PersonalBest.FireClient(player, "topSpeed", rising.speed);
+			}
+			continue;
+		}
+		risingSpeed.set(player, {
+			speed,
+			announce: (rising?.announce ?? false) || best >= MIN_ANNOUNCED_SPEED,
+		});
 		updateProfile(player, (data) => {
 			data.stats.topSpeed = speed;
 		});
@@ -104,7 +130,10 @@ function sampleSpeeds() {
 }
 
 export function startProgression() {
-	Players.PlayerRemoving.Connect((player) => matchXp.delete(player));
+	Players.PlayerRemoving.Connect((player) => {
+		matchXp.delete(player);
+		risingSpeed.delete(player);
+	});
 	Remotes.MarkOnboarding.OnServerEvent.Connect((player, key) => {
 		const valid = ONBOARDING_KEYS.find((candidate) => candidate === key);
 		if (!valid) return;

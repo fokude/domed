@@ -6,7 +6,7 @@
 
 const SoundService = game.GetService("SoundService");
 
-export type SoundCue = "kill" | "killThump" | "bodyHit" | "shieldBreak" | "perkPickup" | "death";
+export type SoundCue = "kill" | "killThump" | "bodyHit" | "shieldBreak" | "perkPickup" | "death" | "personalBest";
 
 interface CueSettings {
 	id: string;
@@ -24,6 +24,7 @@ export const SOUND_CUES: Record<SoundCue, CueSettings> = {
 	shieldBreak: { id: "rbxasset://sounds/impact_water.mp3", volume: 0.7, pitch: 1.8 },
 	perkPickup: { id: TICK, volume: 0.8, pitch: 1.2 },
 	death: { id: "rbxasset://sounds/ouch.ogg", volume: 0.6, pitch: 1 },
+	personalBest: { id: TICK, volume: 0.9, pitch: 2 },
 };
 
 // Plays a cue once. `pitchScale` multiplies the cue's pitch, for escalation.

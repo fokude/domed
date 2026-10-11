@@ -13,6 +13,7 @@ function remote<T extends Callback>(name: string) {
 }
 
 export type HitKind = "kill" | "body" | "shield";
+export type PersonalBestRecord = "topSpeed" | "longestHeadshot";
 
 export const Remotes = {
 	Fire: remote<(origin: Vector3, hitPosition: Vector3, hitPart: BasePart | undefined) => void>("Fire"),
@@ -26,6 +27,8 @@ export const Remotes = {
 	MarkOnboarding: remote<(key: OnboardingKey) => void>("MarkOnboarding"),
 	// Sent to each player as a match ends: XP earned this match, and the level they're now on.
 	MatchXp: remote<(earned: number, level: number, leveledUp: boolean) => void>("MatchXp"),
+	// Sent to a player who just beat one of their saved records.
+	PersonalBest: remote<(record: PersonalBestRecord, value: number) => void>("PersonalBest"),
 	// Everyone is told when a player takes a perk, so there's counterplay.
 	PerkTaken: remote<(taker: Player, perk: PerkId) => void>("PerkTaken"),
 	// Client reports it used a held perk (the Super Jump is triggered by client movement).

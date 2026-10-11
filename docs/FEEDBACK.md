@@ -29,6 +29,11 @@ DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch ea
 count toward streaks, so practice can't carry a streak into a match. Body shots, shield
 breaks and perk pickups each have their own cue.
 
+**Personal bests** ("NEW TOP SPEED: 92", "LONGEST HEADSHOT: 140 STUDS") call out in gold the
+moment a saved record falls. Speed records announce once the player stops accelerating, with
+the peak, and low records (under 50 speed or 50 studs) stay quiet so new players aren't
+flooded. They show improvement that doesn't depend on winning fights (see SKILL_FLOOR.md).
+
 ## Why this design
 
 - **Layered, multi-sensory feedback.** The "juice" approach: flash, motion, floating text,

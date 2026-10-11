@@ -65,6 +65,9 @@
 				},
 				"LeaveToMenu": {
 					"$className": "RemoteEvent"
+				},
+				"PersonalBest": {
+					"$className": "RemoteEvent"
 				}
 			},
 			"MatchState": {
