@@ -27,6 +27,18 @@ export const MovementConfig = {
 	speedFovBoost: 12,
 };
 
+export const XpConfig = {
+	kill: 10,
+	flagCapture: 50,
+	pointCapture: 25,
+	hardpointSecond: 2,
+	// Finishing a match only pays if the player did something: a kill or objective play.
+	matchCompleted: 40,
+	win: 60,
+	// Most XP one player can earn in a match, so idle servers and farming don't pay off.
+	matchCap: 800,
+};
+
 export const WeaponConfig = {
 	cooldown: 0.9,
 	range: 1000,

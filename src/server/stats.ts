@@ -7,6 +7,12 @@ function getStat(player: Player, name: StatName): IntValue | undefined {
 	return stat?.IsA("IntValue") ? stat : undefined;
 }
 
+// Level sits beside the per-match stats on the leaderboard but isn't reset between matches.
+export function setLevelStat(player: Player, level: number) {
+	const stat = player.FindFirstChild("leaderstats")?.FindFirstChild("Level");
+	if (stat?.IsA("IntValue")) stat.Value = level;
+}
+
 export function createLeaderstats(player: Player) {
 	const leaderstats = new Instance("Folder");
 	leaderstats.Name = "leaderstats";
@@ -15,6 +21,10 @@ export function createLeaderstats(player: Player) {
 		stat.Name = name;
 		stat.Parent = leaderstats;
 	}
+	const level = new Instance("IntValue");
+	level.Name = "Level";
+	level.Value = 1;
+	level.Parent = leaderstats;
 	leaderstats.Parent = player;
 }
 

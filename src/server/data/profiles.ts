@@ -3,7 +3,8 @@
 // and shutdown. Without DataStore access (Studio with API access off) it uses mock profiles.
 
 import ProfileStore from "@rbxts/profile-store";
-import { PlayerProfile, PROFILE_ATTRIBUTE } from "shared/progression";
+import { levelForXp, PlayerProfile, PROFILE_ATTRIBUTE } from "shared/progression";
+import { setLevelStat } from "../stats";
 
 const HttpService = game.GetService("HttpService");
 const Players = game.GetService("Players");
@@ -31,6 +32,7 @@ const profiles = new Map<Player, ProfileStore.Profile<PlayerProfile>>();
 // Sends the player's profile to their client.
 function publish(player: Player, data: PlayerProfile) {
 	player.SetAttribute(PROFILE_ATTRIBUTE, HttpService.JSONEncode(data));
+	setLevelStat(player, levelForXp(data.xp).level);
 }
 
 function load(player: Player) {

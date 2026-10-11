@@ -21,6 +21,8 @@ export const Remotes = {
 	KillFeed: remote<(killer?: Player, victim?: Player) => void>("KillFeed"),
 	// Client reports that the player has seen an onboarding step.
 	MarkOnboarding: remote<(key: OnboardingKey) => void>("MarkOnboarding"),
+	// Sent to each player as a match ends: XP earned this match, and the level they're now on.
+	MatchXp: remote<(earned: number, level: number, leveledUp: boolean) => void>("MatchXp"),
 	CastVote: remote<(optionIndex: number) => void>("CastVote"),
 	// Client asks to leave the menu and join the match in progress.
 	Deploy: remote<() => void>("Deploy"),

@@ -10,7 +10,7 @@ import { initMenu } from "./menu";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
 import { initObjectives } from "./objectives";
 import { initOnboarding } from "./onboarding";
-import { initPodium, showMatchEnd } from "./podium";
+import { initPodium, setMatchXp, showMatchEnd } from "./podium";
 import { initSpeedometer, setSpeed } from "./speedometer";
 import { initTeammates } from "./teammates";
 import { initWeapon } from "./weapon";
@@ -60,6 +60,7 @@ Remotes.KillFeed.OnClientEvent.Connect((killer, victim) => {
 });
 
 Remotes.MatchEnded.OnClientEvent.Connect(showMatchEnd);
+Remotes.MatchXp.OnClientEvent.Connect(setMatchXp);
 
 Remotes.Announce.OnClientEvent.Connect((text, duration) => showBanner(text, HudColors.White, duration));
 

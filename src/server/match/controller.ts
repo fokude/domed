@@ -8,7 +8,7 @@ import { Remotes } from "shared/remotes";
 import { getStandings } from "shared/standings";
 import { setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
-import { recordMatchEnd } from "../progression";
+import { recordMatchEnd, startMatchXp } from "../progression";
 import { getMapModel, listMaps } from "../maps/library";
 import { LoadedMap, loadMap } from "../maps/loader";
 import {
@@ -115,6 +115,7 @@ function startMatch(option: MatchOption): GameMode {
 		resetStats(player);
 	}
 	deployAll();
+	startMatchXp();
 	setCombatRules(mode);
 	Remotes.Announce.FireAllClients("FIGHT", 1.5);
 	return mode;

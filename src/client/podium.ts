@@ -32,6 +32,7 @@ const player = Players.LocalPlayer;
 const liveSlots: LiveSlot[] = [];
 let finalScreen: Frame;
 let finalTitle: TextLabel;
+let xpLabel: TextLabel;
 let finalColumns: Frame;
 let finalToken = 0;
 
@@ -163,7 +164,27 @@ function buildFinalScreen(gui: ScreenGui) {
 		},
 		finalScreen,
 	);
+	xpLabel = create(
+		"TextLabel",
+		{
+			AnchorPoint: new Vector2(0.5, 0),
+			Position: new UDim2(0.5, 0, 0.1, 74),
+			Size: UDim2.fromOffset(800, 30),
+			BackgroundTransparency: 1,
+			Font: Enum.Font.GothamBold,
+			TextSize: 24,
+			TextColor3: RANK_COLORS[0],
+			Text: "",
+		},
+		finalScreen,
+	);
 	finalColumns = create("Frame", { Size: UDim2.fromScale(1, 1), BackgroundTransparency: 1 }, finalScreen);
+}
+
+// Shown under the title on the next end-of-match screen. The server sends it just before the
+// match results.
+export function setMatchXp(earned: number, level: number, leveledUp: boolean) {
+	xpLabel.Text = leveledUp ? `+${earned} XP  ·  LEVEL UP! LEVEL ${level}` : `+${earned} XP  ·  LEVEL ${level}`;
 }
 
 function buildFinalColumn(standing: Standing, rank: number) {
@@ -255,7 +276,9 @@ export function showMatchEnd(title: string, standings: Standing[], duration: num
 	}
 	finalScreen.Visible = true;
 	task.delay(duration, () => {
-		if (finalToken === token) finalScreen.Visible = false;
+		if (finalToken !== token) return;
+		finalScreen.Visible = false;
+		xpLabel.Text = "";
 	});
 }
 

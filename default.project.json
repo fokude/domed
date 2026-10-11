@@ -47,6 +47,9 @@
 				},
 				"MarkOnboarding": {
 					"$className": "RemoteEvent"
+				},
+				"MatchXp": {
+					"$className": "RemoteEvent"
 				}
 			},
 			"MatchState": {
