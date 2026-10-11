@@ -43,13 +43,16 @@ function buildFloor(map: Model) {
 	}
 }
 
-// Two walls 10 studs apart: climb by kicking back and forth, then step onto the goal.
+// Two walls 10 studs apart: climb by kicking back and forth, then step onto the goal. The top
+// is set within reach: a jump, three wall kicks and the double jump climb about 25 to 30 studs.
+const CHIMNEY_HEIGHT = 26;
+
 function buildChimney(map: Model) {
 	for (const x of [-76, -64]) {
-		slab(map, new Vector3(x, 40, 0), new Vector3(2, 40, 30), Wall, "ChimneyWall");
+		slab(map, new Vector3(x, CHIMNEY_HEIGHT, 0), new Vector3(2, CHIMNEY_HEIGHT, 30), Wall, "ChimneyWall");
 	}
-	slab(map, new Vector3(-70, 40, -21), new Vector3(14, 1, 10), Goal, "ChimneyGoal");
-	label(map, new Vector3(-70, 48, 0), "CHIMNEY: wall jump between the walls");
+	slab(map, new Vector3(-70, CHIMNEY_HEIGHT, -21), new Vector3(14, 1, 10), Goal, "ChimneyGoal");
+	label(map, new Vector3(-70, CHIMNEY_HEIGHT + 6, 0), "CHIMNEY: wall jump between the walls");
 }
 
 // A block whose top is a ledge, with a pillar 7 studs out to kick off.
