@@ -46,9 +46,11 @@ let currentMode: GameMode | undefined;
 let endRequested = false;
 let forcedOption: MatchOption | undefined;
 
-export function allMatchOptions(): MatchOption[] {
+// Dev-only test maps are left out unless asked for.
+export function allMatchOptions(includeDevOnly = false): MatchOption[] {
 	const options: MatchOption[] = [];
 	for (const info of listMaps()) {
+		if (info.devOnly && !includeDevOnly) continue;
 		for (const mode of info.modes) {
 			if (MODE_FACTORIES[mode]) options.push({ mapId: info.id, mode });
 		}

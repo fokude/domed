@@ -16,6 +16,7 @@ export interface MapInfo {
 	tagline: string;
 	modes: ModeId[];
 	themeColor: Color3;
+	devOnly: boolean;
 }
 
 export interface SpawnPoint {
@@ -60,6 +61,7 @@ export function readMapInfo(map: Model): MapInfo {
 		tagline: attribute(map, MapAttribute.Tagline, "string", ""),
 		modes,
 		themeColor: attribute(map, MapAttribute.ThemeColor, "Color3", Color3.fromRGB(200, 205, 215)),
+		devOnly: attribute(map, MapAttribute.DevOnly, "boolean", false),
 	};
 }
 

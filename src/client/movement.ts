@@ -191,7 +191,7 @@ function findWall(rootPart: BasePart): Vector3 | undefined {
 // and up. The same wall can't be used twice in a row, so chimneys can be climbed but single
 // walls can't.
 function tryWallJump(rootPart: BasePart): boolean {
-	if (wallJumpsUsed >= Config.maxWallJumps) return false;
+	if (!Config.wallJumpEnabled || wallJumpsUsed >= Config.maxWallJumps) return false;
 	const normal = findWall(rootPart);
 	if (!normal || (lastWallNormal && normal.Dot(lastWallNormal) > 0.9)) return false;
 

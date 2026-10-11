@@ -8,7 +8,7 @@ const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
 
 function switchMap(mapId: string | undefined, mode: string | undefined) {
-	const options = allMatchOptions();
+	const options = allMatchOptions(true);
 	const option = options.find(
 		(candidate) =>
 			candidate.mapId.lower() === mapId?.lower() &&

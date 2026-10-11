@@ -17,6 +17,7 @@ export const MovementConfig = {
 	doubleJumpVelocity: 55,
 
 	// Wall jump: Space in the air near a wall kicks off it. Doesn't use the double jump.
+	wallJumpEnabled: true,
 	wallJumpRange: 2.5,
 	wallJumpPush: 42,
 	wallJumpVelocity: 50,

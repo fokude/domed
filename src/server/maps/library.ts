@@ -9,12 +9,13 @@
 import { Gridline } from "./gridline";
 import { HalcyonStation } from "./halcyonStation";
 import { InfernalSpire } from "./infernalSpire";
+import { MovementLab } from "./movementLab";
 import { readMapInfo, MapInfo } from "./loader";
 import { MapBuilder } from "./types";
 
 const ServerStorage = game.GetService("ServerStorage");
 
-const CODE_MAPS: MapBuilder[] = [InfernalSpire, Gridline, HalcyonStation];
+const CODE_MAPS: MapBuilder[] = [InfernalSpire, Gridline, HalcyonStation, MovementLab];
 
 export function bakeMaps(): Folder {
 	ServerStorage.FindFirstChild("BakedMaps")?.Destroy();

@@ -43,6 +43,8 @@ Type these in chat during a Studio playtest. They're ignored on live servers.
 | `/map <MapId> [Deathmatch | CTF]`                                             | Switch to that map right away, e.g. `/map InfernalSpire` |
 | `/end`                    | End the match, then show results and the map vote |
 
+`/map MovementLab` loads a test map with stations for trying movement features.
+
 ## Scripts
 
 | Command         | Does                       |

@@ -217,6 +217,7 @@ export interface MapInfo {
 	gravity: number;
 	killHeight: number;
 	themeColor: Color3;
+	devOnly?: boolean;
 }
 
 export function setMapInfo(map: Model, info: MapInfo) {
@@ -226,6 +227,7 @@ export function setMapInfo(map: Model, info: MapInfo) {
 	map.SetAttribute(MapAttribute.Gravity, info.gravity);
 	map.SetAttribute(MapAttribute.KillHeight, info.killHeight);
 	map.SetAttribute(MapAttribute.ThemeColor, info.themeColor);
+	if (info.devOnly) map.SetAttribute(MapAttribute.DevOnly, true);
 }
 
 export interface LightingSettings {

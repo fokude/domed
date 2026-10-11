@@ -18,6 +18,8 @@ export const MapAttribute = {
 	KillHeight: "KillHeight",
 	// Accent color for the map's vote card.
 	ThemeColor: "ThemeColor",
+	// Test maps: reachable with /map in Studio, never in rotation or votes.
+	DevOnly: "DevOnly",
 	// On Spawn and FlagBase markers.
 	Team: "Team",
 	// On jump pads: how far above the higher end the arc peaks.
