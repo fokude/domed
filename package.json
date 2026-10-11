@@ -9,7 +9,9 @@
 	"scripts": {
 		"build": "rbxtsc",
 		"watch": "rbxtsc -w",
-		"lint": "eslint src"
+		"lint": "eslint src",
+		"check": "eslint src && rbxtsc",
+		"format": "eslint src --fix && prettier --write \"*.md\" \"docs/*.md\""
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

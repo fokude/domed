@@ -53,10 +53,12 @@ Type these in chat during a Studio playtest. They're ignored on live servers.
 
 ## Scripts
 
-| Command         | Does                       |
-| --------------- | -------------------------- |
-| `npm run build` | Compile once               |
-| `npm run watch` | Compile on save            |
-| `npm run lint`  | ESLint and Prettier checks |
+| Command          | Does                                                 |
+| ---------------- | ---------------------------------------------------- |
+| `npm run build`  | Compile once                                         |
+| `npm run watch`  | Compile on save                                      |
+| `npm run lint`   | ESLint and Prettier checks                           |
+| `npm run check`  | Lint and compile: what CI runs, minus the Rojo build |
+| `npm run format` | Fix lint formatting and format the Markdown docs     |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the code fits together.
