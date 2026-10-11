@@ -15,6 +15,9 @@ const Workspace = game.GetService("Workspace");
 
 const WALL_PROBE_RADIUS = 1.4;
 const JUMP_PAD_DEBOUNCE = 0.4;
+// How far below the root to look for a jump pad. The root sits about 3 studs above the feet;
+// the extra catches players landing on a pad from above.
+const PAD_PROBE_DEPTH = 5;
 // A scroll tick counts as a jump press for this long, so scrolling just before landing still hops.
 const SCROLL_JUMP_BUFFER = 0.1;
 // If physics leaves us below this fraction of our intended speed, something blocked us.
@@ -22,7 +25,6 @@ const BLOCKED_SPEED_RATIO = 0.3;
 
 const player = Players.LocalPlayer;
 
-let character: Model | undefined;
 let humanoid: Humanoid | undefined;
 let root: BasePart | undefined;
 
@@ -34,6 +36,10 @@ let doubleJumpUsed = false;
 // MoveDirection is zeroed while airborne, so input handlers read the last real value here.
 let wishDirection = Vector3.zero;
 let lastPadLaunch = 0;
+const jumpPads: BasePart[] = [];
+const padProbeParams = new RaycastParams();
+padProbeParams.FilterType = Enum.RaycastFilterType.Include;
+padProbeParams.FilterDescendantsInstances = [];
 let lastScrollAt = -math.huge;
 
 const wallProbeParams = new RaycastParams();
@@ -105,6 +111,7 @@ function onPreSimulation(dt: number) {
 	const body = getLiveBody();
 	if (!body) return;
 	const [currentHumanoid, rootPart] = body;
+	checkJumpPad(rootPart);
 	const actualVelocity = rootPart.AssemblyLinearVelocity;
 
 	if (!isAirborne(currentHumanoid)) {
@@ -190,7 +197,6 @@ function onInputChanged(input: InputObject, gameProcessed: boolean) {
 }
 
 function onCharacterAdded(newCharacter: Model) {
-	character = newCharacter;
 	humanoid = newCharacter.WaitForChild("Humanoid") as Humanoid;
 	root = newCharacter.WaitForChild("HumanoidRootPart") as BasePart;
 	wallProbeParams.FilterDescendantsInstances = [newCharacter];
@@ -202,18 +208,32 @@ function onCharacterAdded(newCharacter: Model) {
 	doubleJumpUsed = false;
 }
 
-function hookJumpPad(pad: Instance) {
+function trackJumpPad(pad: Instance) {
 	if (!pad.IsA("BasePart")) return;
-	pad.Touched.Connect((hit) => {
-		if (!character || !hit.IsDescendantOf(character)) return;
-		const launch = pad.GetAttribute("Launch");
-		if (!typeIs(launch, "Vector3") || os.clock() - lastPadLaunch < JUMP_PAD_DEBOUNCE) return;
-		lastPadLaunch = os.clock();
-		// The pad sets vertical speed and adds its push to the player's own momentum, so they keep
-		// the direction they were moving in rather than being redirected onto a fixed path.
-		const momentum = root ? flatten(root.AssemblyLinearVelocity) : Vector3.zero;
-		launchCharacter(new Vector3(momentum.X + launch.X, launch.Y, momentum.Z + launch.Z), false);
-	});
+	jumpPads.push(pad);
+	padProbeParams.FilterDescendantsInstances = jumpPads;
+}
+
+function untrackJumpPad(pad: Instance) {
+	const index = jumpPads.indexOf(pad as BasePart);
+	if (index === -1) return;
+	jumpPads.remove(index);
+	padProbeParams.FilterDescendantsInstances = jumpPads;
+}
+
+// Pads are found by probing under the feet every frame rather than with Touched: R15
+// characters hover on their HipHeight, so their feet often never touch the pad.
+function checkJumpPad(rootPart: BasePart) {
+	if (os.clock() - lastPadLaunch < JUMP_PAD_DEBOUNCE) return;
+	const hit = Workspace.Raycast(rootPart.Position, new Vector3(0, -PAD_PROBE_DEPTH, 0), padProbeParams);
+	const launch = hit?.Instance.GetAttribute("Launch");
+	if (!typeIs(launch, "Vector3")) return;
+	lastPadLaunch = os.clock();
+
+	// The pad sets vertical speed and adds its push to the player's own momentum, so they keep
+	// the direction they were moving in rather than being redirected onto a fixed path.
+	const momentum = flatten(rootPart.AssemblyLinearVelocity);
+	launchCharacter(new Vector3(momentum.X + launch.X, launch.Y, momentum.Z + launch.Z), false);
 }
 
 export function getSpeed(): number {
@@ -242,10 +262,9 @@ export function initMovement() {
 	player.CharacterAdded.Connect(onCharacterAdded);
 	if (player.Character) task.spawn(onCharacterAdded, player.Character);
 
-	for (const pad of CollectionService.GetTagged("JumpPad")) {
-		hookJumpPad(pad);
-	}
-	CollectionService.GetInstanceAddedSignal("JumpPad").Connect(hookJumpPad);
+	CollectionService.GetTagged("JumpPad").forEach(trackJumpPad);
+	CollectionService.GetInstanceAddedSignal("JumpPad").Connect(trackJumpPad);
+	CollectionService.GetInstanceRemovedSignal("JumpPad").Connect(untrackJumpPad);
 
 	RunService.PreSimulation.Connect(onPreSimulation);
 	RunService.RenderStepped.Connect(onRenderStepped);
