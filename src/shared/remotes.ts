@@ -27,6 +27,8 @@ export const Remotes = {
 	MarkOnboarding: remote<(key: OnboardingKey) => void>("MarkOnboarding"),
 	// Sent to each player as a match ends: XP earned this match, and the level they're now on.
 	MatchXp: remote<(earned: number, level: number, leveledUp: boolean) => void>("MatchXp"),
+	// Sent to a shooter whose miss passed close to a head they could have hit.
+	NearMiss: remote<() => void>("NearMiss"),
 	// Sent to a player who just beat one of their saved records.
 	PersonalBest: remote<(record: PersonalBestRecord, value: number) => void>("PersonalBest"),
 	// Everyone is told when a player takes a perk, so there's counterplay.

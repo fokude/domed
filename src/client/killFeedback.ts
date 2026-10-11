@@ -104,6 +104,30 @@ function edgeFlash(color: Color3) {
 	}
 }
 
+// "CLOSE" under the crosshair when a miss just passed a head.
+function nearMiss() {
+	const label = create(
+		"TextLabel",
+		{
+			AnchorPoint: new Vector2(0.5, 0),
+			Position: new UDim2(0.5, 0, 0.5, 30),
+			Size: UDim2.fromOffset(120, 20),
+			BackgroundTransparency: 1,
+			Font: Enum.Font.GothamBlack,
+			TextSize: 16,
+			TextColor3: WHITE,
+			TextStrokeTransparency: 0.4,
+			Text: "CLOSE",
+		},
+		gui,
+	);
+	tween(label, 0.6, {
+		Position: new UDim2(0.5, 0, 0.5, 44),
+		TextTransparency: 1,
+		TextStrokeTransparency: 1,
+	}).Completed.Connect(() => label.Destroy());
+}
+
 // "+XP" drifting up beside the crosshair.
 function xpPopup(amount: number) {
 	const label = create(
@@ -254,6 +278,7 @@ export function initKillFeedback() {
 	build();
 	Remotes.HitConfirm.OnClientEvent.Connect(onHitConfirm);
 	Remotes.HeadBurst.OnClientEvent.Connect(headBurst);
+	Remotes.NearMiss.OnClientEvent.Connect(nearMiss);
 	Remotes.KillFeed.OnClientEvent.Connect((_, victim) => {
 		if (victim === player) playSound("death");
 	});

@@ -59,7 +59,7 @@ None of these change one-shot headshots or air strafing. Ranked by expected valu
 2. **Death recap.** A moment after dying, show who killed you, from how far and how fast they
    were moving. It turns a "random death" into "they were bhopping at 90 from 140 studs":
    fair, and something to aspire to.
-3. **Near-miss feedback.** When a shot passes just over a head, flash "CLOSE". It tells new
+3. **Near-miss feedback.** Shipped. When a shot passes just over a head, flash "CLOSE". It tells new
    players they're nearly there, and teaches that only heads count.
 4. **Personal bests during play.** Shipped. "NEW TOP SPEED" or "LONGEST HEADSHOT" the moment it
    happens, from stats already saved. Visible improvement that doesn't need kills.

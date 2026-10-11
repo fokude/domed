@@ -29,6 +29,11 @@ DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch ea
 count toward streaks, so practice can't carry a streak into a match. Body shots, shield
 breaks and perk pickups each have their own cue.
 
+**Near misses**: when a clean miss passes within 2.5 studs of a head the shooter could have
+hit (a player or a training dummy), "CLOSE" flashes under the crosshair. It tells new players
+they're nearly there and teaches that only heads count; the server decides, so it can't be
+faked, and it's only shown to the shooter.
+
 **Personal bests** ("NEW TOP SPEED: 92", "LONGEST HEADSHOT: 140 STUDS") call out in gold the
 moment a saved record falls. Speed records announce once the player stops accelerating, with
 the peak, and low records (under 50 speed or 50 studs) stay quiet so new players aren't

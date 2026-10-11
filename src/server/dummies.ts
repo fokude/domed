@@ -101,6 +101,16 @@ function step(dt: number) {
 	}
 }
 
+// Heads of the dummies currently standing.
+export function livingDummyHeads(): BasePart[] {
+	const heads: BasePart[] = [];
+	for (const [model, dummy] of dummies) {
+		const head = model.FindFirstChild("Head");
+		if (dummy.alive && head?.IsA("BasePart")) heads.push(head);
+	}
+	return heads;
+}
+
 export function isDummy(model: Model): boolean {
 	return model.HasTag(DUMMY_TAG);
 }

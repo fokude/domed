@@ -68,6 +68,9 @@
 				},
 				"PersonalBest": {
 					"$className": "RemoteEvent"
+				},
+				"NearMiss": {
+					"$className": "RemoteEvent"
 				}
 			},
 			"MatchState": {

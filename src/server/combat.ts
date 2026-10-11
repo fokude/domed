@@ -8,7 +8,7 @@
 import { WeaponConfig } from "shared/config";
 import { railCooldown } from "shared/perks";
 import { Remotes } from "shared/remotes";
-import { hitDummy, isDummy } from "./dummies";
+import { hitDummy, isDummy, livingDummyHeads } from "./dummies";
 import { hitShield } from "./perks";
 import { recordKill } from "./progression";
 import { incrementStat } from "./stats";
@@ -27,6 +27,8 @@ const LAG_SECONDS = 0.35;
 const MAX_AIM_ANGLE = math.rad(100);
 // Rejections are logged on the first one and then every this many, per player.
 const REJECTION_LOG_EVERY = 10;
+// A miss passing this close to the center of a head it could have hit counts as a near miss.
+const NEAR_MISS_STUDS = 2.5;
 
 export interface CombatRules {
 	canDamage(shooter: Player, victim: Player): boolean;
@@ -95,6 +97,30 @@ function implausibleHit(
 	return undefined;
 }
 
+function distanceToSegment(point: Vector3, from: Vector3, to: Vector3): number {
+	const segment = to.sub(from);
+	const length = segment.Dot(segment);
+	const along = length > 0 ? math.clamp(point.sub(from).Dot(segment) / length, 0, 1) : 0;
+	return from.add(segment.mul(along)).sub(point).Magnitude;
+}
+
+// Tells the shooter when a miss just passed a head: encouragement for new players, and a
+// reminder that only heads count. Purely cosmetic, so it uses server positions without lag
+// allowance. See docs/SKILL_FLOOR.md.
+function checkNearMiss(shooter: Player, origin: Vector3, hitPosition: Vector3, currentRules: CombatRules) {
+	const heads = livingDummyHeads();
+	for (const other of Players.GetPlayers()) {
+		const otherCharacter = other.Character;
+		const otherHumanoid = otherCharacter?.FindFirstChildOfClass("Humanoid");
+		const otherHead = otherCharacter?.FindFirstChild("Head");
+		if (other === shooter || !otherHumanoid || otherHumanoid.Health <= 0 || !otherHead?.IsA("BasePart")) continue;
+		if (currentRules.canDamage(shooter, other)) heads.push(otherHead);
+	}
+	if (heads.some((head) => distanceToSegment(head.Position, origin, hitPosition) <= NEAR_MISS_STUDS)) {
+		Remotes.NearMiss.FireClient(shooter);
+	}
+}
+
 function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedHitPart: unknown) {
 	if (!typeIs(origin, "Vector3") || !typeIs(hitPosition, "Vector3")) return;
 	if (claimedHitPart !== undefined && !(typeIs(claimedHitPart, "Instance") && claimedHitPart.IsA("BasePart"))) {
@@ -116,6 +142,9 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 
 	Remotes.ShotFired.FireAllClients(shooter, origin, hitPosition);
 
+	// Only clean misses count: hitting anyone (a body shot, say) already has its own feedback.
+	const hitSomeone = hitPart?.Parent?.FindFirstChildOfClass("Humanoid") !== undefined;
+	if (rules && !hitSomeone) checkNearMiss(shooter, origin, hitPosition, rules);
 	if (!hitPart || !rules) return;
 
 	const victimCharacter = hitPart.Parent;
