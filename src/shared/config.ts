@@ -49,6 +49,14 @@ export const RatingConfig = {
 	kappa: 0.0001,
 };
 
+export const TeamBalanceConfig = {
+	// Random team splits tried at match start, alongside the most balanced one.
+	candidates: 64,
+	// Splits within this much total skill (mu) of the most balanced count as fair; among them the
+	// one that repeats the fewest teammate pairs from last match is picked, so teams rotate.
+	tolerance: 4,
+};
+
 export const WeaponConfig = {
 	cooldown: 0.9,
 	range: 1000,

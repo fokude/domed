@@ -1,6 +1,7 @@
 // Red and Blue teams for team modes: creates the Team instances, balances players between
 // them, keeps team scores, and picks team spawns.
 
+import { TeamBalanceConfig } from "shared/config";
 import { setMatchState } from "shared/matchState";
 import { TEAM_IDS, TeamId } from "shared/modes";
 import { SpawnPoint } from "../maps/loader";
@@ -15,6 +16,82 @@ const TEAM_BRICK_COLORS: Record<TeamId, BrickColor> = {
 	Red: new BrickColor("Bright red"),
 	Blue: new BrickColor("Bright blue"),
 };
+
+// Team of each player (by UserId) in the previous split, so the next one can rotate teammates.
+let lastSplit = new Map<number, TeamId>();
+
+type Split = TeamId[];
+
+function imbalance(split: Split, skills: number[]): number {
+	let difference = 0;
+	split.forEach((team, index) => (difference += team === "Red" ? skills[index] : -skills[index]));
+	return math.abs(difference);
+}
+
+// Pairs of players who were teammates last match and would be again.
+function repeatedPairs(players: Player[], split: Split): number {
+	let repeats = 0;
+	for (let i = 0; i < players.size(); i++) {
+		for (let j = i + 1; j < players.size(); j++) {
+			const [a, b] = [lastSplit.get(players[i].UserId), lastSplit.get(players[j].UserId)];
+			if (a !== undefined && a === b && split[i] === split[j]) repeats += 1;
+		}
+	}
+	return repeats;
+}
+
+// Strongest first, each to the team that keeps sizes within one and has less total skill.
+function greedySplit(skills: number[]): Split {
+	const order = skills.map((_, index) => index).sort((a, b) => skills[a] > skills[b]);
+	const split: Split = skills.map(() => "Red");
+	const [count, total] = [
+		{ Red: 0, Blue: 0 },
+		{ Red: 0, Blue: 0 },
+	];
+	for (const index of order) {
+		let team: TeamId;
+		if (count.Red !== count.Blue) team = count.Red < count.Blue ? "Red" : "Blue";
+		else team = total.Red <= total.Blue ? "Red" : "Blue";
+		split[index] = team;
+		count[team] += 1;
+		total[team] += skills[index];
+	}
+	return split;
+}
+
+// Random split with team sizes within one.
+function randomSplit(size: number): Split {
+	const order = new Array<number>(size, 0).map((_, index) => index);
+	for (let i = size - 1; i > 0; i--) {
+		const j = math.random(0, i);
+		[order[i], order[j]] = [order[j], order[i]];
+	}
+	const split: Split = new Array<TeamId>(size, "Red");
+	order.forEach((index, position) => (split[index] = position % 2 === 0 ? "Red" : "Blue"));
+	return split;
+}
+
+// Splits players into fair teams that rotate between matches: of all splits close to the most
+// balanced, picks one that repeats the fewest teammate pairs from last time.
+function splitTeams(players: Player[]): Map<Player, TeamId> {
+	const skills = players.map((player) => getRating(player).mu);
+	const candidates: Split[] = [greedySplit(skills)];
+	for (let i = 0; i < TeamBalanceConfig.candidates; i++) candidates.push(randomSplit(players.size()));
+
+	const best = math.min(...candidates.map((split) => imbalance(split, skills)));
+	const fair = candidates.filter((split) => imbalance(split, skills) <= best + TeamBalanceConfig.tolerance);
+	const fewestRepeats = math.min(...fair.map((split) => repeatedPairs(players, split)));
+	const finalists = fair.filter((split) => repeatedPairs(players, split) === fewestRepeats);
+	const chosen = finalists[math.random(0, finalists.size() - 1)];
+
+	const result = new Map<Player, TeamId>();
+	lastSplit = new Map();
+	players.forEach((player, index) => {
+		result.set(player, chosen[index]);
+		lastSplit.set(player.UserId, chosen[index]);
+	});
+	return result;
+}
 
 export class TeamRoster {
 	private readonly teams = new Map<TeamId, Team>();
@@ -32,10 +109,10 @@ export class TeamRoster {
 			this.publishScore(id);
 		}
 
-		// Split everyone already here by skill before the match starts: strongest first, each to
-		// whichever team keeps sizes within one and has less total skill.
-		const bySkill = [...Players.GetPlayers()].sort((a, b) => getRating(a).mu > getRating(b).mu);
-		for (const player of bySkill) this.assign(player);
+		for (const [player, team] of splitTeams(Players.GetPlayers())) {
+			player.Neutral = false;
+			player.Team = this.teams.get(team);
+		}
 	}
 
 	teamOf(player: Player): TeamId | undefined {

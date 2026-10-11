@@ -117,8 +117,9 @@ class, `controlPoints.ts`) live alongside it; the team modes share
 `TeamRoster` (`server/match/teams.ts`) for teams, balancing, scores and spawns.
 
 Teams are balanced within each server by a hidden skill rating (`server/rating.ts`, the
-OpenSkill Weng-Lin Bradley-Terry model). At match start players are split strongest first, each
-to the team with less total skill while sizes stay within one; mid-match joiners go to the
+OpenSkill Weng-Lin Bradley-Terry model). At match start the server tries the most balanced split and a set of random
+ones, keeps those close to the best balance, and picks the one that repeats the fewest
+teammate pairs from the last match, so teams stay fair but rotate; mid-match joiners go to the
 smaller team, or the weaker one if sizes match. Team matches update the rating; free-for-all
 doesn't. The rating is saved in the profile but never sent to clients, so there's no visible
 number to protect.
