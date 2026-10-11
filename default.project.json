@@ -1,0 +1,42 @@
+{
+	"name": "DOMED",
+	"globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"rbxts_include": {
+				"$path": "include",
+				"node_modules": {
+					"$className": "Folder",
+					"@rbxts": {
+						"$path": "node_modules/@rbxts"
+					}
+				}
+			},
+			"TS": {
+				"$path": "out/shared"
+			},
+			"Remotes": {
+				"$className": "Folder",
+				"Fire": { "$className": "RemoteEvent" },
+				"ShotFired": { "$className": "RemoteEvent" },
+				"HitConfirm": { "$className": "RemoteEvent" },
+				"Knockback": { "$className": "RemoteEvent" },
+				"KillFeed": { "$className": "RemoteEvent" },
+				"Announce": { "$className": "RemoteEvent" }
+			}
+		},
+		"ServerScriptService": {
+			"TS": {
+				"$path": "out/server"
+			}
+		},
+		"StarterPlayer": {
+			"StarterPlayerScripts": {
+				"TS": {
+					"$path": "out/client"
+				}
+			}
+		}
+	}
+}
