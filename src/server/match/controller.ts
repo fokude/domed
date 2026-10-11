@@ -35,6 +35,7 @@ import { CaptureTheFlag } from "./modes/ctf";
 import { Deathmatch } from "./modes/deathmatch";
 import { TeamDeathmatch } from "./modes/teamDeathmatch";
 import { GameMode, MatchResult } from "./modes/types";
+import { startFriendTracking } from "./teams";
 import { pickVoteOptions, runVote, startVoting } from "./voting";
 
 const Players = game.GetService("Players");
@@ -274,6 +275,7 @@ export function startMatchLoop() {
 		if (data.onboarding.intro !== true) deploy(player);
 	});
 	startVoting();
+	startFriendTracking();
 
 	task.spawn(() => {
 		// Nothing runs on an empty server, so the first player arrives to a fresh warm-up.

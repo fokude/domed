@@ -61,8 +61,15 @@ Only players present at the end of a match are rated.
 
 At match start the server builds the most balanced split by total μ, plus 64 random splits. Any
 split within a small margin (`TeamBalanceConfig.tolerance`) of the best balance counts as fair,
-and of those, the one that repeats the fewest teammate pairs from the previous match is chosen.
-Players who join mid-match go to the smaller team, or the weaker one when sizes match.
+and of those, the ones that keep the most Roblox friends on the same team are preferred, then
+the one that repeats the fewest teammate pairs from the previous match (not counting friends)
+is chosen. Players who join mid-match go to the smaller team; when sizes match, to a friend's
+team, or else the weaker one.
+
+**Why friends together:** players stick with hard games when they play with friends, and
+being split from the friend you joined with is a common complaint (see SKILL_FLOOR.md).
+Fairness still comes first: friends are kept together only among splits that are already
+fair, so a strong group can't stack a team.
 
 **Why the randomness:** a purely deterministic split gives the same lobby the same teams and
 the same result every round, which gets stale quickly.

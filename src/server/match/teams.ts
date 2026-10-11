@@ -20,6 +20,49 @@ const TEAM_BRICK_COLORS: Record<TeamId, BrickColor> = {
 // Team of each player (by UserId) in the previous split, so the next one can rotate teammates.
 let lastSplit = new Map<number, TeamId>();
 
+// Pairs of Roblox friends in the server, as "lowerId:higherId". Looked up when players join,
+// since IsFriendsWith makes a web request, so splitting teams never waits on it.
+const friendPairs = new Set<string>();
+
+function pairKey(a: number, b: number): string {
+	return a < b ? `${a}:${b}` : `${b}:${a}`;
+}
+
+function areFriends(a: Player, b: Player): boolean {
+	return friendPairs.has(pairKey(a.UserId, b.UserId));
+}
+
+function lookUpFriends(player: Player) {
+	for (const other of Players.GetPlayers()) {
+		if (other === player) continue;
+		// The typings model user ids as a nominal User type; at runtime it is the numeric UserId.
+		const [ok, friends] = pcall(() => player.IsFriendsWithAsync(other.UserId as unknown as User));
+		if (ok && friends) friendPairs.add(pairKey(player.UserId, other.UserId));
+	}
+}
+
+export function startFriendTracking() {
+	Players.PlayerAdded.Connect((player) => task.spawn(lookUpFriends, player));
+	Players.PlayerRemoving.Connect((player) => {
+		const id = tostring(player.UserId);
+		for (const key of [...friendPairs]) {
+			if (key.split(":").includes(id)) friendPairs.delete(key);
+		}
+	});
+	Players.GetPlayers().forEach((player) => task.spawn(lookUpFriends, player));
+}
+
+// Pairs of friends on the same team.
+function friendsTogether(players: Player[], split: Split): number {
+	let together = 0;
+	for (let i = 0; i < players.size(); i++) {
+		for (let j = i + 1; j < players.size(); j++) {
+			if (split[i] === split[j] && areFriends(players[i], players[j])) together += 1;
+		}
+	}
+	return together;
+}
+
 type Split = TeamId[];
 
 function imbalance(split: Split, skills: number[]): number {
@@ -28,13 +71,15 @@ function imbalance(split: Split, skills: number[]): number {
 	return math.abs(difference);
 }
 
-// Pairs of players who were teammates last match and would be again.
+// Pairs of players who were teammates last match and would be again. Friends don't count: they
+// stay together on purpose.
 function repeatedPairs(players: Player[], split: Split): number {
 	let repeats = 0;
 	for (let i = 0; i < players.size(); i++) {
 		for (let j = i + 1; j < players.size(); j++) {
 			const [a, b] = [lastSplit.get(players[i].UserId), lastSplit.get(players[j].UserId)];
-			if (a !== undefined && a === b && split[i] === split[j]) repeats += 1;
+			if (a === undefined || a !== b || split[i] !== split[j]) continue;
+			if (!areFriends(players[i], players[j])) repeats += 1;
 		}
 	}
 	return repeats;
@@ -71,8 +116,9 @@ function randomSplit(size: number): Split {
 	return split;
 }
 
-// Splits players into fair teams that rotate between matches: of all splits close to the most
-// balanced, picks one that repeats the fewest teammate pairs from last time.
+// Splits players into fair teams: of all splits close to the most balanced, picks those that
+// keep the most friends together, then rotates everyone else by repeating the fewest teammate
+// pairs from last time. Fairness always comes first. See docs/RATING.md.
 function splitTeams(players: Player[]): Map<Player, TeamId> {
 	const skills = players.map((player) => getRating(player).mu);
 	const candidates: Split[] = [greedySplit(skills)];
@@ -80,8 +126,10 @@ function splitTeams(players: Player[]): Map<Player, TeamId> {
 
 	const best = math.min(...candidates.map((split) => imbalance(split, skills)));
 	const fair = candidates.filter((split) => imbalance(split, skills) <= best + TeamBalanceConfig.tolerance);
-	const fewestRepeats = math.min(...fair.map((split) => repeatedPairs(players, split)));
-	const finalists = fair.filter((split) => repeatedPairs(players, split) === fewestRepeats);
+	const mostFriends = math.max(...fair.map((split) => friendsTogether(players, split)));
+	const friendly = fair.filter((split) => friendsTogether(players, split) === mostFriends);
+	const fewestRepeats = math.min(...friendly.map((split) => repeatedPairs(players, split)));
+	const finalists = friendly.filter((split) => repeatedPairs(players, split) === fewestRepeats);
 	const chosen = finalists[math.random(0, finalists.size() - 1)];
 
 	const result = new Map<Player, TeamId>();
@@ -131,14 +179,18 @@ export class TeamRoster {
 		return Players.GetPlayers().filter((player) => player.Team === this.teams.get(team));
 	}
 
-	// Puts a player without a team on the smaller team, or if they're level, the one with less
-	// total hidden skill.
+	// Puts a player without a team on the smaller team. If they're level, joins a friend's team,
+	// or failing that the one with less total hidden skill.
 	assign(player: Player) {
 		if (this.teamOf(player)) return;
 		const [red, blue] = TEAM_IDS.map((id) => this.members(id));
 		let team: TeamId;
 		if (red.size() !== blue.size()) {
 			team = red.size() < blue.size() ? "Red" : "Blue";
+		} else if (
+			red.some((member) => areFriends(member, player)) !== blue.some((member) => areFriends(member, player))
+		) {
+			team = red.some((member) => areFriends(member, player)) ? "Red" : "Blue";
 		} else {
 			const skill = (members: Player[]) => members.reduce((sum, member) => sum + getRating(member).mu, 0);
 			team = skill(red) <= skill(blue) ? "Red" : "Blue";

@@ -46,7 +46,7 @@ features against it.
 | Fair deaths         | Client-side hits (what you see is what lands); visible beams; death recap with distance and killer speed                                      |
 | Early competence    | Body-shot knockback, which earns the kill if it sends someone into a hazard or the void; teams balanced by hidden rating; warm-up and dummies |
 | Visible improvement | Levels, lifetime stats, top speed and longest headshot records, announced when beaten                                                         |
-| Friends             | Short matches suited to dropping in together                                                                                                  |
+| Friends             | Short matches; friends kept on the same team when it stays fair                                                                               |
 | Depth               | Air strafing, bhop, long-range headshots in the air                                                                                           |
 | Fast first minute   | First-time players skip the menu; one lesson at a time on screen, cleared by doing it                                                         |
 
@@ -71,7 +71,7 @@ None of these change one-shot headshots or air strafing. Ranked by expected valu
    of rules, one lesson shows at a time (shoot, bunny hop, air strafe, double jump) and clears
    the moment the player does it; moves they already know are skipped. The how-to-play card
    stays in the menu. Judge it by the funnel's joined-to-deployed step and first-kill rate.
-7. **Friends together.** Prefer keeping Roblox friends on the same team when balance allows,
+7. **Friends together.** Shipped for teams; the invite button is still to do. Prefer keeping Roblox friends on the same team when balance allows,
    and add an invite button.
 
 Rejected: body-shot damage, which makes spraying at bodies a strategy and dilutes every
