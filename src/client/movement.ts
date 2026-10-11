@@ -7,6 +7,7 @@
 // docs/MOVEMENT.md explains each move and the engine quirks this code works around.
 
 import { MovementConfig as Config, CtfConfig } from "shared/config";
+import { MapAttribute, MapTag } from "shared/mapMarkers";
 import { CARRYING_FLAG_ATTRIBUTE } from "shared/matchState";
 
 const CollectionService = game.GetService("CollectionService");
@@ -244,7 +245,7 @@ function untrackJumpPad(pad: Instance) {
 function checkJumpPad(rootPart: BasePart) {
 	if (os.clock() - lastPadLaunch < JUMP_PAD_DEBOUNCE) return;
 	const hit = Workspace.Raycast(rootPart.Position, new Vector3(0, -PAD_PROBE_DEPTH, 0), padProbeParams);
-	const launch = hit?.Instance.GetAttribute("Launch");
+	const launch = hit?.Instance.GetAttribute(MapAttribute.Launch);
 	if (!typeIs(launch, "Vector3")) return;
 	lastPadLaunch = os.clock();
 
@@ -283,9 +284,9 @@ export function initMovement() {
 	player.CharacterAdded.Connect(onCharacterAdded);
 	if (player.Character) task.spawn(onCharacterAdded, player.Character);
 
-	CollectionService.GetTagged("JumpPad").forEach(trackJumpPad);
-	CollectionService.GetInstanceAddedSignal("JumpPad").Connect(trackJumpPad);
-	CollectionService.GetInstanceRemovedSignal("JumpPad").Connect(untrackJumpPad);
+	CollectionService.GetTagged(MapTag.JumpPad).forEach(trackJumpPad);
+	CollectionService.GetInstanceAddedSignal(MapTag.JumpPad).Connect(trackJumpPad);
+	CollectionService.GetInstanceRemovedSignal(MapTag.JumpPad).Connect(untrackJumpPad);
 
 	RunService.PreSimulation.Connect(onPreSimulation);
 	RunService.RenderStepped.Connect(onRenderStepped);

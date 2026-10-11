@@ -1,6 +1,6 @@
 // Kills characters that touch hazard parts (lava) or fall below the map's kill height.
 
-import { MapTag } from "./maps/markers";
+import { MapTag } from "shared/mapMarkers";
 
 const CollectionService = game.GetService("CollectionService");
 const Players = game.GetService("Players");

@@ -1,7 +1,14 @@
 // Loads a map Model into the workspace and turns its markers into gameplay data.
 
 import { MODE_IDS, ModeId, TEAM_IDS, TeamId } from "shared/modes";
-import { DEFAULT_ARC_HEIGHT, LIGHTING_FOLDER, MapAttribute, MapTag, PAD_TARGET_LINK, ROOT_HEIGHT } from "./markers";
+import {
+	DEFAULT_ARC_HEIGHT,
+	LIGHTING_FOLDER,
+	MapAttribute,
+	MapTag,
+	PAD_TARGET_LINK,
+	ROOT_HEIGHT,
+} from "shared/mapMarkers";
 
 const CollectionService = game.GetService("CollectionService");
 const Lighting = game.GetService("Lighting");

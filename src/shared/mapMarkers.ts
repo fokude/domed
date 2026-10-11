@@ -1,4 +1,5 @@
-// Conventions shared by map authoring (Studio or the kit) and the runtime loader.
+// Map marker conventions shared by map authoring (Studio or the kit), the server loader, and
+// the client (jump pads).
 // docs/MAPPING.md documents these for map makers; keep the two in sync.
 
 export const MapTag = {

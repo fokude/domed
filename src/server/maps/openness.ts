@@ -4,7 +4,7 @@
 // Spots are sampled on every walkable floor, including upper floors, at eye height.
 
 import { LoadedMap } from "./loader";
-import { MapTag } from "./markers";
+import { MapTag } from "shared/mapMarkers";
 
 const CollectionService = game.GetService("CollectionService");
 const Workspace = game.GetService("Workspace");

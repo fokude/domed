@@ -3,7 +3,7 @@
 // be baked into Studio models and finished by hand (see docs/MAPPING.md).
 
 import { ModeId, TeamId } from "shared/modes";
-import { DEFAULT_ARC_HEIGHT, LIGHTING_FOLDER, MapAttribute, MapTag, PAD_TARGET_LINK } from "./markers";
+import { DEFAULT_ARC_HEIGHT, LIGHTING_FOLDER, MapAttribute, MapTag, PAD_TARGET_LINK } from "shared/mapMarkers";
 
 const CollectionService = game.GetService("CollectionService");
 
