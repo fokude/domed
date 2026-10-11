@@ -2,7 +2,7 @@
 // because that is what matters for layout: where players stand. Maps built here are meant to
 // be baked into Studio models and finished by hand (see docs/MAPPING.md).
 
-import { ModeId, TeamId } from "shared/modes";
+import { ModeId, TEAM_COLORS, TeamId } from "shared/modes";
 import { DEFAULT_ARC_HEIGHT, LIGHTING_FOLDER, MapAttribute, MapTag, PAD_TARGET_LINK } from "shared/mapMarkers";
 
 const CollectionService = game.GetService("CollectionService");
@@ -165,6 +165,89 @@ const MarkerStyle: Style = {
 function tag<T extends Instance>(instance: T, name: string): T {
 	CollectionService.AddTag(instance, name);
 	return instance;
+}
+
+// Neon in a team's color, for base trim and flag stands.
+export function teamGlow(team: TeamId): Style {
+	return { color: TEAM_COLORS[team], material: Enum.Material.Neon, collide: false, castShadow: false };
+}
+
+// Decoration that shots and line-of-sight checks pass through, like backdrops and barriers.
+export function scenery<T extends BasePart>(part: T): T {
+	part.CanQuery = false;
+	return part;
+}
+
+// Neon strips along the top edges of a box whose top face is centered on `top`.
+export function outline(parent: Instance, top: Vector3, width: number, depth: number, style: Style) {
+	const thickness = 0.4;
+	for (const side of [-1, 1]) {
+		const alongX = new Vector3(width, 0.4, thickness);
+		const alongZ = new Vector3(thickness, 0.4, depth);
+		slab(parent, top.add(new Vector3(0, 0.2, (side * (depth - thickness)) / 2)), alongX, style, "Edge");
+		slab(parent, top.add(new Vector3((side * (width - thickness)) / 2, 0.2, 0)), alongZ, style, "Edge");
+	}
+}
+
+// A wall standing on `base` along X (or Z) at `fixed`, from `from` to `to`, leaving a doorway
+// in each `gaps` range.
+export function wallWithGaps(
+	parent: Instance,
+	alongX: boolean,
+	fixed: number,
+	from: number,
+	to: number,
+	gaps: [number, number][],
+	base: number,
+	height: number,
+	style: Style,
+	thickness = 2,
+) {
+	const cuts = [math.min(from, to)];
+	for (const [a, b] of gaps) {
+		cuts.push(math.min(a, b), math.max(a, b));
+	}
+	cuts.push(math.max(from, to));
+	for (let k = 0; k < cuts.size(); k += 2) {
+		const [start, finish] = [cuts[k], cuts[k + 1]];
+		if (finish - start < 0.5) continue;
+		const middle = (start + finish) / 2;
+		const top = alongX ? new Vector3(middle, base + height, fixed) : new Vector3(fixed, base + height, middle);
+		const size = alongX
+			? new Vector3(finish - start, height, thickness)
+			: new Vector3(thickness, height, finish - start);
+		slab(parent, top, size, style, "Wall");
+	}
+}
+
+// A 2-stud floor plate with its top at `top` over a rectangle, leaving out `holes` (each
+// [x1, x2, z1, z2]) for stairwells. Built from cells merged into runs, so it stays a handful of
+// parts. Hole edges should fall on the cell grid.
+export function plateWithHoles(
+	parent: Instance,
+	top: number,
+	x1: number,
+	x2: number,
+	z1: number,
+	z2: number,
+	holes: [number, number, number, number][],
+	style: Style,
+	cell = 10,
+) {
+	const inHole = (x: number, z: number) =>
+		holes.some(([hx1, hx2, hz1, hz2]) => x > hx1 && x < hx2 && z > hz1 && z < hz2);
+	for (let z = z1; z < z2; z += cell) {
+		let runStart: number | undefined;
+		for (let x = x1; x <= x2; x += cell) {
+			const solid = x < x2 && !inHole(x + cell / 2, z + cell / 2);
+			if (solid && runStart === undefined) runStart = x;
+			if (!solid && runStart !== undefined) {
+				const center = new Vector3((runStart + x) / 2, top, z + cell / 2);
+				slab(parent, center, new Vector3(x - runStart, 2, cell), style, "Floor");
+				runStart = undefined;
+			}
+		}
+	}
 }
 
 export function hazard<T extends BasePart>(part: T): T {

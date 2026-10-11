@@ -2,7 +2,7 @@
 // ends connect to a central reactor atrium by an open bridge and two glass-roofed tubes.
 // Falling off means drifting into space. Red's bay is at +Z, Blue's at -Z.
 
-import { TEAM_COLORS, TeamId } from "shared/modes";
+import { TeamId } from "shared/modes";
 import {
 	controlPointMarker,
 	cylinder,
@@ -18,6 +18,7 @@ import {
 	slab,
 	spawnMarker,
 	Style,
+	teamGlow,
 } from "./kit";
 import { MapBuilder } from "./types";
 
@@ -38,10 +39,6 @@ const Reactor: Style = { color: Color3.fromRGB(180, 240, 255), material: Enum.Ma
 const Pad: Style = { color: Color3.fromRGB(90, 230, 220), material: Enum.Material.Neon };
 
 const ACCENT_LIGHT = Color3.fromRGB(150, 240, 235);
-
-function teamGlow(team: TeamId): Style {
-	return { color: TEAM_COLORS[team], material: Enum.Material.Neon, collide: false, castShadow: false };
-}
 
 function buildShuttle(map: Model, x: number, sign: number) {
 	const z = (distance: number) => sign * distance;

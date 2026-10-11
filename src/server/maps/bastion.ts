@@ -8,7 +8,7 @@
 //
 // Heights: canal -10, court -6, ground 0, upper floors and aqueduct 18, roofs 36, tower 44.
 
-import { TEAM_COLORS, TeamId } from "shared/modes";
+import { TeamId } from "shared/modes";
 import {
 	controlPointMarker,
 	cylinder,
@@ -16,13 +16,17 @@ import {
 	jumpPad,
 	onCircle,
 	plank,
+	plateWithHoles,
 	ramp,
 	ring,
+	scenery,
 	setMapInfo,
 	setMapLighting,
 	slab,
 	spawnMarker,
 	Style,
+	teamGlow,
+	wallWithGaps,
 } from "./kit";
 import { MapBuilder } from "./types";
 
@@ -63,69 +67,6 @@ const Copper: Style = {
 const Pad: Style = { color: Color3.fromRGB(255, 140, 40), material: Enum.Material.Neon };
 const Barrier: Style = { color: new Color3(), transparency: 1 };
 const Backdrop: Style = { color: Color3.fromRGB(196, 150, 100), material: Enum.Material.Sandstone, collide: false };
-
-function noQuery<T extends BasePart>(part: T): T {
-	part.CanQuery = false;
-	return part;
-}
-
-function teamGlow(team: TeamId): Style {
-	return { color: TEAM_COLORS[team], material: Enum.Material.Neon, collide: false, castShadow: false };
-}
-
-// A wall from `from` to `to` along one axis, leaving a doorway in each `gaps` range.
-function wallWithGaps(
-	map: Model,
-	alongX: boolean,
-	fixed: number,
-	from: number,
-	to: number,
-	gaps: [number, number][],
-	base: number,
-	height: number,
-) {
-	const cuts = [math.min(from, to)];
-	for (const [a, b] of gaps) {
-		cuts.push(math.min(a, b), math.max(a, b));
-	}
-	cuts.push(math.max(from, to));
-	for (let k = 0; k < cuts.size(); k += 2) {
-		const [start, finish] = [cuts[k], cuts[k + 1]];
-		if (finish - start < 0.5) continue;
-		const middle = (start + finish) / 2;
-		const top = alongX ? new Vector3(middle, base + height, fixed) : new Vector3(fixed, base + height, middle);
-		const size = alongX ? new Vector3(finish - start, height, 2) : new Vector3(2, height, finish - start);
-		slab(map, top, size, DarkConcrete, "Wall");
-	}
-}
-
-// A floor plate over a rectangle, leaving out `holes` (each [x1, x2, z1, z2]). Built from
-// 10-stud cells merged into runs along X, so it stays a handful of parts.
-function plateWithHoles(
-	map: Model,
-	top: number,
-	x1: number,
-	x2: number,
-	z1: number,
-	z2: number,
-	holes: [number, number, number, number][],
-) {
-	const cell = 10;
-	const inHole = (x: number, z: number) =>
-		holes.some(([hx1, hx2, hz1, hz2]) => x > hx1 && x < hx2 && z > hz1 && z < hz2);
-	for (let z = z1; z < z2; z += cell) {
-		let runStart: number | undefined;
-		for (let x = x1; x <= x2; x += cell) {
-			const solid = x < x2 && !inHole(x + cell / 2, z + cell / 2);
-			if (solid && runStart === undefined) runStart = x;
-			if (!solid && runStart !== undefined) {
-				const center = new Vector3((runStart + x) / 2, top, z + cell / 2);
-				slab(map, center, new Vector3(x - runStart, 2, cell), Concrete, "Floor");
-				runStart = undefined;
-			}
-		}
-	}
-}
 
 // Signed range [a, b] along Z as [low, high].
 function zRange(a: number, b: number): [number, number] {
@@ -168,8 +109,8 @@ function buildBoundary(map: Model) {
 		slab(map, new Vector3(0, top, side * (MAP_END + 2)), endWall, DarkConcrete, "Boundary");
 		const sideBarrier = new Vector3(4, 300, MAP_END * 2 + 8);
 		const endBarrier = new Vector3(HALF_WIDTH * 2 + 8, 300, 4);
-		noQuery(slab(map, new Vector3(side * (HALF_WIDTH + 2), top + 300, 0), sideBarrier, Barrier, "Barrier"));
-		noQuery(slab(map, new Vector3(0, top + 300, side * (MAP_END + 2)), endBarrier, Barrier, "Barrier"));
+		scenery(slab(map, new Vector3(side * (HALF_WIDTH + 2), top + 300, 0), sideBarrier, Barrier, "Barrier"));
+		scenery(slab(map, new Vector3(0, top + 300, side * (MAP_END + 2)), endBarrier, Barrier, "Barrier"));
 	}
 }
 
@@ -181,7 +122,7 @@ function buildLaneWalls(map: Model) {
 		[98, 122],
 	];
 	for (const side of [-1, 1]) {
-		wallWithGaps(map, false, side * LANE_WALL_X, -LANES_END, LANES_END, crossings, GROUND, 14);
+		wallWithGaps(map, false, side * LANE_WALL_X, -LANES_END, LANES_END, crossings, GROUND, 14, DarkConcrete);
 	}
 }
 
@@ -241,10 +182,20 @@ function buildAqueduct(map: Model) {
 		const [x1, x2] = [AQUEDUCT_X - 18, AQUEDUCT_X + 18];
 		slab(map, new Vector3(AQUEDUCT_X, UPPER, gz), new Vector3(36, 2, 30), Concrete, "GatehouseFloor");
 		for (const face of [-1, 1]) {
-			wallWithGaps(map, true, gz + face * 15, x1, x2, [[AQUEDUCT_X - 7, AQUEDUCT_X + 7]], UPPER, STOREY);
+			wallWithGaps(
+				map,
+				true,
+				gz + face * 15,
+				x1,
+				x2,
+				[[AQUEDUCT_X - 7, AQUEDUCT_X + 7]],
+				UPPER,
+				STOREY,
+				DarkConcrete,
+			);
 		}
 		for (const x of [x1, x2]) {
-			wallWithGaps(map, false, x, gz - 15, gz + 15, [[gz - 6, gz + 6]], UPPER, STOREY);
+			wallWithGaps(map, false, x, gz - 15, gz + 15, [[gz - 6, gz + 6]], UPPER, STOREY, DarkConcrete);
 		}
 		slab(map, new Vector3(AQUEDUCT_X, ROOF, gz), new Vector3(36, 2, 30), Concrete, "GatehouseRoof");
 		slab(map, new Vector3(AQUEDUCT_X, ROOF + 0.3, gz), new Vector3(36.4, 0.6, 30.4), Copper, "GatehouseTrim");
@@ -323,8 +274,8 @@ function buildBase(map: Model, team: TeamId, sign: number) {
 	slab(map, floorCenter, new Vector3(HALF_WIDTH * 2, 12, depth), Concrete, "BaseFloor");
 
 	// Ground floor: a front hall, and a spawn room behind it with two exits.
-	wallWithGaps(map, true, z(BASE_FRONT + 1), -HALF_WIDTH, HALF_WIDTH, doorways, GROUND, STOREY);
-	wallWithGaps(map, true, z(BASE_BACK + 1), -HALF_WIDTH, HALF_WIDTH, [], GROUND, STOREY);
+	wallWithGaps(map, true, z(BASE_FRONT + 1), -HALF_WIDTH, HALF_WIDTH, doorways, GROUND, STOREY, DarkConcrete);
+	wallWithGaps(map, true, z(BASE_BACK + 1), -HALF_WIDTH, HALF_WIDTH, [], GROUND, STOREY, DarkConcrete);
 	wallWithGaps(
 		map,
 		true,
@@ -337,6 +288,7 @@ function buildBase(map: Model, team: TeamId, sign: number) {
 		],
 		GROUND,
 		STOREY,
+		DarkConcrete,
 	);
 	for (const x of [-95, -30, 30, 95]) {
 		slab(map, new Vector3(x, STOREY, z(250)), new Vector3(6, STOREY, 6), DarkConcrete, "Column");
@@ -348,8 +300,8 @@ function buildBase(map: Model, team: TeamId, sign: number) {
 	const [roofLow, roofHigh] = zRange(z(270), z(300));
 	const roofHoles: [number, number, number, number][] = [-125, 125].map((x) => [x - 15, x + 15, roofLow, roofHigh]);
 	const [baseLow, baseHigh] = zRange(z(BASE_FRONT), z(BASE_BACK));
-	plateWithHoles(map, UPPER, -HALF_WIDTH, HALF_WIDTH, baseLow, baseHigh, stairHoles);
-	plateWithHoles(map, ROOF, -HALF_WIDTH, HALF_WIDTH, baseLow, baseHigh, roofHoles);
+	plateWithHoles(map, UPPER, -HALF_WIDTH, HALF_WIDTH, baseLow, baseHigh, stairHoles, Concrete);
+	plateWithHoles(map, ROOF, -HALF_WIDTH, HALF_WIDTH, baseLow, baseHigh, roofHoles, Concrete);
 	for (const x of [-60, 60]) {
 		ramp(map, new Vector3(x, GROUND, z(230)), new Vector3(x, UPPER, z(270)), 12, Concrete);
 	}
@@ -357,13 +309,13 @@ function buildBase(map: Model, team: TeamId, sign: number) {
 		ramp(map, new Vector3(x, UPPER, z(300)), new Vector3(x, ROOF, z(270)), 12, Concrete);
 	}
 
-	wallWithGaps(map, true, z(BASE_FRONT + 1), -HALF_WIDTH, HALF_WIDTH, doorways, UPPER, STOREY);
-	wallWithGaps(map, true, z(BASE_BACK + 1), -HALF_WIDTH, HALF_WIDTH, [], UPPER, STOREY);
+	wallWithGaps(map, true, z(BASE_FRONT + 1), -HALF_WIDTH, HALF_WIDTH, doorways, UPPER, STOREY, DarkConcrete);
+	wallWithGaps(map, true, z(BASE_BACK + 1), -HALF_WIDTH, HALF_WIDTH, [], UPPER, STOREY, DarkConcrete);
 
 	// Flag room at the back of the upper floor, with three entrances.
-	wallWithGaps(map, true, z(270), -40, 40, [[-8, 8]], UPPER, STOREY);
+	wallWithGaps(map, true, z(270), -40, 40, [[-8, 8]], UPPER, STOREY, DarkConcrete);
 	for (const x of [-40, 40]) {
-		wallWithGaps(map, false, x, z(270), z(BASE_BACK), [[z(285), z(300)]], UPPER, STOREY);
+		wallWithGaps(map, false, x, z(270), z(BASE_BACK), [[z(285), z(300)]], UPPER, STOREY, DarkConcrete);
 	}
 	const flagSpot = new Vector3(0, UPPER + 0.5, z(300));
 	cylinder(map, flagSpot, 0.5, 10, DarkConcrete, "FlagDais");
@@ -371,8 +323,8 @@ function buildBase(map: Model, team: TeamId, sign: number) {
 	flagBaseMarker(map, flagSpot, team);
 
 	// Roof parapet, team trim on the front face, and pads from the forecourt up to the roof.
-	wallWithGaps(map, true, z(BASE_FRONT + 1), -HALF_WIDTH, HALF_WIDTH, [], ROOF, 3);
-	wallWithGaps(map, true, z(BASE_BACK + 1), -HALF_WIDTH, HALF_WIDTH, [], ROOF, 3);
+	wallWithGaps(map, true, z(BASE_FRONT + 1), -HALF_WIDTH, HALF_WIDTH, [], ROOF, 3, DarkConcrete);
+	wallWithGaps(map, true, z(BASE_BACK + 1), -HALF_WIDTH, HALF_WIDTH, [], ROOF, 3, DarkConcrete);
 	for (const height of [UPPER, ROOF]) {
 		const trim = new Vector3(0, height + 0.3, z(BASE_FRONT - 0.2));
 		slab(map, trim, new Vector3(HALF_WIDTH * 2, 0.6, 0.4), glow, "TeamTrim");
@@ -388,7 +340,7 @@ function buildBase(map: Model, team: TeamId, sign: number) {
 
 // Desert floor and mesas on the horizon. Scenery only.
 function buildBackdrop(map: Model) {
-	noQuery(slab(map, new Vector3(0, -14, 0), new Vector3(2000, 2, 2000), { ...Backdrop, collide: true }, "Desert"));
+	scenery(slab(map, new Vector3(0, -14, 0), new Vector3(2000, 2, 2000), { ...Backdrop, collide: true }, "Desert"));
 	const mesas: [number, number, number][] = [
 		[0.3, 820, 160],
 		[1.2, 900, 240],
@@ -399,7 +351,7 @@ function buildBackdrop(map: Model) {
 	];
 	for (const [angle, distance, height] of mesas) {
 		const base = onCircle(new Vector3(0, -14, 0), distance, angle);
-		noQuery(
+		scenery(
 			slab(map, base.add(new Vector3(0, height, 0)), new Vector3(height * 1.3, height, height), Backdrop, "Mesa"),
 		);
 	}

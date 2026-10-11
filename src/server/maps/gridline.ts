@@ -3,20 +3,23 @@
 // a sunken trench to build speed out of sight, lane walls and billboards that break long
 // sightlines, and an exposed raised platform in the middle. Red's base is at +Z, Blue's at -Z.
 
-import { TEAM_COLORS, TeamId } from "shared/modes";
+import { TeamId } from "shared/modes";
 import {
 	block,
 	controlPointMarker,
 	cylinder,
 	flagBaseMarker,
 	jumpPad,
+	outline,
 	ramp,
 	ring,
+	scenery,
 	setMapInfo,
 	setMapLighting,
 	slab,
 	spawnMarker,
 	Style,
+	teamGlow,
 } from "./kit";
 import { MapBuilder } from "./types";
 
@@ -60,36 +63,6 @@ const Sun: Style = {
 };
 const SunStripe: Style = { color: Color3.fromRGB(60, 24, 80), collide: false, castShadow: false };
 const Barrier: Style = { color: new Color3(), transparency: 1 };
-
-function teamGlow(team: TeamId): Style {
-	return { color: TEAM_COLORS[team], material: Enum.Material.Neon, collide: false, castShadow: false };
-}
-
-// Decorative parts that rail shots and the line-of-sight check should pass through.
-function scenery(part: BasePart) {
-	part.CanQuery = false;
-}
-
-// Neon strips along the top edges of a box.
-function outline(parent: Instance, top: Vector3, width: number, depth: number, style: Style) {
-	const thickness = 0.4;
-	for (const side of [-1, 1]) {
-		slab(
-			parent,
-			top.add(new Vector3(0, 0.2, (side * (depth - thickness)) / 2)),
-			new Vector3(width, 0.4, thickness),
-			style,
-			"Edge",
-		);
-		slab(
-			parent,
-			top.add(new Vector3((side * (width - thickness)) / 2, 0.2, 0)),
-			new Vector3(thickness, 0.4, depth),
-			style,
-			"Edge",
-		);
-	}
-}
 
 // Cover piece with a neon top edge.
 function coverBlock(parent: Instance, top: Vector3, size: Vector3, style: Style, glow: Style, name: string) {
