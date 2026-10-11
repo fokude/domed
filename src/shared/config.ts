@@ -49,6 +49,8 @@ export const RatingConfig = {
 	kappa: 0.0001,
 	// Free-for-all results move ratings this fraction as much as team results: placings are noisier.
 	freeForAllWeight: 0.5,
+	// Duels between two players needed for their head-to-head result to count fully.
+	duelsForFullWeight: 3,
 };
 
 export const TeamBalanceConfig = {

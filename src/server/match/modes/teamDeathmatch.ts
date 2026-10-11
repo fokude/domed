@@ -44,6 +44,10 @@ export class TeamDeathmatch implements GameMode {
 		return this.roster.timeUpResult();
 	}
 
+	rateMatch(participants: Player[], result: MatchResult) {
+		this.roster.rateMatch(participants, result);
+	}
+
 	stop() {
 		this.roster.destroy();
 	}

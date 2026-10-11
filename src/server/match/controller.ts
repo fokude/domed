@@ -10,7 +10,6 @@ import { setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
 import { logMatchFinished, logOnboardingStep } from "../analytics";
 import { recordMatchEnd, startMatchXp } from "../progression";
-import { rateFreeForAll, rateTeamMatch } from "../rating";
 import { getMapModel, listMaps } from "../maps/library";
 import { LoadedMap, loadMap } from "../maps/loader";
 import {
@@ -135,14 +134,6 @@ function waitForResult(mode: GameMode): MatchResult {
 	}
 }
 
-// Updates hidden skill ratings after a team match, from the teams as they stand at the end.
-function rateMatch(participants: Player[], result: MatchResult) {
-	const onTeam = (name: string) => participants.filter((player) => player.Team?.Name === name);
-	const winnerTeam = result.winners[0]?.Team?.Name;
-	const winner = winnerTeam === "Red" || winnerTeam === "Blue" ? winnerTeam : undefined;
-	rateTeamMatch(onTeam("Red"), onTeam("Blue"), winner);
-}
-
 function showResults(result: MatchResult) {
 	setMatchState("Phase", "Results");
 	setMatchState("EndsAt", Workspace.GetServerTimeNow() + MatchConfig.resultsTime);
@@ -167,8 +158,7 @@ function runMatch(option: MatchOption) {
 	if (!forcedOption) {
 		const participants = Players.GetPlayers().filter((player) => player.GetAttribute(DEPLOYED_ATTRIBUTE) === true);
 		recordMatchEnd(participants, result.winners);
-		if (mode.id === "Deathmatch") rateFreeForAll(participants);
-		else rateMatch(participants, result);
+		mode.rateMatch(participants, result);
 		for (const player of participants) {
 			logOnboardingStep(player, "matchFinished");
 			logMatchFinished(player, option.mode, option.mapId, os.clock() - startedAt);

@@ -68,7 +68,8 @@ and read it on the client with `getMatchState` and `onMatchStateChanged`.
 
 1. Add its id and display name in `src/shared/modes.ts`, and its tuning in `config.ts`.
 2. Write a class implementing `GameMode` in `src/server/match/modes/`. Team modes use
-   `TeamRoster` from `src/server/match/teams.ts`.
+   `TeamRoster` from `src/server/match/teams.ts`, which also rates team results
+   (`roster.rateMatch`).
 3. Register it in `MODE_FACTORIES` in `src/server/match/controller.ts`.
 4. Add the mode to the `modes` list of each map that supports it, with any markers it needs.
 5. If the HUD needs to show something new, add replicated match state for it.

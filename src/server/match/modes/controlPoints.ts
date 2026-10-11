@@ -273,6 +273,10 @@ export class ControlPointMode implements GameMode {
 		return this.roster.timeUpResult();
 	}
 
+	rateMatch(participants: Player[], result: MatchResult) {
+		this.roster.rateMatch(participants, result);
+	}
+
 	stop() {
 		this.heartbeat.Disconnect();
 		this.folder.Destroy();

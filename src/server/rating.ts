@@ -15,7 +15,6 @@ import { RatingConfig } from "shared/config";
 import { TeamId } from "shared/modes";
 import { PlayerRating } from "shared/progression";
 import { getProfile, updateProfile } from "./data/profiles";
-import { readStat } from "./stats";
 
 export function getRating(player: Player): PlayerRating {
 	return getProfile(player)?.rating ?? { mu: RatingConfig.initialMu, sigma: RatingConfig.initialSigma };
@@ -84,26 +83,48 @@ export function rateTeamMatch(red: Player[], blue: Player[], winner: TeamId | un
 	rateRanked([red, blue], ranks, 1);
 }
 
-// Rates a free-for-all from final placings: most kills first, fewest deaths breaking ties, and
-// players level on both counted as a draw. Counts less than a team match because placings
-// depend on who was in the lobby and when they joined.
-export function rateFreeForAll(players: Player[]) {
-	if (players.size() < 2) return;
-	const placed = players.map((player) => ({
-		player,
-		kills: readStat(player, "Kills"),
-		deaths: readStat(player, "Deaths"),
-	}));
-	placed.sort((a, b) => (a.kills !== b.kills ? a.kills > b.kills : a.deaths < b.deaths));
-	const ranks: number[] = [];
-	placed.forEach((entry, index) => {
-		const previous = placed[index - 1];
-		const tied = previous !== undefined && previous.kills === entry.kills && previous.deaths === entry.deaths;
-		ranks.push(tied ? ranks[index - 1] : index + 1);
-	});
-	rateRanked(
-		placed.map((entry) => [entry.player]),
-		ranks,
-		RatingConfig.freeForAllWeight,
-	);
+// Kills each player scored on each other player during a free-for-all.
+export type DuelRecord = Map<Player, Map<Player, number>>;
+
+// Rates a free-for-all head to head: for every pair who fought, the share of kills between them
+// is the result, compared with what their ratings predicted. Beating a strong player counts for
+// more than beating a weak one. Pairs with few duels count proportionally less, and the whole
+// update counts less than a team result because free-for-all fights are noisier.
+export function rateHeadToHead(players: Player[], duels: DuelRecord) {
+	const kills = (a: Player, b: Player) => duels.get(a)?.get(b) ?? 0;
+	const updates = new Map<Player, { mu: number; sigma: number }>();
+
+	for (const player of players) {
+		const own = getRating(player);
+		const ownVariance = own.sigma ** 2;
+		let omega = 0;
+		let delta = 0;
+		let fought = false;
+		for (const opponent of players) {
+			if (opponent === player) continue;
+			const [won, lost] = [kills(player, opponent), kills(opponent, player)];
+			const fights = won + lost;
+			if (fights === 0) continue;
+			fought = true;
+			const rival = getRating(opponent);
+			const c = math.sqrt(ownVariance + rival.sigma ** 2 + 2 * RatingConfig.beta ** 2);
+			const expected = 1 / (1 + math.exp((rival.mu - own.mu) / c));
+			const pairWeight = math.min(fights, RatingConfig.duelsForFullWeight) / RatingConfig.duelsForFullWeight;
+			const gamma = own.sigma / c;
+			omega += pairWeight * (ownVariance / c) * (won / fights - expected);
+			delta += pairWeight * ((gamma * ownVariance) / c ** 2) * expected * (1 - expected);
+		}
+		if (!fought) continue;
+		const weight = RatingConfig.freeForAllWeight;
+		updates.set(player, {
+			mu: own.mu + omega * weight,
+			sigma: own.sigma * math.sqrt(math.max(1 - delta * weight, RatingConfig.kappa)),
+		});
+	}
+
+	for (const [player, rating] of updates) {
+		updateProfile(player, (data) => {
+			data.rating = rating;
+		});
+	}
 }

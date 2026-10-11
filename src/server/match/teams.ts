@@ -5,7 +5,7 @@ import { TeamBalanceConfig } from "shared/config";
 import { setMatchState } from "shared/matchState";
 import { TEAM_IDS, TeamId } from "shared/modes";
 import { SpawnPoint } from "../maps/loader";
-import { getRating } from "../rating";
+import { getRating, rateTeamMatch } from "../rating";
 import { pickSafestSpawn } from "../spawning";
 import { MatchResult } from "./modes/types";
 
@@ -175,6 +175,13 @@ export class TeamRoster {
 	private teamWin(team: TeamId): MatchResult {
 		const winners = this.members(team);
 		return { title: `${team.upper()} TEAM WINS`, winners };
+	}
+
+	// Rates a finished team match from the teams as they stand at the end.
+	rateMatch(participants: Player[], result: MatchResult) {
+		const onTeam = (team: TeamId) => participants.filter((player) => this.teamOf(player) === team);
+		const winner = result.winners[0] ? this.teamOf(result.winners[0]) : undefined;
+		rateTeamMatch(onTeam("Red"), onTeam("Blue"), winner);
 	}
 
 	destroy() {

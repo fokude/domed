@@ -261,6 +261,10 @@ export class CaptureTheFlag implements GameMode {
 		return this.roster.timeUpResult();
 	}
 
+	rateMatch(participants: Player[], result: MatchResult) {
+		this.roster.rateMatch(participants, result);
+	}
+
 	stop() {
 		this.heartbeat.Disconnect();
 		for (const [, flag] of this.flags) {

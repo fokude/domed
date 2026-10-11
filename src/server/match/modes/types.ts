@@ -24,5 +24,7 @@ export interface GameMode extends CombatRules {
 	// Checked frequently; returns a result once a win condition is met.
 	checkWinner(): MatchResult | undefined;
 	timeUpResult(): MatchResult;
+	// Updates hidden skill ratings for the players present at the end.
+	rateMatch(participants: Player[], result: MatchResult): void;
 	stop(): void;
 }

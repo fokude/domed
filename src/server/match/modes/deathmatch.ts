@@ -1,6 +1,7 @@
 import { DeathmatchConfig } from "shared/config";
 import { getStandings } from "shared/standings";
 import { LoadedMap } from "../../maps/loader";
+import { DuelRecord, rateHeadToHead } from "../../rating";
 import { pickSafestSpawn } from "../../spawning";
 import { GameMode, MatchResult } from "./types";
 
@@ -11,6 +12,7 @@ export class Deathmatch implements GameMode {
 	readonly timeLimit: number;
 	readonly scoreTarget: number;
 	private readonly spawns: CFrame[];
+	private readonly duels: DuelRecord = new Map();
 
 	constructor(map: LoadedMap) {
 		const small = Players.GetPlayers().size() <= DeathmatchConfig.smallLobbyMaxPlayers;
@@ -23,7 +25,11 @@ export class Deathmatch implements GameMode {
 		return true;
 	}
 
-	onKill() {}
+	onKill(shooter: Player, victim: Player) {
+		const record = this.duels.get(shooter) ?? new Map<Player, number>();
+		record.set(victim, (record.get(victim) ?? 0) + 1);
+		this.duels.set(shooter, record);
+	}
 
 	addPlayer() {}
 
@@ -45,6 +51,10 @@ export class Deathmatch implements GameMode {
 		if (!leader) return { title: "MATCH OVER", winners: [] };
 		const winner = Players.GetPlayers().find((player) => player.UserId === leader.userId);
 		return { title: `${leader.name} WINS`, winners: winner ? [winner] : [] };
+	}
+
+	rateMatch(participants: Player[]) {
+		rateHeadToHead(participants, this.duels);
 	}
 
 	stop() {}
