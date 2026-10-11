@@ -8,6 +8,7 @@ import { CARRYING_FLAG_ATTRIBUTE, FlagStatus, getMatchState, setMatchState } fro
 import { TEAM_IDS, TeamId } from "shared/modes";
 import { Remotes } from "shared/remotes";
 import { LoadedMap } from "../../maps/loader";
+import { recordObjective } from "../../progression";
 import { TeamRoster } from "../teams";
 import { GameMode, MatchResult } from "./types";
 
@@ -183,6 +184,7 @@ export class CaptureTheFlag implements GameMode {
 	private capture(flag: Flag, player: Player, team: TeamId) {
 		this.returnHome(flag);
 		this.roster.addScore(team);
+		recordObjective(player, "flagCapture");
 		Remotes.Announce.FireAllClients(`${player.DisplayName} CAPTURED THE ${flag.team.upper()} FLAG`, ANNOUNCE_TIME);
 	}
 

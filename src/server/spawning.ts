@@ -5,6 +5,7 @@
 import { getLiveRoot } from "shared/characters";
 import { MatchConfig, MovementConfig } from "shared/config";
 import { DEPLOYED_ATTRIBUTE } from "shared/matchState";
+import { recordDeath } from "./progression";
 import { incrementStat } from "./stats";
 
 const Debris = game.GetService("Debris");
@@ -87,6 +88,7 @@ function onCharacterAdded(player: Player, character: Model) {
 
 	humanoid.Died.Connect(() => {
 		incrementStat(player, "Deaths");
+		recordDeath(player);
 		onDeath(player, character);
 		task.delay(respawnTime, () => {
 			if (spawningOpen && deployed.has(player) && player.Parent && player.Character === character) {

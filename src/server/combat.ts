@@ -7,6 +7,7 @@
 
 import { WeaponConfig } from "shared/config";
 import { Remotes } from "shared/remotes";
+import { recordKill } from "./progression";
 import { incrementStat } from "./stats";
 
 const Players = game.GetService("Players");
@@ -84,6 +85,7 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	if (hitPart.Name === "Head") {
 		victimHumanoid.Health = 0;
 		incrementStat(shooter, "Kills");
+		recordKill(shooter, shotVector.Magnitude);
 		Remotes.HitConfirm.FireClient(shooter, "kill");
 		Remotes.KillFeed.FireAllClients(shooter, victim);
 		rules.onKill(shooter, victim);

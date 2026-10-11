@@ -2,12 +2,13 @@
 // show results, then send everyone to the menu to vote on the next map.
 
 import { MatchConfig, ModeMinPlayers } from "shared/config";
-import { setMatchState } from "shared/matchState";
+import { DEPLOYED_ATTRIBUTE, setMatchState } from "shared/matchState";
 import { ModeId } from "shared/modes";
 import { Remotes } from "shared/remotes";
 import { getStandings } from "shared/standings";
 import { setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
+import { recordMatchEnd } from "../progression";
 import { getMapModel, listMaps } from "../maps/library";
 import { LoadedMap, loadMap } from "../maps/loader";
 import {
@@ -151,7 +152,11 @@ function runMatch(option: MatchOption) {
 	const result = waitForResult(mode);
 	setCombatRules(undefined);
 	closeSpawning();
-	if (!forcedOption) showResults(result);
+	if (!forcedOption) {
+		const participants = Players.GetPlayers().filter((player) => player.GetAttribute(DEPLOYED_ATTRIBUTE) === true);
+		recordMatchEnd(participants, result.winners);
+		showResults(result);
+	}
 	mode.stop();
 	currentMode = undefined;
 	returnAllToMenu();

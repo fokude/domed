@@ -1,7 +1,9 @@
 import { startCombat } from "./combat";
+import { startProfiles } from "./data/profiles";
 import { startDevCommands } from "./dev";
 import { startHazards } from "./hazards";
 import { startMatchLoop } from "./match/controller";
+import { startProgression } from "./progression";
 import { watchCharacters } from "./spawning";
 import { createLeaderstats } from "./stats";
 
@@ -20,6 +22,8 @@ for (const player of Players.GetPlayers()) {
 	onPlayerAdded(player);
 }
 
+startProfiles();
+startProgression();
 startCombat();
 startHazards();
 startMatchLoop();

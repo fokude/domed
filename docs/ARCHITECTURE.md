@@ -10,15 +10,16 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 
 **Shared** (`src/shared`, used by server and client)
 
-| File            | Owns                                                          |
-| --------------- | ------------------------------------------------------------- |
-| `config.ts`     | Every tuning value: movement, weapon, match and mode settings |
-| `modes.ts`      | Mode and team ids, team colors, mode display names            |
-| `remotes.ts`    | Typed handles to the RemoteEvents                             |
-| `matchState.ts` | Replicated match state attributes, and player attribute names |
-| `mapMarkers.ts` | Map marker tags and attribute names                           |
-| `standings.ts`  | Player ranking (kills, then deaths)                           |
-| `characters.ts` | Safe reads of player characters                               |
+| File             | Owns                                                          |
+| ---------------- | ------------------------------------------------------------- |
+| `config.ts`      | Every tuning value: movement, weapon, match and mode settings |
+| `modes.ts`       | Mode and team ids, team colors, mode display names            |
+| `remotes.ts`     | Typed handles to the RemoteEvents                             |
+| `matchState.ts`  | Replicated match state attributes, and player attribute names |
+| `mapMarkers.ts`  | Map marker tags and attribute names                           |
+| `standings.ts`   | Player ranking (kills, then deaths)                           |
+| `characters.ts`  | Safe reads of player characters                               |
+| `progression.ts` | Saved profile types, and the XP-to-level curve                |
 
 **Server** (`src/server`)
 
@@ -29,6 +30,8 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection |
 | `hazards.ts`          | Lava and falling out of the map                                |
 | `stats.ts`            | Kills and deaths on the leaderboard                            |
+| `data/profiles.ts`    | Loading and saving player profiles with ProfileStore           |
+| `progression.ts`      | Recording lifetime stats into profiles                         |
 | `dev.ts`              | Studio-only chat commands                                      |
 | `match/controller.ts` | The match loop: play, results, vote                            |
 | `match/voting.ts`     | Map vote options and tallying                                  |
@@ -127,6 +130,14 @@ the conventions. `server/maps/loader.ts` clones a map into the workspace and tur
 markers into spawns, flag bases and jump pad velocities. `server/maps/library.ts` collects
 Studio-authored maps from `ServerStorage.Maps` and maps still defined in code.
 
+## Saved data
+
+Player progression (lifetime stats, XP, onboarding flags) is saved with ProfileStore, which
+session-locks each profile so two servers can't overwrite each other's saves. Each player's
+profile is copied to their `Profile` attribute as JSON for their client to read. In Studio,
+saving to real DataStores needs **Enable Studio Access to API Services** in Game Settings;
+without it profiles are temporary.
+
 ## Known gaps
 
 Technical debt to address as the game grows:
@@ -139,4 +150,3 @@ Technical debt to address as the game grows:
   and aren't caught by the match loop's recovery.
 - **Maps built in code** are meant to be baked into Studio models (see MAPPING.md); until then
   their layouts can only be changed in code.
-- **No saved data.** Stats reset when players leave; progression needs DataStores.

@@ -11,6 +11,7 @@ import { ControlPointState, getMatchState, setMatchState } from "shared/matchSta
 import { TEAM_IDS, TeamId } from "shared/modes";
 import { Remotes } from "shared/remotes";
 import { ControlPoint, LoadedMap } from "../../maps/loader";
+import { recordObjective } from "../../progression";
 import { TeamRoster } from "../teams";
 import { GameMode, MatchResult } from "./types";
 
@@ -134,23 +135,27 @@ export class ControlPointMode implements GameMode {
 		return { point, state, ring, marker, letter };
 	}
 
-	private occupants(point: ControlPoint): Map<TeamId, number> {
-		const counts = new Map<TeamId, number>();
+	// Living players standing in the zone, by team.
+	private occupants(point: ControlPoint): Map<TeamId, Player[]> {
+		const counts = new Map<TeamId, Player[]>();
 		for (const player of Players.GetPlayers()) {
 			const root = getLiveRoot(player);
 			const team = this.roster.teamOf(player);
-			if (root && team && isInside(point, root.Position)) counts.set(team, (counts.get(team) ?? 0) + 1);
+			if (!root || !team || !isInside(point, root.Position)) continue;
+			const list = counts.get(team) ?? [];
+			list.push(player);
+			counts.set(team, list);
 		}
 		return counts;
 	}
 
 	// The single team on a point, or undefined if it's empty or contested.
-	private holder(counts: Map<TeamId, number>): TeamId | undefined {
-		const present = TEAM_IDS.filter((team) => (counts.get(team) ?? 0) > 0);
+	private holder(counts: Map<TeamId, Player[]>): TeamId | undefined {
+		const present = TEAM_IDS.filter((team) => (counts.get(team)?.size() ?? 0) > 0);
 		return present.size() === 1 ? present[0] : undefined;
 	}
 
-	private updateCapture(zone: Zone, counts: Map<TeamId, number>, dt: number) {
+	private updateCapture(zone: Zone, counts: Map<TeamId, Player[]>, dt: number) {
 		const state = zone.state;
 		const team = this.holder(counts);
 		state.contested = counts.size() > 1;
@@ -170,12 +175,14 @@ export class ControlPointMode implements GameMode {
 			state.capturing = team;
 			state.progress = 0;
 		}
-		const multiplier = math.min(counts.get(team)!, MAX_CAPTURE_MULTIPLIER);
+		const capturers = counts.get(team)!;
+		const multiplier = math.min(capturers.size(), MAX_CAPTURE_MULTIPLIER);
 		state.progress += (dt / DominationConfig.captureTime) * multiplier;
 		if (state.progress >= 1) {
 			state.owner = team;
 			state.capturing = undefined;
 			state.progress = 0;
+			capturers.forEach((player) => recordObjective(player, "pointCapture"));
 			Remotes.Announce.FireAllClients(`${team.upper()} CAPTURED ${zone.point.label}`, ANNOUNCE_TIME);
 		}
 	}
@@ -194,6 +201,8 @@ export class ControlPointMode implements GameMode {
 		if (this.id === "Hardpoint") this.rotateHardpoint();
 
 		const scorers: TeamId[] = [];
+		// Players holding the hardpoint alone, credited each scoring second.
+		let holders: Player[] = [];
 		this.zones.forEach((zone, index) => {
 			const counts = this.occupants(zone.point);
 			if (this.id === "Domination") {
@@ -204,13 +213,17 @@ export class ControlPointMode implements GameMode {
 			zone.state.active = index === this.activeIndex;
 			zone.state.contested = zone.state.active && counts.size() > 1;
 			zone.state.owner = zone.state.active ? this.holder(counts) : undefined;
-			if (zone.state.owner) scorers.push(zone.state.owner);
+			if (zone.state.owner) {
+				scorers.push(zone.state.owner);
+				holders = counts.get(zone.state.owner) ?? [];
+			}
 		});
 
 		this.sinceScore += dt;
 		if (this.sinceScore >= SCORE_INTERVAL) {
 			this.sinceScore -= SCORE_INTERVAL;
 			for (const team of scorers) this.roster.addScore(team);
+			holders.forEach((player) => recordObjective(player, "hardpointSecond"));
 		}
 		this.publish();
 	}

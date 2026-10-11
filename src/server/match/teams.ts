@@ -71,14 +71,19 @@ export class TeamRoster {
 
 	winner(target: number): MatchResult | undefined {
 		const team = TEAM_IDS.find((id) => this.scores.get(id)! >= target);
-		return team ? { title: `${team.upper()} TEAM WINS` } : undefined;
+		return team ? this.teamWin(team) : undefined;
 	}
 
 	timeUpResult(): MatchResult {
 		const red = this.scores.get("Red")!;
 		const blue = this.scores.get("Blue")!;
-		if (red === blue) return { title: "DRAW" };
-		return { title: `${red > blue ? "RED" : "BLUE"} TEAM WINS` };
+		if (red === blue) return { title: "DRAW", winners: [] };
+		return this.teamWin(red > blue ? "Red" : "Blue");
+	}
+
+	private teamWin(team: TeamId): MatchResult {
+		const winners = Players.GetPlayers().filter((player) => this.teamOf(player) === team);
+		return { title: `${team.upper()} TEAM WINS`, winners };
 	}
 
 	destroy() {

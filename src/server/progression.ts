@@ -1,0 +1,80 @@
+// Records lifetime stats into each player's saved profile as they play.
+
+import { getLiveRoot } from "shared/characters";
+import { MovementConfig } from "shared/config";
+import { getProfile, updateProfile } from "./data/profiles";
+
+const Players = game.GetService("Players");
+
+const SPEED_SAMPLE_INTERVAL = 0.25;
+const PLAY_TIME_INTERVAL = 60;
+// Speeds above this are physics glitches or exploits rather than bhops, so they don't count.
+const MAX_CREDIBLE_SPEED = MovementConfig.maxAirSpeed + 10;
+
+export type Objective = "flagCapture" | "pointCapture" | "hardpointSecond";
+
+export function recordKill(shooter: Player, distance: number) {
+	updateProfile(shooter, (data) => {
+		data.stats.kills += 1;
+		data.stats.longestHeadshot = math.max(data.stats.longestHeadshot, math.floor(distance));
+	});
+}
+
+export function recordDeath(player: Player) {
+	updateProfile(player, (data) => {
+		data.stats.deaths += 1;
+	});
+}
+
+export function recordObjective(player: Player, objective: Objective) {
+	updateProfile(player, (data) => {
+		if (objective === "flagCapture") data.stats.flagCaptures += 1;
+		else if (objective === "pointCapture") data.stats.pointCaptures += 1;
+		else data.stats.hardpointSeconds += 1;
+	});
+}
+
+export function recordMatchEnd(participants: Player[], winners: Player[]) {
+	for (const player of participants) {
+		const won = winners.includes(player);
+		updateProfile(player, (data) => {
+			data.stats.matches += 1;
+			if (won) data.stats.wins += 1;
+		});
+	}
+}
+
+// Top speed is measured on the server from replicated physics, so a modified client can't
+// claim a speed it never reached.
+function sampleSpeeds() {
+	for (const player of Players.GetPlayers()) {
+		const root = getLiveRoot(player);
+		if (!root) continue;
+		const velocity = root.AssemblyLinearVelocity;
+		const speed = math.floor(new Vector3(velocity.X, 0, velocity.Z).Magnitude);
+		const best = getProfile(player)?.stats.topSpeed;
+		if (best === undefined || speed <= best || speed > MAX_CREDIBLE_SPEED) continue;
+		updateProfile(player, (data) => {
+			data.stats.topSpeed = speed;
+		});
+	}
+}
+
+export function startProgression() {
+	task.spawn(() => {
+		for (;;) {
+			task.wait(SPEED_SAMPLE_INTERVAL);
+			sampleSpeeds();
+		}
+	});
+	task.spawn(() => {
+		for (;;) {
+			task.wait(PLAY_TIME_INTERVAL);
+			for (const player of Players.GetPlayers()) {
+				updateProfile(player, (data) => {
+					data.stats.playSeconds += PLAY_TIME_INTERVAL;
+				});
+			}
+		}
+	});
+}

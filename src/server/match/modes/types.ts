@@ -4,6 +4,8 @@ import { CombatRules } from "../../combat";
 export interface MatchResult {
 	// Shown above the end-of-match podium, e.g. "RED TEAM WINS".
 	title: string;
+	// Players credited with the win; empty for a draw.
+	winners: Player[];
 }
 
 // One running match of a mode on a loaded map. Created when the match starts and stopped

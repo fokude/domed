@@ -25,5 +25,8 @@
 		"roblox-ts": "^3.0.0",
 		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.71.1"
+	},
+	"dependencies": {
+		"@rbxts/profile-store": "^1.0.3"
 	}
 }
