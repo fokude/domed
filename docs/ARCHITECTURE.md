@@ -39,20 +39,8 @@ condition is met. Deathmatch and CTF live alongside it.
 
 ## Movement
 
-On the ground the default Humanoid handles walking. In the air, `client/movement.ts` takes
-over horizontal velocity, because the Humanoid's air control would pull the player back
-toward `WalkSpeed` and make bunny hopping impossible. Air acceleration follows Half-Life's
-`PM_AirAccelerate`: only velocity along the input direction is capped, so strafing while
-turning gains speed. Landing and jumping again within `bhopWindow` keeps that speed.
-
-The same module adds the rest of the kit: double jump, wall jump, wall slide, slide (which
-also overrides the Humanoid on the ground) and a UT-style double-tap dodge. Each has an
-`...Enabled` switch in `MovementConfig` so moves can be trialled and cut.
-
-Because the module sets velocity directly, it has to handle walls itself: a spherecast
-removes the into-wall component of velocity so the player slides, and if physics reports a
-much lower speed than intended, the module assumes something blocked the player and adopts
-the physics velocity.
+Movement runs on the client, layered on top of the default Humanoid. See
+[MOVEMENT.md](MOVEMENT.md) for each move and the engine behavior it depends on.
 
 ## Hit detection
 

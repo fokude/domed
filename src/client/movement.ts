@@ -4,6 +4,8 @@
 // On the ground the Humanoid moves the character as usual, except while sliding. While
 // airborne this module owns horizontal velocity: the Humanoid's built-in air control would
 // otherwise drag the player back toward WalkSpeed and make bunny hopping impossible.
+//
+// docs/MOVEMENT.md explains each move and the engine quirks this code works around.
 
 import { MovementConfig as Config, CtfConfig } from "shared/config";
 import { CARRYING_FLAG_ATTRIBUTE } from "shared/matchState";
