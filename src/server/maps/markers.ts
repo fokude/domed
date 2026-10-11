@@ -28,6 +28,8 @@ export const MapAttribute = {
 	// On ControlPoint markers: the point's letter, and the zone radius in studs.
 	Label: "Label",
 	Radius: "Radius",
+	// On ControlPoint markers: "Domination" or "Hardpoint" to use a point in one mode only.
+	PointMode: "PointMode",
 	// Set on jump pads by the loader, read by the client.
 	Launch: "Launch",
 } as const;

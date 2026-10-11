@@ -341,10 +341,16 @@ export const Gridline: MapBuilder = {
 			themeColor: Color3.fromRGB(255, 60, 200),
 		});
 
-		// Domination and Hardpoint zones, on the center line so neither side is closer.
-		controlPointMarker(map, new Vector3(-54, 0, 0), "A", 12);
-		controlPointMarker(map, new Vector3(0, ROOF_HEIGHT, 0), "B", 10);
-		controlPointMarker(map, new Vector3(54, 0, 0), "C", 12);
+		// Domination points, on the center line so neither side is closer.
+		controlPointMarker(map, new Vector3(-54, 0, 0), "A", 12, "Domination");
+		controlPointMarker(map, new Vector3(0, ROOF_HEIGHT, 0), "B", 10, "Domination");
+		controlPointMarker(map, new Vector3(54, 0, 0), "C", 12, "Domination");
+		// Hardpoints: larger zones with cover, rotating center first and then alternating sides.
+		controlPointMarker(map, new Vector3(0, -6, 0), "1", 18, "Hardpoint");
+		controlPointMarker(map, new Vector3(-54, 0, 30), "2", 16, "Hardpoint");
+		controlPointMarker(map, new Vector3(54, 0, -30), "3", 16, "Hardpoint");
+		controlPointMarker(map, new Vector3(-54, 0, -30), "4", 16, "Hardpoint");
+		controlPointMarker(map, new Vector3(54, 0, 30), "5", 16, "Hardpoint");
 
 		buildGround(map);
 		buildLandscape(map);

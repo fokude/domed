@@ -210,11 +210,19 @@ export function jumpPad(parent: Instance, position: Vector3, target: Vector3, ar
 	return pad;
 }
 
-// Domination and Hardpoint zone centered on `position` (floor level).
-export function controlPointMarker(parent: Instance, position: Vector3, label: string, radius = 12): Part {
+// Domination or Hardpoint zone centered on `position` (floor level). Without `mode` the point
+// is used by both. Hardpoints rotate in label order.
+export function controlPointMarker(
+	parent: Instance,
+	position: Vector3,
+	label: string,
+	radius = 12,
+	mode?: "Domination" | "Hardpoint",
+): Part {
 	const marker = slab(parent, position.add(new Vector3(0, 1, 0)), new Vector3(4, 1, 4), MarkerStyle, "ControlPoint");
 	marker.SetAttribute(MapAttribute.Label, label);
 	if (radius !== 12) marker.SetAttribute(MapAttribute.Radius, radius);
+	if (mode) marker.SetAttribute(MapAttribute.PointMode, mode);
 	return tag(marker, MapTag.ControlPoint);
 }
 

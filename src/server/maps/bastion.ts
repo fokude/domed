@@ -417,10 +417,16 @@ export const Bastion: MapBuilder = {
 			themeColor: Color3.fromRGB(255, 140, 40),
 		});
 
-		// Domination and Hardpoint zones, on the center line so neither side is closer.
-		controlPointMarker(map, new Vector3(AQUEDUCT_X, UPPER, 0), "A", 12);
-		controlPointMarker(map, new Vector3(0, TOWER, 0), "B", 10);
-		controlPointMarker(map, new Vector3(CANAL_X, CANAL, 0), "C", 12);
+		// Domination points, on the center line so neither side is closer.
+		controlPointMarker(map, new Vector3(AQUEDUCT_X, UPPER, 0), "A", 12, "Domination");
+		controlPointMarker(map, new Vector3(0, TOWER, 0), "B", 10, "Domination");
+		controlPointMarker(map, new Vector3(CANAL_X, CANAL, 0), "C", 12, "Domination");
+		// Hardpoints: larger zones with cover, rotating center first and then alternating sides.
+		controlPointMarker(map, new Vector3(0, COURT, 0), "1", 30, "Hardpoint");
+		controlPointMarker(map, new Vector3(AQUEDUCT_X, UPPER, 110), "2", 15, "Hardpoint");
+		controlPointMarker(map, new Vector3(CANAL_X, CANAL, -110), "3", 16, "Hardpoint");
+		controlPointMarker(map, new Vector3(AQUEDUCT_X, UPPER, -110), "4", 15, "Hardpoint");
+		controlPointMarker(map, new Vector3(CANAL_X, CANAL, 110), "5", 16, "Hardpoint");
 
 		buildGround(map);
 		buildBoundary(map);

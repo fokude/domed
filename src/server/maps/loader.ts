@@ -29,6 +29,8 @@ export interface ControlPoint {
 	// Floor-level center of the zone.
 	position: Vector3;
 	radius: number;
+	// Undefined when the point is used by both Domination and Hardpoint.
+	mode?: ModeId;
 }
 
 export interface LoadedMap {
@@ -146,6 +148,7 @@ function collectControlPoints(arena: Model): ControlPoint[] {
 			label: attribute(marker, MapAttribute.Label, "string", "?"),
 			position: feetPosition(marker),
 			radius: attribute(marker, MapAttribute.Radius, "number", 12),
+			mode: MODE_IDS.find((id) => id === marker.GetAttribute(MapAttribute.PointMode)),
 		});
 	}
 	points.sort((a, b) => a.label < b.label);

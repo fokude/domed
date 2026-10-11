@@ -69,11 +69,12 @@ export class ControlPointMode implements GameMode {
 		this.timeLimit = config.timeLimit;
 		this.scoreTarget = config.scoreTarget;
 		this.roster = new TeamRoster(map.spawns);
-		if (map.controlPoints.size() === 0) error(`Map ${map.info.id} has no ControlPoint markers`);
+		const points = map.controlPoints.filter((point) => point.mode === undefined || point.mode === kind);
+		if (points.size() === 0) error(`Map ${map.info.id} has no ${kind} ControlPoint markers`);
 
 		this.folder = new Instance("Folder");
 		this.folder.Name = "ControlPoints";
-		map.controlPoints.forEach((point, index) => {
+		points.forEach((point, index) => {
 			const zone = this.buildZone(point);
 			zone.state.active = kind === "Domination" || index === 0;
 			this.zones.push(zone);

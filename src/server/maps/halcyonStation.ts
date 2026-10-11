@@ -202,10 +202,16 @@ export const HalcyonStation: MapBuilder = {
 			themeColor: Color3.fromRGB(90, 230, 220),
 		});
 
-		// Domination and Hardpoint zones, on the center line so neither side is closer.
-		controlPointMarker(map, new Vector3(-30, 0, 0), "A", 9);
-		controlPointMarker(map, Vector3.zero, "B", 18);
-		controlPointMarker(map, new Vector3(30, 0, 0), "C", 9);
+		// Domination points, on the center line so neither side is closer.
+		controlPointMarker(map, new Vector3(-30, 0, 0), "A", 9, "Domination");
+		controlPointMarker(map, Vector3.zero, "B", 18, "Domination");
+		controlPointMarker(map, new Vector3(30, 0, 0), "C", 9, "Domination");
+		// Hardpoints: larger zones with cover, rotating center first and then alternating sides.
+		controlPointMarker(map, Vector3.zero, "1", 22, "Hardpoint");
+		controlPointMarker(map, new Vector3(-40, 0, 75), "2", 14, "Hardpoint");
+		controlPointMarker(map, new Vector3(40, 0, -75), "3", 14, "Hardpoint");
+		controlPointMarker(map, new Vector3(-40, 0, -75), "4", 14, "Hardpoint");
+		controlPointMarker(map, new Vector3(40, 0, 75), "5", 14, "Hardpoint");
 
 		buildBay(map, "Red", 1);
 		buildBay(map, "Blue", -1);
