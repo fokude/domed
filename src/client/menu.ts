@@ -30,10 +30,18 @@ let gui: ScreenGui;
 let matchInfo: TextLabel;
 let status: TextLabel;
 let playButton: TextButton;
+let buttonList: Frame;
 let menuOpen = false;
 
 // Content area other menu features (map voting, loadout) render into.
 let menuContent: Frame;
+
+// Adds a button to the menu's list; `order` sorts it among the others (Play is 1).
+export function addMenuButton(text: string, order: number, onClick: () => void): TextButton {
+	const button = menuButton(buttonList, text, order);
+	button.Activated.Connect(onClick);
+	return button;
+}
 
 export function getMenuContent(): Frame {
 	return menuContent;
@@ -154,16 +162,17 @@ function buildMenu() {
 
 	const buttons = create(
 		"Frame",
-		{ Position: UDim2.fromOffset(48, 220), Size: UDim2.fromOffset(300, 200), BackgroundTransparency: 1 },
+		{ Position: UDim2.fromOffset(48, 220), Size: UDim2.fromOffset(300, 320), BackgroundTransparency: 1 },
 		sidebar,
 	);
+	buttonList = buttons;
 	create("UIListLayout", { Padding: new UDim(0, 10), SortOrder: Enum.SortOrder.LayoutOrder }, buttons);
 
 	playButton = menuButton(buttons, "PLAY", 1);
 	playButton.BackgroundColor3 = ACCENT;
 	playButton.Activated.Connect(() => Remotes.Deploy.FireServer());
 
-	const loadout = menuButton(buttons, "LOADOUT", 2);
+	const loadout = menuButton(buttons, "LOADOUT", 10);
 	loadout.AutoButtonColor = false;
 	loadout.TextColor3 = MUTED;
 	create(

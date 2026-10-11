@@ -1,6 +1,7 @@
 // Typed handles to the RemoteEvents declared in default.project.json.
 // The server receives arguments as `unknown` regardless, so it must validate them.
 
+import { OnboardingKey } from "./progression";
 import { Standing } from "./standings";
 
 const folder = game.GetService("ReplicatedStorage").WaitForChild("Remotes");
@@ -18,6 +19,8 @@ export const Remotes = {
 	Knockback: remote<(impulse: Vector3) => void>("Knockback"),
 	// Either player may have left by the time a client receives this.
 	KillFeed: remote<(killer?: Player, victim?: Player) => void>("KillFeed"),
+	// Client reports that the player has seen an onboarding step.
+	MarkOnboarding: remote<(key: OnboardingKey) => void>("MarkOnboarding"),
 	CastVote: remote<(optionIndex: number) => void>("CastVote"),
 	// Client asks to leave the menu and join the match in progress.
 	Deploy: remote<() => void>("Deploy"),

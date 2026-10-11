@@ -9,6 +9,7 @@ import { initMatchBar } from "./matchBar";
 import { initMenu } from "./menu";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
 import { initObjectives } from "./objectives";
+import { initOnboarding } from "./onboarding";
 import { initPodium, showMatchEnd } from "./podium";
 import { initSpeedometer, setSpeed } from "./speedometer";
 import { initTeammates } from "./teammates";
@@ -33,6 +34,7 @@ initMovement();
 initWeapon();
 initMenu();
 initMapVote();
+initOnboarding();
 initTeammates();
 
 Remotes.Knockback.OnClientEvent.Connect((impulse) => launchCharacter(impulse, true));

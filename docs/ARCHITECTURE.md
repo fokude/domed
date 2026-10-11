@@ -55,6 +55,8 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `hud.ts`         | Crosshair, hitmarker, cooldown, kill feed, banners, respawn countdown |
 | `matchBar.ts`    | Timer and team scores at the top of the screen                        |
 | `objectives.ts`  | Control point strip in Domination and Hardpoint                       |
+| `onboarding.ts`  | The how-to-play card in the menu and one-time in-game tips            |
+| `profileData.ts` | Reading the local player's saved profile                              |
 | `podium.ts`      | Live top three in Deathmatch, and the end-of-match podium             |
 | `speedometer.ts` | Speed readout and its effects                                         |
 | `teammates.ts`   | Teammate outlines                                                     |

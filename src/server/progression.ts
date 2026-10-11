@@ -2,6 +2,8 @@
 
 import { getLiveRoot } from "shared/characters";
 import { MovementConfig } from "shared/config";
+import { ONBOARDING_KEYS } from "shared/progression";
+import { Remotes } from "shared/remotes";
 import { getProfile, updateProfile } from "./data/profiles";
 
 const Players = game.GetService("Players");
@@ -61,6 +63,14 @@ function sampleSpeeds() {
 }
 
 export function startProgression() {
+	Remotes.MarkOnboarding.OnServerEvent.Connect((player, key) => {
+		const valid = ONBOARDING_KEYS.find((candidate) => candidate === key);
+		if (!valid) return;
+		updateProfile(player, (data) => {
+			data.onboarding[valid] = true;
+		});
+	});
+
 	task.spawn(() => {
 		for (;;) {
 			task.wait(SPEED_SAMPLE_INTERVAL);

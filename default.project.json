@@ -1,9 +1,6 @@
 {
 	"name": "DOMED",
-	"globIgnorePaths": [
-		"**/package.json",
-		"**/tsconfig.json"
-	],
+	"globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
 	"tree": {
 		"$className": "DataModel",
 		"ReplicatedStorage": {
@@ -46,6 +43,9 @@
 					"$className": "RemoteEvent"
 				},
 				"CastVote": {
+					"$className": "RemoteEvent"
+				},
+				"MarkOnboarding": {
 					"$className": "RemoteEvent"
 				}
 			},
