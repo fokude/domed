@@ -31,6 +31,7 @@ const STEPS: [string, string][] = [
 	["BUNNY HOP", "Hold SPACE, or spin the scroll wheel, to jump again the moment you land."],
 	["AIR STRAFE", "In the air, hold A and turn your mouse left (or D and right) to gain speed."],
 	["DOUBLE JUMP", "Press SPACE again in the air."],
+	["MENU", "Press M to open the menu any time. Leaving mid-match counts as a death."],
 ];
 
 const player = Players.LocalPlayer;

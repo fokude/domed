@@ -20,6 +20,7 @@ import {
 	deploy,
 	deployAll,
 	forgetPlayer,
+	leaveToMenu,
 	pickSafestSpawn,
 	returnAllToMenu,
 	setDeathHandler,
@@ -265,6 +266,7 @@ export function startMatchLoop() {
 		forgetPlayer(player);
 	});
 	Remotes.Deploy.OnServerEvent.Connect((player) => deploy(player));
+	Remotes.LeaveToMenu.OnServerEvent.Connect((player) => leaveToMenu(player));
 	startVoting();
 
 	task.spawn(() => {

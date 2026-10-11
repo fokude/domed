@@ -22,6 +22,9 @@ const ACCENT = Color3.fromRGB(255, 60, 40);
 const PANEL = Color3.fromRGB(20, 22, 28);
 
 // In-game HUD that would clutter the menu.
+// Opens the menu during play, and returns to the match from it.
+const MENU_KEY = Enum.KeyCode.M;
+
 const GAMEPLAY_GUIS = ["DomedHud", "Speedometer", "Perks", "KillFeedback"];
 
 const player = Players.LocalPlayer;
@@ -270,6 +273,11 @@ export function initMenu() {
 	player.GetAttributeChangedSignal(DEPLOYED_ATTRIBUTE).Connect(() => setOpen(!isDeployed()));
 	setOpen(!isDeployed());
 	RunService.RenderStepped.Connect(updateOrbit);
+	UserInputService.InputBegan.Connect((input, gameProcessed) => {
+		if (gameProcessed || input.KeyCode !== MENU_KEY) return;
+		if (isDeployed()) Remotes.LeaveToMenu.FireServer();
+		else if (playButton.Visible) Remotes.Deploy.FireServer();
+	});
 	// Roblox's own menus (Esc, chat, emotes) can turn the mouse icon back on, leaving a cursor
 	// sitting on the crosshair. Keep it matching the menu.
 	UserInputService.GetPropertyChangedSignal("MouseIconEnabled").Connect(() => {

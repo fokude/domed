@@ -37,6 +37,8 @@ export const Remotes = {
 	CastVote: remote<(optionIndex: number) => void>("CastVote"),
 	// Client asks to leave the menu and join the match in progress.
 	Deploy: remote<() => void>("Deploy"),
+	// Client asks to leave the match for the menu.
+	LeaveToMenu: remote<() => void>("LeaveToMenu"),
 	Announce: remote<(text: string, duration: number) => void>("Announce"),
 	MatchEnded: remote<(title: string, standings: Standing[], duration: number) => void>("MatchEnded"),
 };

@@ -20,6 +20,8 @@ let onDeploy: (player: Player) => void = () => {};
 let spawningOpen = false;
 let respawnTime = MatchConfig.respawnTime;
 const deployed = new Set<Player>();
+// When each player last left to the menu, so leaving and redeploying can't skip the respawn wait.
+const leftAt = new Map<Player, number>();
 
 export function setSpawnPicker(picker: SpawnPicker) {
 	pickSpawn = picker;
@@ -106,7 +108,31 @@ export function deploy(player: Player) {
 	deployed.add(player);
 	player.SetAttribute(DEPLOYED_ATTRIBUTE, true);
 	onDeploy(player);
-	player.LoadCharacter();
+	const wait = (leftAt.get(player) ?? -math.huge) + respawnTime - os.clock();
+	if (wait <= 0) {
+		player.LoadCharacter();
+		return;
+	}
+	task.delay(wait, () => {
+		if (spawningOpen && deployed.has(player) && player.Parent) player.LoadCharacter();
+	});
+}
+
+// Takes one player out of the match and back to the menu. A living character dies, so the menu
+// can't be used to escape a fight: in a match it counts as a death, and a carried flag drops.
+export function leaveToMenu(player: Player) {
+	if (!deployed.delete(player)) return;
+	player.SetAttribute(DEPLOYED_ATTRIBUTE, false);
+	leftAt.set(player, os.clock());
+	const character = player.Character;
+	const humanoid = character?.FindFirstChildOfClass("Humanoid");
+	if (humanoid && humanoid.Health > 0) humanoid.Health = 0;
+	task.delay(1, () => {
+		if (character && player.Character === character) {
+			character.Destroy();
+			player.Character = undefined;
+		}
+	});
 }
 
 // Opens spawning for a new match and drops every player in.
@@ -126,6 +152,7 @@ export function closeSpawning() {
 export function returnAllToMenu() {
 	spawningOpen = false;
 	deployed.clear();
+	leftAt.clear();
 	for (const player of Players.GetPlayers()) {
 		player.SetAttribute(DEPLOYED_ATTRIBUTE, false);
 		player.Character?.Destroy();
@@ -135,6 +162,7 @@ export function returnAllToMenu() {
 
 export function forgetPlayer(player: Player) {
 	deployed.delete(player);
+	leftAt.delete(player);
 }
 
 export function watchCharacters(player: Player) {

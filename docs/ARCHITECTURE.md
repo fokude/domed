@@ -108,6 +108,10 @@ The server receives remote arguments as `unknown` and validates them before use.
    mid-match start in the menu and deploy with Play.
 3. **Results.** Combat and respawns stop and the podium shows, then the next warm-up starts.
 
+Pressing M opens the menu at any time, and again returns to play. A living character dies on
+the way out, which counts as a death in a match and drops a carried flag, and redeploying waits
+out the respawn time: otherwise the menu would be a free escape from a losing fight.
+
 The warm-up replaced 15 seconds of voting in the menu. Waiting in a menu between matches is
 dead time; a warm-up keeps players moving, lets them practice aim and air strafing, and is
 social rather than competitive, since nobody can be hurt. It also covers what Counter-Strike's
