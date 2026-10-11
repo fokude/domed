@@ -30,6 +30,9 @@ const MAX_AIM_ANGLE = math.rad(100);
 const REJECTION_LOG_EVERY = 10;
 // A miss passing this close to the center of a head it could have hit counts as a near miss.
 const NEAR_MISS_STUDS = 2.5;
+// A player who dies to a hazard or the void this soon after a body shot counts as the
+// shooter's kill. See docs/SKILL_FLOOR.md.
+const KNOCKBACK_CREDIT_SECONDS = 4;
 
 export interface CombatRules {
 	canDamage(shooter: Player, victim: Player): boolean;
@@ -40,6 +43,8 @@ export interface CombatRules {
 let rules: CombatRules | undefined;
 const lastShotAt = new Map<Player, number>();
 const rejections = new Map<Player, number>();
+// The last body shot that pushed each player, for knockback kill credit.
+const lastPush = new Map<Player, { shooter: Player; character: Model; at: number; distance: number }>();
 
 const lineOfSightParams = new RaycastParams();
 lineOfSightParams.FilterType = Enum.RaycastFilterType.Include;
@@ -185,23 +190,45 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	const isHead = hitPart.Name === "Head";
 	if (hitShield(victim, isHead) === "broken") {
 		// A breaking shield absorbs the hit, pushing the target back like a body shot.
-		const knockback = WeaponConfig.bodyShotKnockback;
-		Remotes.Knockback.FireClient(victim, shotVector.Unit.mul(knockback).add(new Vector3(0, knockback * 0.35, 0)));
+		push(shooter, victim, victimCharacter, shotVector);
 		Remotes.HitConfirm.FireClient(shooter, "shield", false);
 	} else if (isHead) {
 		victimHumanoid.Health = 0;
-		incrementStat(shooter, "Kills");
-		recordKill(shooter, shotVector.Magnitude);
-		Remotes.HitConfirm.FireClient(shooter, "kill", false);
-		Remotes.KillFeed.FireAllClients(shooter, victim);
 		Remotes.HeadBurst.FireAllClients(hitPart.Position);
-		sendDeathRecap(victim, shooter, "headshot", shotVector.Magnitude);
-		rules.onKill(shooter, victim);
+		awardKill(shooter, victim, rules, "headshot", shotVector.Magnitude);
 	} else {
-		const knockback = WeaponConfig.bodyShotKnockback;
-		Remotes.Knockback.FireClient(victim, shotVector.Unit.mul(knockback).add(new Vector3(0, knockback * 0.35, 0)));
+		push(shooter, victim, victimCharacter, shotVector);
 		Remotes.HitConfirm.FireClient(shooter, "body", false);
 	}
+}
+
+function push(shooter: Player, victim: Player, victimCharacter: Model, shotVector: Vector3) {
+	const knockback = WeaponConfig.bodyShotKnockback;
+	Remotes.Knockback.FireClient(victim, shotVector.Unit.mul(knockback).add(new Vector3(0, knockback * 0.35, 0)));
+	lastPush.set(victim, { shooter, character: victimCharacter, at: os.clock(), distance: shotVector.Magnitude });
+}
+
+// Everything a kill earns: stats, XP, feedback, the kill feed, the victim's recap, and the mode's
+// scoring. Only headshots count toward the longest-headshot record.
+function awardKill(shooter: Player, victim: Player, currentRules: CombatRules, cause: DeathCause, distance: number) {
+	lastPush.delete(victim);
+	incrementStat(shooter, "Kills");
+	recordKill(shooter, cause === "headshot" ? distance : undefined);
+	Remotes.HitConfirm.FireClient(shooter, "kill", false);
+	Remotes.KillFeed.FireAllClients(shooter, victim);
+	sendDeathRecap(victim, shooter, cause, distance);
+	currentRules.onKill(shooter, victim);
+}
+
+// Called when a hazard or the void kills a player. Credits whoever knocked them there with a
+// body shot in the last few seconds, as long as they could hurt each other.
+export function creditEnvironmentalKill(victim: Player, character: Model) {
+	const pushed = lastPush.get(victim);
+	lastPush.delete(victim);
+	if (!pushed || !rules || pushed.character !== character) return;
+	if (os.clock() - pushed.at > KNOCKBACK_CREDIT_SECONDS || pushed.shooter.Parent !== Players) return;
+	if (!rules.canDamage(pushed.shooter, victim)) return;
+	awardKill(pushed.shooter, victim, rules, "knockback", pushed.distance);
 }
 
 export function startCombat() {
@@ -209,5 +236,6 @@ export function startCombat() {
 	Players.PlayerRemoving.Connect((player) => {
 		lastShotAt.delete(player);
 		rejections.delete(player);
+		lastPush.delete(player);
 	});
 }

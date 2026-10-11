@@ -10,6 +10,15 @@ Everyone carries the same one-shot railgun. Code: `client/weapon.ts` (firing),
 | Body-shot knockback | 70     | Body shots never kill; they push the target           |
 | Server leniency     | 0.15 s | Shots this much early still count, for network jitter |
 
+## Body shots
+
+Body shots never kill directly; they push the target. A player who dies to a hazard or falls
+out of the map within 4 seconds of a body shot counts as the shooter's kill, with the kill
+feed, XP and kill feedback (but not the longest-headshot record). It makes body shots near
+edges and lava worth taking without body-shot damage, which was rejected because it would
+make spraying at bodies a strategy (see SKILL_FLOOR.md). Teammates can't be credited, and
+the credit is tied to the character that was pushed, so it can't carry over a respawn.
+
 ## Why the cooldown is 0.75 seconds
 
 The cooldown sets how much a miss costs. Too long and missing feels like "waiting an

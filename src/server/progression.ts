@@ -50,9 +50,10 @@ export function startMatchXp() {
 	matchXp.clear();
 }
 
-export function recordKill(shooter: Player, distance: number) {
+// `headshotDistance` is undefined for kills that weren't headshots (knockback kills).
+export function recordKill(shooter: Player, headshotDistance: number | undefined) {
 	const previous = getProfile(shooter)?.stats.longestHeadshot;
-	const studs = math.floor(distance);
+	const studs = headshotDistance !== undefined ? math.floor(headshotDistance) : 0;
 	updateProfile(shooter, (data) => {
 		data.stats.kills += 1;
 		data.stats.longestHeadshot = math.max(data.stats.longestHeadshot, studs);
