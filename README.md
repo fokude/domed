@@ -36,10 +36,10 @@ Then in Studio:
 
 ## Scripts
 
-| Command | Does |
-|---|---|
-| `npm run build` | Compile once |
-| `npm run watch` | Compile on save |
-| `npm run lint` | ESLint and Prettier checks |
+| Command         | Does                       |
+| --------------- | -------------------------- |
+| `npm run build` | Compile once               |
+| `npm run watch` | Compile on save            |
+| `npm run lint`  | ESLint and Prettier checks |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the code fits together.
