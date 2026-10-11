@@ -1,5 +1,6 @@
 // Kills characters that touch hazard parts (lava) or fall below the map's kill height.
 
+import { getLiveRoot } from "shared/characters";
 import { MapTag } from "shared/mapMarkers";
 
 const CollectionService = game.GetService("CollectionService");
@@ -32,8 +33,8 @@ export function startHazards() {
 		for (;;) {
 			task.wait(VOID_CHECK_INTERVAL);
 			for (const player of Players.GetPlayers()) {
-				const root = player.Character?.FindFirstChild("HumanoidRootPart");
-				if (root?.IsA("BasePart") && root.Position.Y < killHeight) killCharacterOf(root);
+				const root = getLiveRoot(player);
+				if (root && root.Position.Y < killHeight) killCharacterOf(root);
 			}
 		}
 	});

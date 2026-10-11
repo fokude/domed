@@ -2,6 +2,7 @@
 // the match and spawns them, and they respawn after dying until everyone returns to the menu.
 // Characters never load on their own (Players.CharacterAutoLoads is off).
 
+import { getLiveRoot } from "shared/characters";
 import { MatchConfig, MovementConfig } from "shared/config";
 import { DEPLOYED_ATTRIBUTE } from "shared/matchState";
 import { incrementStat } from "./stats";
@@ -39,9 +40,8 @@ function livingCharacterPositions(exclude: Player, isThreat: (other: Player) => 
 	const positions: Vector3[] = [];
 	for (const other of Players.GetPlayers()) {
 		if (other === exclude || !isThreat(other)) continue;
-		const humanoid = other.Character?.FindFirstChildOfClass("Humanoid");
-		const root = other.Character?.FindFirstChild("HumanoidRootPart");
-		if (humanoid && humanoid.Health > 0 && root?.IsA("BasePart")) positions.push(root.Position);
+		const root = getLiveRoot(other);
+		if (root) positions.push(root.Position);
 	}
 	return positions;
 }

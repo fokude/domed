@@ -6,6 +6,7 @@
 // every second it has the live point to itself.
 
 import { DominationConfig, HardpointConfig, MatchConfig } from "shared/config";
+import { getLiveRoot } from "shared/characters";
 import { ControlPointState, getMatchState, setMatchState } from "shared/matchState";
 import { TEAM_IDS, TeamId } from "shared/modes";
 import { Remotes } from "shared/remotes";
@@ -34,12 +35,6 @@ interface Zone {
 	ring: Part[];
 	marker: BillboardGui;
 	letter: TextLabel;
-}
-
-function rootOf(player: Player): BasePart | undefined {
-	const humanoid = player.Character?.FindFirstChildOfClass("Humanoid");
-	const root = player.Character?.FindFirstChild("HumanoidRootPart");
-	return humanoid && humanoid.Health > 0 && root?.IsA("BasePart") ? root : undefined;
 }
 
 function isInside(point: ControlPoint, position: Vector3): boolean {
@@ -142,7 +137,7 @@ export class ControlPointMode implements GameMode {
 	private occupants(point: ControlPoint): Map<TeamId, number> {
 		const counts = new Map<TeamId, number>();
 		for (const player of Players.GetPlayers()) {
-			const root = rootOf(player);
+			const root = getLiveRoot(player);
 			const team = this.roster.teamOf(player);
 			if (root && team && isInside(point, root.Position)) counts.set(team, (counts.get(team) ?? 0) + 1);
 		}

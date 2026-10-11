@@ -3,6 +3,7 @@
 // flag returns it, and it returns on its own after a while.
 
 import { CtfConfig, MatchConfig } from "shared/config";
+import { getLiveRoot } from "shared/characters";
 import { CARRYING_FLAG_ATTRIBUTE, FlagStatus, getMatchState, setMatchState } from "shared/matchState";
 import { TEAM_IDS, TeamId } from "shared/modes";
 import { Remotes } from "shared/remotes";
@@ -28,12 +29,6 @@ interface Flag {
 	carrier?: Player;
 	carryWeld?: WeldConstraint;
 	droppedAt: number;
-}
-
-function rootOf(player: Player): BasePart | undefined {
-	const humanoid = player.Character?.FindFirstChildOfClass("Humanoid");
-	const root = player.Character?.FindFirstChild("HumanoidRootPart");
-	return humanoid && humanoid.Health > 0 && root?.IsA("BasePart") ? root : undefined;
 }
 
 function flagPart(size: Vector3, color: Color3, material: Enum.Material): Part {
@@ -195,7 +190,7 @@ export class CaptureTheFlag implements GameMode {
 		for (const [, flag] of this.flags) {
 			if (flag.status === "Taken") {
 				const carrier = flag.carrier;
-				const root = carrier && rootOf(carrier);
+				const root = carrier && getLiveRoot(carrier);
 				const team = carrier && this.roster.teamOf(carrier);
 				if (!carrier || !root || !team) continue;
 				const ownFlag = this.flags.get(team)!;
@@ -213,7 +208,7 @@ export class CaptureTheFlag implements GameMode {
 
 			const base = this.flagBase(flag);
 			for (const player of Players.GetPlayers()) {
-				const root = rootOf(player);
+				const root = getLiveRoot(player);
 				const team = this.roster.teamOf(player);
 				if (!root || !team || root.Position.sub(base).Magnitude > CtfConfig.pickupRadius) continue;
 

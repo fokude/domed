@@ -1,5 +1,6 @@
 // The railgun: hitscan from the camera, one shot per cooldown, hold to keep firing.
 
+import { isAlive } from "shared/characters";
 import { WeaponConfig as Config } from "shared/config";
 import { HitKind, Remotes } from "shared/remotes";
 import { HudColors, setCooldown, showBanner, showHitmarker } from "./hud";
@@ -62,11 +63,6 @@ function resolveHitPart(part: BasePart): BasePart | undefined {
 	const weld = handle?.FindFirstChild("AccessoryWeld");
 	if (weld?.IsA("Weld")) return weld.Part0 === handle ? weld.Part1 : weld.Part0;
 	return undefined;
-}
-
-function isAlive(character: Model): boolean {
-	const humanoid = character.FindFirstChildOfClass("Humanoid");
-	return humanoid !== undefined && humanoid.Health > 0;
 }
 
 function fire() {
