@@ -21,6 +21,7 @@ import {
 	setSpawnPicker,
 } from "../spawning";
 import { resetStats } from "../stats";
+import { CaptureTheFlag } from "./modes/ctf";
 import { Deathmatch } from "./modes/deathmatch";
 import { GameMode, MatchResult } from "./modes/types";
 
@@ -31,6 +32,7 @@ const POLL_INTERVAL = 0.25;
 
 const MODE_FACTORIES: Partial<Record<ModeId, (map: LoadedMap) => GameMode>> = {
 	Deathmatch: (map) => new Deathmatch(map),
+	CTF: (map) => new CaptureTheFlag(map),
 };
 
 export interface MatchOption {

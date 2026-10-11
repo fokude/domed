@@ -90,7 +90,9 @@ function fire() {
 	drawBeam(cameraCFrame.PointToWorldSpace(MUZZLE_OFFSET), hitPosition, LOCAL_BEAM_COLOR);
 
 	const hitCharacter = hitPart?.Parent;
-	if (hitPart && hitCharacter?.IsA("Model") && isAlive(hitCharacter)) {
+	const hitPlayer = hitCharacter?.IsA("Model") ? Players.GetPlayerFromCharacter(hitCharacter) : undefined;
+	const isTeammate = hitPlayer !== undefined && player.Team !== undefined && hitPlayer.Team === player.Team;
+	if (hitPart && hitCharacter?.IsA("Model") && isAlive(hitCharacter) && !isTeammate) {
 		showHitmarker(hitPart.Name === "Head");
 	}
 
@@ -98,7 +100,9 @@ function fire() {
 }
 
 function onShotFired(shooter: Player, origin: Vector3, hitPosition: Vector3) {
-	if (shooter !== player) drawBeam(origin.sub(new Vector3(0, 0.5, 0)), hitPosition, ENEMY_BEAM_COLOR);
+	if (shooter === player) return;
+	const color = shooter.Team ? shooter.TeamColor.Color : ENEMY_BEAM_COLOR;
+	drawBeam(origin.sub(new Vector3(0, 0.5, 0)), hitPosition, color);
 }
 
 function onHitConfirm(kind: HitKind) {

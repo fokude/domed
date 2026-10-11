@@ -40,3 +40,14 @@ export const DeathmatchConfig = {
 	timeLimit: 600,
 	killTarget: 40,
 };
+
+export const CtfConfig = {
+	timeLimit: 900,
+	captureTarget: 3,
+	// Seconds a dropped flag waits before returning home on its own.
+	flagReturnTime: 20,
+	// Top air speed while carrying a flag, so defenders can catch runners.
+	carrierMaxSpeed: 55,
+	pickupRadius: 5,
+	captureRadius: 7,
+};

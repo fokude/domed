@@ -8,6 +8,7 @@ import { initMenu } from "./menu";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
 import { initPodium, showMatchEnd } from "./podium";
 import { initSpeedometer, setSpeed } from "./speedometer";
+import { initTeammates } from "./teammates";
 import { initWeapon } from "./weapon";
 
 const Players = game.GetService("Players");
@@ -27,6 +28,7 @@ initSpeedometer();
 initMovement();
 initWeapon();
 initMenu();
+initTeammates();
 
 Remotes.Knockback.OnClientEvent.Connect((impulse) => launchCharacter(impulse, true));
 

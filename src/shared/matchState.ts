@@ -25,6 +25,8 @@ export type MatchStateKey = keyof MatchStateValues;
 
 // Player attribute: true while the player is in the match rather than the menu.
 export const DEPLOYED_ATTRIBUTE = "Deployed";
+// Player attribute: true while carrying a flag in CTF.
+export const CARRYING_FLAG_ATTRIBUTE = "CarryingFlag";
 
 const folder = game.GetService("ReplicatedStorage").WaitForChild("MatchState");
 

@@ -4,7 +4,8 @@
 // owns horizontal velocity: the Humanoid's built-in air control would otherwise drag
 // the player back toward WalkSpeed and make bunny hopping impossible.
 
-import { MovementConfig as Config } from "shared/config";
+import { MovementConfig as Config, CtfConfig } from "shared/config";
+import { CARRYING_FLAG_ATTRIBUTE } from "shared/matchState";
 
 const CollectionService = game.GetService("CollectionService");
 const Players = game.GetService("Players");
@@ -76,7 +77,7 @@ function airAccelerate(velocity: Vector3, wishDirection: Vector3, dt: number): V
 
 	const accelSpeed = math.min(Config.airAccelerate * Config.walkSpeed * dt, addSpeed);
 	const result = velocity.add(wish.mul(accelSpeed));
-	return result.Magnitude > Config.maxAirSpeed ? result.Unit.mul(Config.maxAirSpeed) : result;
+	return result;
 }
 
 // Removes the part of our velocity that points into a wall, so we slide along it.
@@ -137,6 +138,9 @@ function onPreSimulation(dt: number) {
 	}
 
 	airVelocity = airAccelerate(airVelocity, wishDirection, dt);
+	const maxSpeed =
+		player.GetAttribute(CARRYING_FLAG_ATTRIBUTE) === true ? CtfConfig.carrierMaxSpeed : Config.maxAirSpeed;
+	if (airVelocity.Magnitude > maxSpeed) airVelocity = airVelocity.Unit.mul(maxSpeed);
 	airVelocity = clipToWalls(airVelocity, rootPart, dt);
 
 	// Ground friction during a bhop legitimately lowers the takeoff frame's speed, so only
