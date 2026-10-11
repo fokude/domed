@@ -47,6 +47,8 @@ export const RatingConfig = {
 	beta: 25 / 6,
 	// Floor on how far one match can shrink a player's uncertainty.
 	kappa: 0.0001,
+	// Free-for-all results move ratings this fraction as much as team results: placings are noisier.
+	freeForAllWeight: 0.5,
 };
 
 export const TeamBalanceConfig = {

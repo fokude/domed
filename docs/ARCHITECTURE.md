@@ -120,8 +120,8 @@ Teams are balanced within each server by a hidden skill rating (`server/rating.t
 OpenSkill Weng-Lin Bradley-Terry model). At match start the server tries the most balanced split and a set of random
 ones, keeps those close to the best balance, and picks the one that repeats the fewest
 teammate pairs from the last match, so teams stay fair but rotate; mid-match joiners go to the
-smaller team, or the weaker one if sizes match. Team matches update the rating; free-for-all
-doesn't. The rating is saved in the profile but never sent to clients, so there's no visible
+smaller team, or the weaker one if sizes match. Team matches update the rating, and so does
+free-for-all (each player ranked by placing) at half weight, since placings are noisier. The rating is saved in the profile but never sent to clients, so there's no visible
 number to protect.
 
 ## Movement

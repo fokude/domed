@@ -10,7 +10,7 @@ import { setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
 import { logMatchFinished, logOnboardingStep } from "../analytics";
 import { recordMatchEnd, startMatchXp } from "../progression";
-import { rateTeamMatch } from "../rating";
+import { rateFreeForAll, rateTeamMatch } from "../rating";
 import { getMapModel, listMaps } from "../maps/library";
 import { LoadedMap, loadMap } from "../maps/loader";
 import {
@@ -167,7 +167,8 @@ function runMatch(option: MatchOption) {
 	if (!forcedOption) {
 		const participants = Players.GetPlayers().filter((player) => player.GetAttribute(DEPLOYED_ATTRIBUTE) === true);
 		recordMatchEnd(participants, result.winners);
-		if (mode.id !== "Deathmatch") rateMatch(participants, result);
+		if (mode.id === "Deathmatch") rateFreeForAll(participants);
+		else rateMatch(participants, result);
 		for (const player of participants) {
 			logOnboardingStep(player, "matchFinished");
 			logMatchFinished(player, option.mode, option.mapId, os.clock() - startedAt);
