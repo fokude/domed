@@ -29,6 +29,8 @@ import {
 	setDeployHandler,
 	setRespawnTime,
 	setSpawnPicker,
+	DeathHandler,
+	SpawnPicker,
 } from "../spawning";
 import { resetStats } from "../stats";
 import { ControlPointMode } from "./modes/controlPoints";
@@ -108,29 +110,55 @@ function randomOption(): MatchOption {
 	return options[math.random(0, options.size() - 1)];
 }
 
-function startMatch(option: MatchOption): GameMode {
-	const map = loadMap(getMapModel(option.mapId)!);
+interface ArenaRules {
+	pickSpawn: SpawnPicker;
+	onDeath: DeathHandler;
+	onDeploy: (player: Player) => void;
+	respawnTime: number;
+}
+
+// Readies everything that lives in a loaded map: perks, dummies, hazards, combat line of sight
+// and spawning. Used for both the warm-up and matches; closeArena undoes it.
+function openArena(map: LoadedMap, arenaRules: ArenaRules) {
 	currentMap = map;
 	startPerks(map);
 	startDummies(map);
+	setCombatArena(map.arena);
+	setKillHeight(map.killHeight);
+	setSpawnPicker(arenaRules.pickSpawn);
+	setDeathHandler(arenaRules.onDeath);
+	setDeployHandler(arenaRules.onDeploy);
+	setRespawnTime(arenaRules.respawnTime);
+	setMatchState("RespawnTime", arenaRules.respawnTime);
+	setMatchState("MapName", map.info.name);
+}
+
+// Stops combat and respawns and clears what openArena (and bots) started. Safe to call after a
+// failure, so each step is protected.
+function closeArena() {
+	setCombatRules(undefined);
+	closeSpawning();
+	pcall(stopPerks);
+	pcall(stopDummies);
+	pcall(stopBots);
+}
+
+function startMatch(option: MatchOption): GameMode {
+	const map = loadMap(getMapModel(option.mapId)!);
 	const mode = MODE_FACTORIES[option.mode]!(map);
 	currentMode = mode;
+	openArena(map, {
+		pickSpawn: (player) => mode.pickSpawn(player),
+		onDeath: (player, character) => mode.onDeath(player, character),
+		onDeploy: (player) => mode.addPlayer(player),
+		respawnTime: mode.respawnTime ?? MatchConfig.respawnTime,
+	});
 	// Bots only play free-for-all, which is what near-empty servers run (see docs/BOTS.md).
 	if (mode.id === "Deathmatch") startBots(map);
 
-	setCombatArena(map.arena);
-	setKillHeight(map.killHeight);
-	setSpawnPicker((player) => mode.pickSpawn(player));
-	setDeathHandler((player, character) => mode.onDeath(player, character));
-	setDeployHandler((player) => mode.addPlayer(player));
-
 	setMatchState("Phase", "Playing");
 	setMatchState("Mode", mode.id);
-	setMatchState("MapName", map.info.name);
 	setMatchState("ScoreTarget", mode.scoreTarget);
-	const respawnTime = mode.respawnTime ?? MatchConfig.respawnTime;
-	setRespawnTime(respawnTime);
-	setMatchState("RespawnTime", respawnTime);
 	setMatchState("EndsAt", Workspace.GetServerTimeNow() + mode.timeLimit);
 
 	for (const player of Players.GetPlayers()) {
@@ -166,20 +194,14 @@ function showResults(result: MatchResult) {
 // on training dummies while voting on the next map. Returns the vote's winner.
 function warmUp(previous: MatchOption | undefined): MatchOption {
 	const map = loadMap(getMapModel(WARMUP_MAP_ID)!);
-	currentMap = map;
-	startPerks(map);
-	startDummies(map);
 	const spawns = map.spawns.map((spawn) => spawn.cframe);
-
-	setCombatArena(map.arena);
-	setKillHeight(map.killHeight);
-	setSpawnPicker((player) => pickSafestSpawn(player, spawns, () => true));
-	setDeathHandler(() => {});
-	setDeployHandler(() => {});
-	setRespawnTime(MatchConfig.respawnTime);
-	setMatchState("RespawnTime", MatchConfig.respawnTime);
+	openArena(map, {
+		pickSpawn: (player) => pickSafestSpawn(player, spawns, () => true),
+		onDeath: () => {},
+		onDeploy: () => {},
+		respawnTime: MatchConfig.respawnTime,
+	});
 	setMatchState("Phase", "Warmup");
-	setMatchState("MapName", map.info.name);
 	setMatchState("EndsAt", Workspace.GetServerTimeNow() + MatchConfig.warmupTime);
 	deployAll();
 	setCombatRules(new WarmupRules());
@@ -191,10 +213,7 @@ function warmUp(previous: MatchOption | undefined): MatchOption {
 }
 
 function leaveWarmup() {
-	setCombatRules(undefined);
-	closeSpawning();
-	pcall(stopPerks);
-	pcall(stopDummies);
+	closeArena();
 	returnAllToMenu();
 }
 
@@ -213,11 +232,7 @@ function runMatch(option: MatchOption) {
 	const startedAt = os.clock();
 	const mode = startMatch(option);
 	const result = waitForResult(mode);
-	setCombatRules(undefined);
-	closeSpawning();
-	stopPerks();
-	stopDummies();
-	stopBots();
+	closeArena();
 	if (!forcedOption) {
 		const participants = Players.GetPlayers().filter((player) => player.GetAttribute(DEPLOYED_ATTRIBUTE) === true);
 		recordMatchEnd(participants, result.winners);
@@ -255,11 +270,7 @@ function runMatchSafely(option: MatchOption): boolean {
 	if (ok) return true;
 	warn(`Match ${optionKey(option)} failed and was taken out of rotation: ${err}`);
 	brokenOptions.add(optionKey(option));
-	setCombatRules(undefined);
-	pcall(stopPerks);
-	pcall(stopDummies);
-	pcall(stopBots);
-	closeSpawning();
+	closeArena();
 	const mode = currentMode;
 	if (mode) pcall(() => mode.stop());
 	currentMode = undefined;
