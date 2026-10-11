@@ -10,12 +10,11 @@ import { Gridline } from "./gridline";
 import { HalcyonStation } from "./halcyonStation";
 import { InfernalSpire } from "./infernalSpire";
 import { readMapInfo, MapInfo } from "./loader";
-import { ProvingGrounds } from "./provingGrounds";
 import { MapBuilder } from "./types";
 
 const ServerStorage = game.GetService("ServerStorage");
 
-const CODE_MAPS: MapBuilder[] = [ProvingGrounds, InfernalSpire, Gridline, HalcyonStation];
+const CODE_MAPS: MapBuilder[] = [InfernalSpire, Gridline, HalcyonStation];
 
 export function bakeMaps(): Folder {
 	ServerStorage.FindFirstChild("BakedMaps")?.Destroy();
