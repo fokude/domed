@@ -269,4 +269,9 @@ export function initMenu() {
 	player.GetAttributeChangedSignal(DEPLOYED_ATTRIBUTE).Connect(() => setOpen(!isDeployed()));
 	setOpen(!isDeployed());
 	RunService.RenderStepped.Connect(updateOrbit);
+	// Roblox's own menus (Esc, chat, emotes) can turn the mouse icon back on, leaving a cursor
+	// sitting on the crosshair. Keep it matching the menu.
+	UserInputService.GetPropertyChangedSignal("MouseIconEnabled").Connect(() => {
+		if (UserInputService.MouseIconEnabled !== menuOpen) UserInputService.MouseIconEnabled = menuOpen;
+	});
 }
