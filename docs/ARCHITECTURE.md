@@ -29,6 +29,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `combat.ts`           | Validating railgun shots, kills and knockback                  |
 | `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection |
 | `hazards.ts`          | Lava and falling out of the map                                |
+| `movementCheck.ts`    | Flagging and kicking speed hacks and teleports                 |
 | `stats.ts`            | Kills and deaths on the leaderboard                            |
 | `data/profiles.ts`    | Loading and saving player profiles with ProfileStore           |
 | `progression.ts`      | Recording lifetime stats into profiles                         |
@@ -122,9 +123,14 @@ Movement runs on the client, layered on top of the default Humanoid. See
 
 The client raycasts and reports what it hit. The server checks the claim is plausible (fire
 rate, shooter and target positions within a speed-based lag allowance, line of sight through
-the arena) before awarding a kill. Fast targets with small hitboxes make purely server-side
+the arena, and that the shot doesn't go well behind or beside the way the shooter faces) before
+awarding a kill. Rejected shots are logged with `[anticheat]` in the server output. Fast targets with small hitboxes make purely server-side
 raycasts miss under normal latency. The tradeoff is that a cheating client can still claim
 hits that pass these checks.
+
+Movement is also client-simulated, so `movementCheck.ts` samples each character twice a second
+and kicks players who repeatedly move far faster than the game allows (speed hacks,
+teleports). Its thresholds are lenient so lag spikes don't cause false kicks.
 
 ## Maps
 
@@ -148,7 +154,8 @@ Technical debt to address as the game grows:
 - **No automated tests.** CI only lints and compiles. Gameplay logic (scoring, voting, spawn
   choice) would benefit from unit tests, which need a Luau runtime such as Lune or Roblox's
   Open Cloud Luau execution.
-- **Client-authoritative hits.** Fine with friends; public servers need stronger validation.
+- **Client-authoritative hits.** Plausibility and aim checks stop crude cheats, but an aimbot
+  that aims where the player is looking can't be detected this way.
 - **Errors in per-frame mode logic** (CTF flags, control points) run in their own connection
   and aren't caught by the match loop's recovery.
 - **Maps built in code** are meant to be baked into Studio models (see MAPPING.md); until then

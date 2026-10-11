@@ -3,6 +3,7 @@ import { startProfiles } from "./data/profiles";
 import { startDevCommands } from "./dev";
 import { startHazards } from "./hazards";
 import { startMatchLoop } from "./match/controller";
+import { startMovementCheck } from "./movementCheck";
 import { startProgression } from "./progression";
 import { watchCharacters } from "./spawning";
 import { createLeaderstats } from "./stats";
@@ -25,6 +26,7 @@ for (const player of Players.GetPlayers()) {
 startProfiles();
 startProgression();
 startCombat();
+startMovementCheck();
 startHazards();
 startMatchLoop();
 startDevCommands();
