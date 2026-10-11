@@ -34,12 +34,17 @@ the movement test map.
 
 ## Docs to keep in sync
 
+Documentation grows and changes with the code. Docs record why decisions were made, not just
+what the code does: when research or outside sources shaped a decision, cite them next to it
+with links, and write down notable options that were rejected and why.
+
 Update these in the same commit as the change they describe:
 
 - docs/ARCHITECTURE.md: structure, match flow, the file map, known gaps.
 - docs/MOVEMENT.md: any change to movement or physics. Add new engine workarounds to its
   Engine quirks list.
 - docs/MAPPING.md: map markers and attributes.
+- docs/RATING.md: skill rating, team balance, and the reasoning and sources behind them.
 - docs/MAP_DESIGN.md: researched layout principles and targets. Check new or changed maps
   against it; ask the owner to run `/openness` in Studio to measure them.
 - README.md: setup, scripts, Studio commands, modes.
