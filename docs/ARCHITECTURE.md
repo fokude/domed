@@ -58,6 +58,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `menu.ts`          | Main menu and the orbiting menu camera                                |
 | `mapVote.ts`       | Vote cards in the menu                                                |
 | `hud.ts`           | Crosshair, hitmarker, cooldown, kill feed, banners, respawn countdown |
+| `killFeedback.ts`  | Kill, multi-kill and streak feedback (see FEEDBACK.md)                |
 | `matchBar.ts`      | Timer and team scores at the top of the screen                        |
 | `objectives.ts`    | Control point strip in Domination and Hardpoint                       |
 | `onboarding.ts`    | The how-to-play card in the menu and one-time in-game tips            |
@@ -66,6 +67,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `profileScreen.ts` | The Profile panel in the menu: level, XP and lifetime stats           |
 | `podium.ts`        | Live top three in Deathmatch, and the end-of-match podium             |
 | `speedometer.ts`   | Speed readout and its effects                                         |
+| `sounds.ts`        | Every sound cue, in one table                                         |
 | `teammates.ts`     | Teammate outlines                                                     |
 | `ui.ts`            | The `create` helper for building UI                                   |
 

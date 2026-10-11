@@ -1,0 +1,39 @@
+// Sound cues. Every sound the game plays is listed here, so changing one is a one-line edit.
+//
+// The defaults are placeholders built from the few sounds that ship inside the Roblox client
+// (rbxasset://sounds/...), so they work with no uploads. Replace them with audio from the
+// Creator Store: paste its asset id as "rbxassetid://<id>". See docs/FEEDBACK.md.
+
+const SoundService = game.GetService("SoundService");
+
+export type SoundCue = "kill" | "killThump" | "bodyHit" | "shieldBreak" | "perkPickup" | "death";
+
+interface CueSettings {
+	id: string;
+	volume: number;
+	pitch: number;
+}
+
+const TICK = "rbxasset://sounds/volume_slider.ogg";
+
+export const SOUND_CUES: Record<SoundCue, CueSettings> = {
+	// Layered on a headshot kill: a bright tick (pitched up per multi-kill) over a low thump.
+	kill: { id: TICK, volume: 1, pitch: 1.6 },
+	killThump: { id: "rbxasset://sounds/action_jump_land.mp3", volume: 0.8, pitch: 0.7 },
+	bodyHit: { id: TICK, volume: 0.6, pitch: 0.9 },
+	shieldBreak: { id: "rbxasset://sounds/impact_water.mp3", volume: 0.7, pitch: 1.8 },
+	perkPickup: { id: TICK, volume: 0.8, pitch: 1.2 },
+	death: { id: "rbxasset://sounds/ouch.ogg", volume: 0.6, pitch: 1 },
+};
+
+// Plays a cue once. `pitchScale` multiplies the cue's pitch, for escalation.
+export function playSound(cue: SoundCue, pitchScale = 1) {
+	const settings = SOUND_CUES[cue];
+	const sound = new Instance("Sound");
+	sound.SoundId = settings.id;
+	sound.Volume = settings.volume;
+	sound.PlaybackSpeed = settings.pitch * pitchScale;
+	sound.Parent = SoundService;
+	sound.Ended.Connect(() => sound.Destroy());
+	sound.Play();
+}

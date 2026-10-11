@@ -3,8 +3,8 @@
 import { isAlive } from "shared/characters";
 import { WeaponConfig as Config } from "shared/config";
 import { PERK_INFO, PerkAttribute, railCooldown, timeLeft } from "shared/perks";
-import { HitKind, Remotes } from "shared/remotes";
-import { HudColors, setCooldown, showBanner, showHitmarker } from "./hud";
+import { Remotes } from "shared/remotes";
+import { setCooldown, showHitmarker } from "./hud";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
@@ -107,11 +107,6 @@ function beamColor(shooter: Player, normal: Color3): Color3 {
 	return timeLeft(shooter, PerkAttribute.OverchargeUntil) > 0 ? PERK_INFO.Overcharge.color : normal;
 }
 
-function onHitConfirm(kind: HitKind) {
-	if (kind === "kill") showBanner("DOMED", HudColors.Red, 0.8);
-	else if (kind === "shield") showBanner("SHIELD BROKEN", PERK_INFO.Shield.color, 0.8);
-}
-
 export function initWeapon() {
 	UserInputService.InputBegan.Connect((input, gameProcessed) => {
 		if (input.UserInputType === Enum.UserInputType.MouseButton1 && !gameProcessed) triggerHeld = true;
@@ -126,5 +121,4 @@ export function initWeapon() {
 	});
 
 	Remotes.ShotFired.OnClientEvent.Connect(onShotFired);
-	Remotes.HitConfirm.OnClientEvent.Connect(onHitConfirm);
 }
