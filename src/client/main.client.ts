@@ -3,6 +3,7 @@
 import { MatchConfig } from "shared/config";
 import { getMatchState } from "shared/matchState";
 import { Remotes } from "shared/remotes";
+import { initDeathRecap } from "./deathRecap";
 import { addKill, hideRespawnCountdown, HudColors, initHud, showBanner, showRespawnCountdown } from "./hud";
 import { initKillFeedback } from "./killFeedback";
 import { initMapVote } from "./mapVote";
@@ -44,6 +45,7 @@ initPerks();
 initProfileScreen();
 initSettingsScreen();
 initTeammates();
+initDeathRecap();
 
 Remotes.Knockback.OnClientEvent.Connect((impulse) => launchCharacter(impulse, true));
 

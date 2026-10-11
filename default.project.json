@@ -71,6 +71,9 @@
 				},
 				"NearMiss": {
 					"$className": "RemoteEvent"
+				},
+				"DeathRecap": {
+					"$className": "RemoteEvent"
 				}
 			},
 			"MatchState": {

@@ -5,9 +5,10 @@
 // line of sight). With fast movement and tiny head hitboxes, server-side raycasts would
 // miss constantly because of latency.
 
+import { getLiveRoot } from "shared/characters";
 import { WeaponConfig } from "shared/config";
 import { railCooldown } from "shared/perks";
-import { Remotes } from "shared/remotes";
+import { DeathCause, Remotes } from "shared/remotes";
 import { hitDummy, isDummy, livingDummyHeads } from "./dummies";
 import { hitShield } from "./perks";
 import { recordKill } from "./progression";
@@ -97,6 +98,16 @@ function implausibleHit(
 	return undefined;
 }
 
+// Horizontal speed, the number on the speedometer.
+export function flatSpeed(player: Player): number {
+	const velocity = getLiveRoot(player)?.AssemblyLinearVelocity ?? Vector3.zero;
+	return math.floor(new Vector3(velocity.X, 0, velocity.Z).Magnitude);
+}
+
+export function sendDeathRecap(victim: Player, killer: Player, cause: DeathCause, distance: number) {
+	Remotes.DeathRecap.FireClient(victim, killer, cause, math.floor(distance), flatSpeed(killer));
+}
+
 function distanceToSegment(point: Vector3, from: Vector3, to: Vector3): number {
 	const segment = to.sub(from);
 	const length = segment.Dot(segment);
@@ -184,6 +195,7 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 		Remotes.HitConfirm.FireClient(shooter, "kill", false);
 		Remotes.KillFeed.FireAllClients(shooter, victim);
 		Remotes.HeadBurst.FireAllClients(hitPart.Position);
+		sendDeathRecap(victim, shooter, "headshot", shotVector.Magnitude);
 		rules.onKill(shooter, victim);
 	} else {
 		const knockback = WeaponConfig.bodyShotKnockback;

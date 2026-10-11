@@ -40,15 +40,15 @@ features against it.
 
 ## How DOMED applies this
 
-| Principle           | Already in DOMED                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------- |
-| Fast, cheap failure | 1.5 s respawns in free-for-all and Team Deathmatch; spawn protection                  |
-| Fair deaths         | Client-side hits (what you see is what lands); visible beams show who shot you        |
-| Early competence    | Body-shot knockback; teams balanced by hidden rating; warm-up and dummies             |
-| Visible improvement | Levels, lifetime stats, top speed and longest headshot records, announced when beaten |
-| Friends             | Short matches suited to dropping in together                                          |
-| Depth               | Air strafing, bhop, long-range headshots in the air                                   |
-| Fast first minute   | First-time players skip the menu; one lesson at a time on screen, cleared by doing it |
+| Principle           | Already in DOMED                                                                                         |
+| ------------------- | -------------------------------------------------------------------------------------------------------- |
+| Fast, cheap failure | 1.5 s respawns in free-for-all and Team Deathmatch; spawn protection                                     |
+| Fair deaths         | Client-side hits (what you see is what lands); visible beams; death recap with distance and killer speed |
+| Early competence    | Body-shot knockback; teams balanced by hidden rating; warm-up and dummies                                |
+| Visible improvement | Levels, lifetime stats, top speed and longest headshot records, announced when beaten                    |
+| Friends             | Short matches suited to dropping in together                                                             |
+| Depth               | Air strafing, bhop, long-range headshots in the air                                                      |
+| Fast first minute   | First-time players skip the menu; one lesson at a time on screen, cleared by doing it                    |
 
 ## Ideas that keep the identity
 
@@ -56,7 +56,7 @@ None of these change one-shot headshots or air strafing. Ranked by expected valu
 
 1. **Bots** to fill near-empty servers and give early wins: Fortnite's lesson. Already on
    the roadmap.
-2. **Death recap.** A moment after dying, show who killed you, from how far and how fast they
+2. **Death recap.** Shipped, with the killer outlined until respawn. A moment after dying, show who killed you, from how far and how fast they
    were moving. It turns a "random death" into "they were bhopping at 90 from 140 studs":
    fair, and something to aspire to.
 3. **Near-miss feedback.** Shipped. When a shot passes just over a head, flash "CLOSE". It tells new

@@ -21,6 +21,7 @@ let cooldownFill: Frame;
 let feed: Frame;
 let banner: TextLabel;
 let respawnLabel: TextLabel;
+let deathDetail: TextLabel;
 
 let hitmarkerToken = 0;
 let bannerToken = 0;
@@ -132,6 +133,21 @@ function buildPanels(gui: ScreenGui) {
 		},
 		gui,
 	);
+	deathDetail = create(
+		"TextLabel",
+		{
+			AnchorPoint: new Vector2(0.5, 0.5),
+			Position: new UDim2(0.5, 0, 0.3, 90),
+			Size: UDim2.fromOffset(600, 26),
+			BackgroundTransparency: 1,
+			Font: Enum.Font.GothamBold,
+			TextSize: 18,
+			TextColor3: Color3.fromRGB(200, 205, 215),
+			TextStrokeTransparency: 0.3,
+			Visible: false,
+		},
+		gui,
+	);
 }
 
 export function initHud() {
@@ -171,6 +187,13 @@ export function showRespawnCountdown(seconds: number) {
 export function hideRespawnCountdown() {
 	respawnToken += 1;
 	respawnLabel.Visible = false;
+	deathDetail.Visible = false;
+}
+
+// The death recap's detail line under the countdown, hidden again on respawn.
+export function showDeathDetail(text: string) {
+	deathDetail.Text = text;
+	deathDetail.Visible = true;
 }
 
 export function showBanner(text: string, color: Color3, duration: number) {

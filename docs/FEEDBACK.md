@@ -29,6 +29,11 @@ DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch ea
 count toward streaks, so practice can't carry a streak into a match. Body shots, shield
 breaks and perk pickups each have their own cue.
 
+**Death recap**: the killed player sees how far away the killer was and how fast they were
+moving, under the respawn countdown, and the killer is outlined through walls until respawn.
+A death you can explain feels fair and shows what to aim for (see SKILL_FLOOR.md). The victim
+is out of the fight while it shows, so the outline gives nothing away that matters.
+
 **Near misses**: when a clean miss passes within 2.5 studs of a head the shooter could have
 hit (a player or a training dummy), "CLOSE" flashes under the crosshair. It tells new players
 they're nearly there and teaches that only heads count; the server decides, so it can't be

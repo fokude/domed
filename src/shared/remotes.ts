@@ -14,6 +14,8 @@ function remote<T extends Callback>(name: string) {
 
 export type HitKind = "kill" | "body" | "shield";
 export type PersonalBestRecord = "topSpeed" | "longestHeadshot";
+// How a player was killed, for their death recap.
+export type DeathCause = "headshot" | "knockback";
 
 export const Remotes = {
 	Fire: remote<(origin: Vector3, hitPosition: Vector3, hitPart: BasePart | undefined) => void>("Fire"),
@@ -27,6 +29,12 @@ export const Remotes = {
 	MarkOnboarding: remote<(key: OnboardingKey) => void>("MarkOnboarding"),
 	// Sent to each player as a match ends: XP earned this match, and the level they're now on.
 	MatchXp: remote<(earned: number, level: number, leveledUp: boolean) => void>("MatchXp"),
+	// Sent to a player who was just killed: how, from how far, and how fast the killer was moving.
+	// The killer may have left by the time it arrives.
+	DeathRecap:
+		remote<(killer: Player | undefined, cause: DeathCause, distance: number, killerSpeed: number) => void>(
+			"DeathRecap",
+		),
 	// Sent to a shooter whose miss passed close to a head they could have hit.
 	NearMiss: remote<() => void>("NearMiss"),
 	// Sent to a player who just beat one of their saved records.

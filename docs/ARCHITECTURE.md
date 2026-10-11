@@ -61,6 +61,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `mapVote.ts`        | Vote cards in the menu, and the on-screen vote list in the warm-up            |
 | `hud.ts`            | Crosshair, hitmarker, cooldown, kill feed, banners, respawn countdown         |
 | `killFeedback.ts`   | Kill, multi-kill and streak feedback (see FEEDBACK.md)                        |
+| `deathRecap.ts`     | How you died: distance and killer speed, killer outlined until respawn        |
 | `matchBar.ts`       | Timer and team scores at the top of the screen                                |
 | `objectives.ts`     | Control point strip in Domination and Hardpoint                               |
 | `onboarding.ts`     | First-minute lessons, the body-shot tip, and the how-to-play card in the menu |
