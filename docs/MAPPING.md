@@ -4,21 +4,7 @@ Maps are Roblox Models built in Studio. Gameplay code never refers to specific p
 tagged **marker** parts and **attributes** when the map loads. Anything else in the model is
 yours to shape however you like.
 
-## Designing for DOMED
-
-One headshot kills and players move fast, so whoever sees whom first usually wins. Layout
-decides whether that feels skillful or unfair.
-
-- **Control sightlines.** Most of the map should be broken up by walls, corners and height
-  changes. Long open lines should be rare lanes players choose to cross, not the default.
-- **Give players somewhere to build speed out of sight.** Trenches, halls and side routes
-  let players gain momentum safely and arrive at a fight already fast.
-- **Use height.** Ramps, pits and raised platforms break up sightlines and reward movement.
-  A power position should be strong but exposed.
-- **Make loops, not dead ends.** Every route should connect back so players never have to
-  stop and turn around.
-- **Hide spawns.** No spawn should be visible from a long sightline.
-- **Leave room to strafe.** Corridors narrower than about 12 studs make air strafing awkward.
+See [MAP_DESIGN.md](MAP_DESIGN.md) for layout principles and targets.
 
 ## Where maps live
 
