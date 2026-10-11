@@ -14,6 +14,8 @@ const Workspace = game.GetService("Workspace");
 
 const WALL_PROBE_RADIUS = 1.4;
 const JUMP_PAD_DEBOUNCE = 0.4;
+// A scroll tick counts as a jump press for this long, so scrolling just before landing still hops.
+const SCROLL_JUMP_BUFFER = 0.1;
 // If physics leaves us below this fraction of our intended speed, something blocked us.
 const BLOCKED_SPEED_RATIO = 0.3;
 
@@ -31,6 +33,7 @@ let doubleJumpUsed = false;
 // MoveDirection is zeroed while airborne, so input handlers read the last real value here.
 let wishDirection = Vector3.zero;
 let lastPadLaunch = 0;
+let lastScrollAt = -math.huge;
 
 const wallProbeParams = new RaycastParams();
 wallProbeParams.FilterType = Enum.RaycastFilterType.Exclude;
@@ -50,6 +53,10 @@ function isJumpHeld(): boolean {
 		UserInputService.IsKeyDown(Enum.KeyCode.Space) ||
 		UserInputService.IsGamepadButtonDown(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonA)
 	);
+}
+
+function wantsToJump(): boolean {
+	return isJumpHeld() || os.clock() - lastScrollAt <= SCROLL_JUMP_BUFFER;
 }
 
 function getLiveBody(): [Humanoid, BasePart] | undefined {
@@ -106,7 +113,7 @@ function onPreSimulation(dt: number) {
 			doubleJumpUsed = false;
 			// Re-jump on the landing frame itself; waiting for the Humanoid's own auto-jump
 			// leaves us on the ground long enough for friction to eat the hop.
-			if (isJumpHeld()) currentHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
+			if (wantsToJump()) currentHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
 		}
 		groundTime += dt;
 		return;
@@ -169,6 +176,15 @@ function onInputBegan(input: InputObject) {
 	rootPart.AssemblyLinearVelocity = new Vector3(airVelocity.X, Config.doubleJumpVelocity, airVelocity.Z);
 }
 
+// Scroll wheel jumps on the ground only; in the air it buffers a hop and never spends the double jump.
+function onInputChanged(input: InputObject, gameProcessed: boolean) {
+	if (input.UserInputType !== Enum.UserInputType.MouseWheel || gameProcessed) return;
+	lastScrollAt = os.clock();
+
+	const body = getLiveBody();
+	if (body && !isAirborne(body[0])) body[0].ChangeState(Enum.HumanoidStateType.Jumping);
+}
+
 function onCharacterAdded(newCharacter: Model) {
 	character = newCharacter;
 	humanoid = newCharacter.WaitForChild("Humanoid") as Humanoid;
@@ -227,4 +243,5 @@ export function initMovement() {
 	RunService.PreSimulation.Connect(onPreSimulation);
 	RunService.RenderStepped.Connect(onRenderStepped);
 	UserInputService.InputBegan.Connect(onInputBegan);
+	UserInputService.InputChanged.Connect(onInputChanged);
 }
