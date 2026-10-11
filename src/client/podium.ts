@@ -30,6 +30,7 @@ interface LiveSlot {
 const player = Players.LocalPlayer;
 const liveSlots: LiveSlot[] = [];
 let finalScreen: Frame;
+let finalTitle: TextLabel;
 let finalColumns: Frame;
 let finalToken = 0;
 
@@ -145,7 +146,7 @@ function buildFinalScreen(gui: ScreenGui) {
 		},
 		gui,
 	);
-	create(
+	finalTitle = create(
 		"TextLabel",
 		{
 			AnchorPoint: new Vector2(0.5, 0),
@@ -242,7 +243,8 @@ function buildFinalColumn(standing: Standing, rank: number) {
 	);
 }
 
-export function showMatchEnd(standings: Standing[], duration: number) {
+export function showMatchEnd(title: string, standings: Standing[], duration: number) {
+	finalTitle.Text = title;
 	const token = ++finalToken;
 	finalColumns.ClearAllChildren();
 	for (let rank = 0; rank < math.min(3, standings.size()); rank++) {
@@ -265,7 +267,8 @@ export function initPodium() {
 		"Frame",
 		{
 			AnchorPoint: new Vector2(0.5, 0),
-			Position: new UDim2(0.5, 0, 0, 12),
+			// Sits below the match bar.
+			Position: new UDim2(0.5, 0, 0, 78),
 			Size: UDim2.fromOffset(420, 52),
 			BackgroundTransparency: 1,
 		},

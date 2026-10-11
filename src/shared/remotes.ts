@@ -19,5 +19,5 @@ export const Remotes = {
 	// Either player may have left by the time a client receives this.
 	KillFeed: remote<(killer?: Player, victim?: Player) => void>("KillFeed"),
 	Announce: remote<(text: string, duration: number) => void>("Announce"),
-	MatchEnded: remote<(standings: Standing[], duration: number) => void>("MatchEnded"),
+	MatchEnded: remote<(title: string, standings: Standing[], duration: number) => void>("MatchEnded"),
 };

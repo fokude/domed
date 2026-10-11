@@ -1,6 +1,9 @@
 {
 	"name": "DOMED",
-	"globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
+	"globIgnorePaths": [
+		"**/package.json",
+		"**/tsconfig.json"
+	],
 	"tree": {
 		"$className": "DataModel",
 		"ReplicatedStorage": {
@@ -39,6 +42,9 @@
 				"MatchEnded": {
 					"$className": "RemoteEvent"
 				}
+			},
+			"MatchState": {
+				"$className": "Configuration"
 			}
 		},
 		"ServerScriptService": {

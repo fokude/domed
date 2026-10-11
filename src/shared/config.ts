@@ -28,8 +28,13 @@ export const WeaponConfig = {
 };
 
 export const MatchConfig = {
-	killsToWin: 25,
-	intermissionTime: 8,
 	respawnTime: 1.5,
 	spawnProtection: 1.5,
+	// Seconds the end-of-match podium stays up.
+	resultsTime: 8,
+};
+
+export const DeathmatchConfig = {
+	timeLimit: 600,
+	killTarget: 40,
 };

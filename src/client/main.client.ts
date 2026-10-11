@@ -3,6 +3,7 @@
 import { MatchConfig } from "shared/config";
 import { Remotes } from "shared/remotes";
 import { addKill, HudColors, initHud, showBanner } from "./hud";
+import { initMatchBar } from "./matchBar";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
 import { initPodium, showMatchEnd } from "./podium";
 import { initSpeedometer, setSpeed } from "./speedometer";
@@ -21,6 +22,7 @@ StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Health, false);
 
 initHud();
+initMatchBar();
 initPodium();
 initSpeedometer();
 initMovement();
@@ -40,5 +42,3 @@ Remotes.MatchEnded.OnClientEvent.Connect(showMatchEnd);
 Remotes.Announce.OnClientEvent.Connect((text, duration) => showBanner(text, HudColors.White, duration));
 
 RunService.RenderStepped.Connect(() => setSpeed(getSpeed()));
-
-showBanner(`FIRST TO ${MatchConfig.killsToWin} HEADSHOTS`, HudColors.White, 3);
