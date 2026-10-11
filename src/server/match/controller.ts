@@ -52,6 +52,17 @@ let currentMap: LoadedMap | undefined;
 // Set by dev commands to cut the current match short.
 let endRequested = false;
 let forcedOption: MatchOption | undefined;
+// Options whose map or mode failed to start, kept out of rotation until the server restarts.
+const brokenOptions = new Set<string>();
+
+function optionKey(option: MatchOption): string {
+	return `${option.mapId}/${option.mode}`;
+}
+
+function playableOptions(): MatchOption[] {
+	const options = allMatchOptions().filter((option) => !brokenOptions.has(optionKey(option)));
+	return options.size() > 0 ? options : allMatchOptions();
+}
 
 // Dev-only test maps are left out unless asked for.
 export function allMatchOptions(includeDevOnly = false): MatchOption[] {
@@ -66,7 +77,7 @@ export function allMatchOptions(includeDevOnly = false): MatchOption[] {
 }
 
 function randomOption(): MatchOption {
-	const options = allMatchOptions();
+	const options = playableOptions();
 	return options[math.random(0, options.size() - 1)];
 }
 
@@ -118,7 +129,7 @@ function showResults(result: MatchResult) {
 }
 
 function voteForNext(previous: MatchOption): MatchOption {
-	const choices = pickVoteOptions(allMatchOptions(), previous);
+	const choices = pickVoteOptions(playableOptions(), previous);
 	setMatchState("Phase", "Voting");
 	setMatchState("EndsAt", Workspace.GetServerTimeNow() + MatchConfig.intermissionTime);
 	return runVote(choices, MatchConfig.intermissionTime, () => forcedOption !== undefined);
@@ -151,6 +162,22 @@ export function getCurrentMap(): LoadedMap | undefined {
 	return currentMap;
 }
 
+// Runs a match, recovering if it errors (for example a map with broken markers) so one bad
+// map can't stall the server. Returns false if the match failed.
+function runMatchSafely(option: MatchOption): boolean {
+	const [ok, err] = pcall(() => runMatch(option));
+	if (ok) return true;
+	warn(`Match ${optionKey(option)} failed and was taken out of rotation: ${err}`);
+	brokenOptions.add(optionKey(option));
+	setCombatRules(undefined);
+	closeSpawning();
+	const mode = currentMode;
+	if (mode) pcall(() => mode.stop());
+	currentMode = undefined;
+	returnAllToMenu();
+	return false;
+}
+
 export function startMatchLoop() {
 	Players.PlayerRemoving.Connect((player) => {
 		currentMode?.removePlayer(player);
@@ -162,7 +189,12 @@ export function startMatchLoop() {
 	task.spawn(() => {
 		let option = randomOption();
 		for (;;) {
-			runMatch(option);
+			if (!runMatchSafely(option)) {
+				forcedOption = undefined;
+				option = randomOption();
+				task.wait(1);
+				continue;
+			}
 			if (!forcedOption) option = voteForNext(option);
 			// A dev command during the match or the vote overrides the vote.
 			option = forcedOption ?? option;
