@@ -62,3 +62,5 @@ Type these in chat during a Studio playtest. They're ignored on live servers.
 | `npm run format` | Fix lint formatting and format the Markdown docs     |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the code fits together.
+To contribute, read [CONTRIBUTING.md](CONTRIBUTING.md); [AGENTS.md](AGENTS.md) has the rules
+that humans and coding agents both follow.
