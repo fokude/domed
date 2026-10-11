@@ -13,6 +13,10 @@ export const MovementConfig = {
 	// Seconds you can touch the ground after landing and still keep air speed.
 	bhopWindow: 0.2,
 	bhopSpeedLoss: 0,
+	// Low-speed strafing gains little because each push swings the velocity a long way, so
+	// chained hops get a boost until hopBoostMaxSpeed. 0 turns it off.
+	hopBoost: 0.12,
+	hopBoostMaxSpeed: 50,
 
 	doubleJumpVelocity: 55,
 

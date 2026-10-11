@@ -111,6 +111,14 @@ function clipToWalls(velocity: Vector3, rootPart: BasePart, dt: number): Vector3
 	return intoWall < 0 ? velocity.sub(normal.mul(intoWall)) : velocity;
 }
 
+// Chained hops below hopBoostMaxSpeed gain a little speed each, to get through the sluggish
+// low-speed range where strafing barely accelerates. Above it, speed comes from strafing only.
+function boostHop(velocity: Vector3): Vector3 {
+	const speed = velocity.Magnitude;
+	if (speed < 1 || speed >= Config.hopBoostMaxSpeed) return velocity;
+	return velocity.Unit.mul(math.min(speed * (1 + Config.hopBoost), Config.hopBoostMaxSpeed));
+}
+
 function onPreSimulation(dt: number) {
 	const body = getLiveBody();
 	if (!body) return;
@@ -142,7 +150,7 @@ function onPreSimulation(dt: number) {
 		if (keepVelocityOnTakeoff) {
 			keepVelocityOnTakeoff = false;
 		} else if (groundTime <= Config.bhopWindow) {
-			airVelocity = airVelocity.mul(1 - Config.bhopSpeedLoss);
+			airVelocity = boostHop(airVelocity.mul(1 - Config.bhopSpeedLoss));
 		} else {
 			airVelocity = flatten(actualVelocity);
 		}

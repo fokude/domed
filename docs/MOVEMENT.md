@@ -11,7 +11,7 @@ to [Engine quirks](#engine-quirks) so it isn't undone later.
 | Move        | Input                                     | Config                                        |
 | ----------- | ----------------------------------------- | --------------------------------------------- |
 | Air strafe  | A or D while turning the mouse in the air | `airAccelerate`, `airSpeedCap`, `maxAirSpeed` |
-| Bunny hop   | Hold Space, or scroll, through landings   | `bhopWindow`, `bhopSpeedLoss`                 |
+| Bunny hop   | Hold Space, or scroll, through landings   | `bhopWindow`, `bhopSpeedLoss`, `hopBoost*`    |
 | Double jump | Space in the air                          | `doubleJumpVelocity`                          |
 
 Use `/map MovementLab` in Studio to test movement. Wall jump, wall slide, slide and dodge
@@ -41,6 +41,11 @@ a flag in CTF.
 the last 0.1 s, the module forces a jump immediately. On takeoff, if the player spent no
 more than `bhopWindow` on the ground, the stored air velocity carries over; otherwise air
 velocity starts from the measured ground velocity.
+
+**Hop boost.** Each chained hop below `hopBoostMaxSpeed` multiplies speed by
+`1 + hopBoost`. At low speed each strafing push swings the velocity a long way, so strafing
+alone gains slowly and feels sticky; the boost carries players through that range. Above
+it, speed comes only from strafing.
 
 **Walls in the air.** Because the module sets velocity directly, it handles walls itself:
 a spherecast along the velocity removes the into-wall component so players slide along
