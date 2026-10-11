@@ -30,8 +30,9 @@ from across the map.
 
 **Why:** missing a shot up close left a player helpless for the whole cooldown. The shove
 gives that moment a play, rewards closing in rather than sitting back, and makes ledges and
-lava part of fights, with knockback kill credit already in place. It follows Unreal
-Tournament's melee and Impact Hammer, which knock players around.
+lava part of fights, with knockback kill credit already in place. It echoes Unreal
+Tournament's Impact Hammer, a close-range weapon that also sends players flying, minus the
+damage.
 
 **Rejected: melee damage.** A melee kill would be a second way to kill besides the headshot,
 which dilutes the game's identity the same way body-shot damage would. Every kill stays a
