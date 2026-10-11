@@ -6,6 +6,69 @@
 `ReplicatedStorage.TS`, `ServerScriptService.TS`, and `StarterPlayerScripts.TS`
 respectively. Gameplay tuning lives in `src/shared/config.ts`.
 
+## Where things live
+
+**Shared** (`src/shared`, used by server and client)
+
+| File            | Owns                                                          |
+| --------------- | ------------------------------------------------------------- |
+| `config.ts`     | Every tuning value: movement, weapon, match and mode settings |
+| `modes.ts`      | Mode and team ids, team colors, mode display names            |
+| `remotes.ts`    | Typed handles to the RemoteEvents                             |
+| `matchState.ts` | Replicated match state attributes, and player attribute names |
+| `mapMarkers.ts` | Map marker tags and attribute names                           |
+| `standings.ts`  | Player ranking (kills, then deaths)                           |
+| `characters.ts` | Safe reads of player characters                               |
+
+**Server** (`src/server`)
+
+| File                  | Owns                                                           |
+| --------------------- | -------------------------------------------------------------- |
+| `main.server.ts`      | Entry point: wires the modules together                        |
+| `combat.ts`           | Validating railgun shots, kills and knockback                  |
+| `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection |
+| `hazards.ts`          | Lava and falling out of the map                                |
+| `stats.ts`            | Kills and deaths on the leaderboard                            |
+| `dev.ts`              | Studio-only chat commands                                      |
+| `match/controller.ts` | The match loop: play, results, vote                            |
+| `match/voting.ts`     | Map vote options and tallying                                  |
+| `match/teams.ts`      | Red and Blue teams, balancing, team scores and spawns          |
+| `match/modes/*.ts`    | One file per game mode                                         |
+| `maps/loader.ts`      | Loading a map Model and reading its markers                    |
+| `maps/library.ts`     | Finding maps: Studio-authored, and those still built in code   |
+| `maps/kit.ts`         | Building blocks for maps built in code                         |
+| `maps/openness.ts`    | The `/openness` measurement                                    |
+| `maps/<name>.ts`      | Maps built in code, one per file                               |
+
+**Client** (`src/client`)
+
+| File             | Owns                                                                  |
+| ---------------- | --------------------------------------------------------------------- |
+| `main.client.ts` | Entry point: camera setup and wiring server events to the UI          |
+| `movement.ts`    | All movement (see MOVEMENT.md)                                        |
+| `weapon.ts`      | Firing the railgun and drawing beams                                  |
+| `menu.ts`        | Main menu and the orbiting menu camera                                |
+| `mapVote.ts`     | Vote cards in the menu                                                |
+| `hud.ts`         | Crosshair, hitmarker, cooldown, kill feed, banners, respawn countdown |
+| `matchBar.ts`    | Timer and team scores at the top of the screen                        |
+| `objectives.ts`  | Control point strip in Domination and Hardpoint                       |
+| `podium.ts`      | Live top three in Deathmatch, and the end-of-match podium             |
+| `speedometer.ts` | Speed readout and its effects                                         |
+| `teammates.ts`   | Teammate outlines                                                     |
+| `ui.ts`          | The `create` helper for building UI                                   |
+
+## Rules of the codebase
+
+- **One owner per concern.** Before writing a helper, check `shared/`, `maps/kit.ts` and the
+  owning module above; extend them rather than copying code.
+- **Names and numbers live in one place.** Tuning goes in `config.ts`, marker names in
+  `mapMarkers.ts`, replicated state in `matchState.ts`. Don't hard-code strings or numbers
+  that another file also uses.
+- **The server never trusts the client.** Remote arguments arrive as `unknown` and are
+  validated; gameplay outcomes (kills, scores, captures) are decided on the server.
+- **No circular imports.** If two modules need each other, move the shared piece into a third
+  module, or pass a callback (as `spawning.ts` does with its handlers).
+
 ## Remotes
 
 RemoteEvents are declared as instances in `default.project.json` under
@@ -58,3 +121,17 @@ Maps are Models with tagged marker parts and attributes. See [MAPPING.md](MAPPIN
 the conventions. `server/maps/loader.ts` clones a map into the workspace and turns its
 markers into spawns, flag bases and jump pad velocities. `server/maps/library.ts` collects
 Studio-authored maps from `ServerStorage.Maps` and maps still defined in code.
+
+## Known gaps
+
+Technical debt to address as the game grows:
+
+- **No automated tests.** CI only lints and compiles. Gameplay logic (scoring, voting, spawn
+  choice) would benefit from unit tests, which need a Luau runtime such as Lune or Roblox's
+  Open Cloud Luau execution.
+- **Client-authoritative hits.** Fine with friends; public servers need stronger validation.
+- **Errors in per-frame mode logic** (CTF flags, control points) run in their own connection
+  and aren't caught by the match loop's recovery.
+- **Maps built in code** are meant to be baked into Studio models (see MAPPING.md); until then
+  their layouts can only be changed in code.
+- **No saved data.** Stats reset when players leave; progression needs DataStores.
