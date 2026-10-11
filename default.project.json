@@ -18,13 +18,27 @@
 			},
 			"Remotes": {
 				"$className": "Folder",
-				"Fire": { "$className": "RemoteEvent" },
-				"ShotFired": { "$className": "RemoteEvent" },
-				"HitConfirm": { "$className": "RemoteEvent" },
-				"Knockback": { "$className": "RemoteEvent" },
-				"KillFeed": { "$className": "RemoteEvent" },
-				"Announce": { "$className": "RemoteEvent" },
-				"MatchEnded": { "$className": "RemoteEvent" }
+				"Fire": {
+					"$className": "RemoteEvent"
+				},
+				"ShotFired": {
+					"$className": "RemoteEvent"
+				},
+				"HitConfirm": {
+					"$className": "RemoteEvent"
+				},
+				"Knockback": {
+					"$className": "RemoteEvent"
+				},
+				"KillFeed": {
+					"$className": "RemoteEvent"
+				},
+				"Announce": {
+					"$className": "RemoteEvent"
+				},
+				"MatchEnded": {
+					"$className": "RemoteEvent"
+				}
 			}
 		},
 		"ServerScriptService": {
@@ -37,6 +51,11 @@
 				"TS": {
 					"$path": "out/client"
 				}
+			}
+		},
+		"ServerStorage": {
+			"Maps": {
+				"$path": "maps"
 			}
 		}
 	}

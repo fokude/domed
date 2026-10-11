@@ -1,19 +1,6 @@
-import { ModeId, TeamId } from "shared/modes";
-
-export interface BuiltMap {
-	// Free-for-all spawns. Team modes use teamSpawns.
-	spawns: CFrame[];
-	teamSpawns?: Record<TeamId, CFrame[]>;
-	flagBases?: Record<TeamId, Vector3>;
-	// Characters below this height die, for lava floors and drops into the void.
-	killHeight: number;
-}
-
-export interface MapDefinition {
+// A map built in code. Building fills an empty Model with geometry, markers, map attributes
+// and a lighting folder, the same as a map made by hand in Studio.
+export interface MapBuilder {
 	id: string;
-	name: string;
-	tagline: string;
-	modes: ModeId[];
-	gravity: number;
-	build(arena: Folder): BuiltMap;
+	build(map: Model): void;
 }

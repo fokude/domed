@@ -1,6 +1,6 @@
 // Kills characters that touch hazard parts (lava) or fall below the map's kill height.
 
-import { HAZARD_TAG } from "./maps/kit";
+import { MapTag } from "./maps/markers";
 
 const CollectionService = game.GetService("CollectionService");
 const Players = game.GetService("Players");
@@ -25,8 +25,8 @@ export function setKillHeight(height: number) {
 }
 
 export function startHazards() {
-	CollectionService.GetTagged(HAZARD_TAG).forEach(watchHazard);
-	CollectionService.GetInstanceAddedSignal(HAZARD_TAG).Connect(watchHazard);
+	CollectionService.GetTagged(MapTag.Hazard).forEach(watchHazard);
+	CollectionService.GetInstanceAddedSignal(MapTag.Hazard).Connect(watchHazard);
 
 	task.spawn(() => {
 		for (;;) {

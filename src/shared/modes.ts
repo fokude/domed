@@ -1,6 +1,7 @@
 export type ModeId = "Deathmatch" | "CTF";
 export type TeamId = "Red" | "Blue";
 
+export const MODE_IDS: ModeId[] = ["Deathmatch", "CTF"];
 export const TEAM_IDS: TeamId[] = ["Red", "Blue"];
 
 export const TEAM_COLORS: Record<TeamId, Color3> = {

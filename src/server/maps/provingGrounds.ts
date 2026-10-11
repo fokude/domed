@@ -1,5 +1,5 @@
-import { applyLighting, jumpPad, ramp, slab, spawnAt, Style } from "./kit";
-import { MapDefinition } from "./types";
+import { jumpPad, ramp, setMapInfo, setMapLighting, slab, spawnMarker, Style } from "./kit";
+import { MapBuilder } from "./types";
 
 const ARENA_SIZE = 240;
 const WALL_HEIGHT = 50;
@@ -13,13 +13,16 @@ const Trim: Style = { color: Color3.fromRGB(255, 70, 40), material: Enum.Materia
 const Pad: Style = { color: Color3.fromRGB(0, 220, 255), material: Enum.Material.Neon };
 const Barrier: Style = { color: Color3.fromRGB(0, 0, 0), transparency: 1 };
 
-export const ProvingGrounds: MapDefinition = {
-	id: "provingGrounds",
-	name: "Proving Grounds",
-	tagline: "Where it started",
-	modes: ["Deathmatch"],
-	gravity: 196.2,
+export const ProvingGrounds: MapBuilder = {
+	id: "ProvingGrounds",
 	build(arena) {
+		setMapInfo(arena, {
+			name: "Proving Grounds",
+			tagline: "Where it started",
+			modes: ["Deathmatch"],
+			gravity: 196.2,
+			killHeight: -50,
+		});
 		const half = ARENA_SIZE / 2;
 		slab(arena, Vector3.zero, new Vector3(ARENA_SIZE, 4, ARENA_SIZE), Floor, "Floor");
 
@@ -73,7 +76,7 @@ export const ProvingGrounds: MapDefinition = {
 			slab(arena, spot.add(new Vector3(0, 18, 0)), new Vector3(6, 18, 6), Wall, "Cover");
 		}
 
-		applyLighting({
+		setMapLighting(arena, {
 			clockTime: 14,
 			brightness: 2,
 			ambient: Color3.fromRGB(70, 70, 80),
@@ -90,9 +93,8 @@ export const ProvingGrounds: MapDefinition = {
 			new Vector3(105, 0, -50),
 			new Vector3(-105, 0, 50),
 		];
-		return {
-			spawns: spawnSpots.map((spot) => spawnAt(spot, Vector3.zero)),
-			killHeight: -50,
-		};
+		for (const spot of spawnSpots) {
+			spawnMarker(arena, spot, Vector3.zero);
+		}
 	},
 };

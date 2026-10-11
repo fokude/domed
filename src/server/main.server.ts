@@ -3,8 +3,8 @@ import { Remotes } from "shared/remotes";
 import { getStandings } from "shared/standings";
 import { setCombatArena, setCombatRules, startCombat } from "./combat";
 import { setKillHeight, startHazards } from "./hazards";
+import { getMapModel, listMaps } from "./maps/library";
 import { loadMap } from "./maps/loader";
-import { ProvingGrounds } from "./maps/provingGrounds";
 import { pickSafestSpawn, setSpawnPicker, watchCharacters } from "./spawning";
 import { createLeaderstats, readStat, resetStats } from "./stats";
 
@@ -12,10 +12,13 @@ const Players = game.GetService("Players");
 
 Players.RespawnTime = MatchConfig.respawnTime;
 
-const loaded = loadMap(ProvingGrounds);
+const deathmatchMaps = listMaps().filter((info) => info.modes.includes("Deathmatch"));
+const firstMap = deathmatchMaps[math.random(0, deathmatchMaps.size() - 1)];
+const loaded = loadMap(getMapModel(firstMap.id)!);
+const spawnFrames = loaded.spawns.map((spawn) => spawn.cframe);
 setCombatArena(loaded.arena);
-setKillHeight(loaded.layout.killHeight);
-setSpawnPicker((player) => pickSafestSpawn(player, loaded.layout.spawns, () => true));
+setKillHeight(loaded.killHeight);
+setSpawnPicker((player) => pickSafestSpawn(player, spawnFrames, () => true));
 
 let roundOver = false;
 

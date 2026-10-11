@@ -34,7 +34,7 @@ export function setCombatRules(newRules: CombatRules | undefined) {
 	rules = newRules;
 }
 
-export function setCombatArena(arena: Folder) {
+export function setCombatArena(arena: Instance) {
 	lineOfSightParams.FilterDescendantsInstances = [arena];
 }
 

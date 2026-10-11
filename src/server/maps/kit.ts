@@ -1,15 +1,11 @@
-// Building blocks for maps. Positions passed to these helpers are top surfaces unless noted,
-// because that is what matters for layout: where players stand.
+// Helpers for building maps in code. Positions passed to these are top surfaces unless noted,
+// because that is what matters for layout: where players stand. Maps built here are meant to
+// be baked into Studio models and finished by hand (see docs/MAPPING.md).
+
+import { ModeId, TeamId } from "shared/modes";
+import { DEFAULT_ARC_HEIGHT, LIGHTING_FOLDER, MapAttribute, MapTag, PAD_TARGET_LINK } from "./markers";
 
 const CollectionService = game.GetService("CollectionService");
-const Lighting = game.GetService("Lighting");
-const Workspace = game.GetService("Workspace");
-
-export const HAZARD_TAG = "Hazard";
-export const JUMP_PAD_TAG = "JumpPad";
-
-// HumanoidRootPart height above the feet, used for spawn heights and pad trajectories.
-const ROOT_HEIGHT = 3;
 
 export interface Style {
 	color: Color3;
@@ -140,31 +136,6 @@ export function ring(
 	return parts;
 }
 
-// Velocity that carries a body from `from` to `to`, peaking `arcHeight` above the higher point.
-function launchVelocity(from: Vector3, to: Vector3, arcHeight: number): Vector3 {
-	const gravity = Workspace.Gravity;
-	const apex = math.max(from.Y, to.Y) + arcHeight;
-	const verticalSpeed = math.sqrt(2 * gravity * (apex - from.Y));
-	const flightTime = verticalSpeed / gravity + math.sqrt((2 * (apex - to.Y)) / gravity);
-	const horizontal = new Vector3(to.X - from.X, 0, to.Z - from.Z);
-	return horizontal.div(flightTime).add(new Vector3(0, verticalSpeed, 0));
-}
-
-// Pad sitting on `position` that lands players on `target`. Requires Workspace.Gravity to be
-// set for the map before building.
-export function jumpPad(parent: Instance, position: Vector3, target: Vector3, arcHeight: number, style: Style): Part {
-	const pad = slab(parent, position.add(new Vector3(0, 0.6, 0)), new Vector3(8, 0.6, 8), style, "JumpPad");
-	const rootOffset = new Vector3(0, ROOT_HEIGHT, 0);
-	pad.SetAttribute("Launch", launchVelocity(position.add(rootOffset), target.add(rootOffset), arcHeight));
-	CollectionService.AddTag(pad, JUMP_PAD_TAG);
-	return pad;
-}
-
-export function hazard<T extends BasePart>(part: T): T {
-	CollectionService.AddTag(part, HAZARD_TAG);
-	return part;
-}
-
 export function pointLight(part: BasePart, color: Color3, range: number, brightness: number): PointLight {
 	const light = new Instance("PointLight");
 	light.Color = color;
@@ -184,10 +155,75 @@ export function flames(part: BasePart, color: Color3, secondaryColor: Color3, si
 	return fire;
 }
 
-// Spawn standing on `position`, facing `lookAt` horizontally.
-export function spawnAt(position: Vector3, lookAt: Vector3): CFrame {
-	const root = position.add(new Vector3(0, ROOT_HEIGHT + 0.5, 0));
-	return CFrame.lookAt(root, new Vector3(lookAt.X, root.Y, lookAt.Z));
+const MarkerStyle: Style = {
+	color: Color3.fromRGB(80, 255, 120),
+	transparency: 0.5,
+	collide: false,
+	castShadow: false,
+};
+
+function tag<T extends Instance>(instance: T, name: string): T {
+	CollectionService.AddTag(instance, name);
+	return instance;
+}
+
+export function hazard<T extends BasePart>(part: T): T {
+	return tag(part, MapTag.Hazard);
+}
+
+// Spawn marker standing on `position`, facing `lookAt`. Team spawns are also used in
+// free-for-all modes.
+export function spawnMarker(parent: Instance, position: Vector3, lookAt: Vector3, team?: TeamId): Part {
+	const center = position.add(new Vector3(0, 2.5, 0));
+	const marker = block(
+		parent,
+		new Vector3(3, 5, 1.5),
+		CFrame.lookAt(center, new Vector3(lookAt.X, center.Y, lookAt.Z)),
+		MarkerStyle,
+		"Spawn",
+	);
+	if (team) marker.SetAttribute(MapAttribute.Team, team);
+	return tag(marker, MapTag.Spawn);
+}
+
+export function flagBaseMarker(parent: Instance, position: Vector3, team: TeamId): Part {
+	const marker = slab(parent, position.add(new Vector3(0, 1, 0)), new Vector3(4, 1, 4), MarkerStyle, "FlagBase");
+	marker.SetAttribute(MapAttribute.Team, team);
+	return tag(marker, MapTag.FlagBase);
+}
+
+// Pad sitting on `position` that lands players on `target`. The loader computes the launch
+// velocity, so either end can be moved freely in Studio.
+export function jumpPad(parent: Instance, position: Vector3, target: Vector3, arcHeight: number, style: Style): Part {
+	const pad = slab(parent, position.add(new Vector3(0, 0.6, 0)), new Vector3(8, 0.6, 8), style, "JumpPad");
+	if (arcHeight !== DEFAULT_ARC_HEIGHT) pad.SetAttribute(MapAttribute.ArcHeight, arcHeight);
+	tag(pad, MapTag.JumpPad);
+
+	const marker = block(parent, new Vector3(2, 2, 2), new CFrame(target), MarkerStyle, "PadTarget");
+	marker.Shape = Enum.PartType.Ball;
+	tag(marker, MapTag.PadTarget);
+
+	const link = new Instance("ObjectValue");
+	link.Name = PAD_TARGET_LINK;
+	link.Value = marker;
+	link.Parent = pad;
+	return pad;
+}
+
+export interface MapInfo {
+	name: string;
+	tagline: string;
+	modes: ModeId[];
+	gravity: number;
+	killHeight: number;
+}
+
+export function setMapInfo(map: Model, info: MapInfo) {
+	map.SetAttribute(MapAttribute.DisplayName, info.name);
+	map.SetAttribute(MapAttribute.Tagline, info.tagline);
+	map.SetAttribute(MapAttribute.Modes, info.modes.join(","));
+	map.SetAttribute(MapAttribute.Gravity, info.gravity);
+	map.SetAttribute(MapAttribute.KillHeight, info.killHeight);
 }
 
 export interface LightingSettings {
@@ -200,28 +236,15 @@ export interface LightingSettings {
 	colorCorrection?: { tint: Color3; contrast: number; saturation: number; brightness: number };
 }
 
-const LIGHTING_EFFECT_CLASSES = new Set([
-	"Atmosphere",
-	"BloomEffect",
-	"BlurEffect",
-	"ColorCorrectionEffect",
-	"DepthOfFieldEffect",
-	"SunRaysEffect",
-]);
-
-// Replaces post-processing effects, including the Baseplate template's defaults. The Sky is
-// kept: its stars show at night, which several maps rely on.
-export function applyLighting(settings: LightingSettings) {
-	for (const child of Lighting.GetChildren()) {
-		if (LIGHTING_EFFECT_CLASSES.has(child.ClassName)) child.Destroy();
-	}
-	Workspace.Terrain.FindFirstChildOfClass("Clouds")?.Destroy();
-
-	Lighting.ClockTime = settings.clockTime;
-	Lighting.Brightness = settings.brightness;
-	Lighting.Ambient = settings.ambient;
-	Lighting.OutdoorAmbient = settings.outdoorAmbient;
-	Lighting.GlobalShadows = true;
+// Lighting lives in the map so it can be tuned in Studio: Lighting properties as attributes on
+// the folder, post-processing effects as children copied into Lighting when the map loads.
+export function setMapLighting(map: Model, settings: LightingSettings) {
+	const folder = new Instance("Folder");
+	folder.Name = LIGHTING_FOLDER;
+	folder.SetAttribute("ClockTime", settings.clockTime);
+	folder.SetAttribute("Brightness", settings.brightness);
+	folder.SetAttribute("Ambient", settings.ambient);
+	folder.SetAttribute("OutdoorAmbient", settings.outdoorAmbient);
 
 	if (settings.atmosphere) {
 		const atmosphere = new Instance("Atmosphere");
@@ -230,14 +253,14 @@ export function applyLighting(settings: LightingSettings) {
 		atmosphere.Decay = settings.atmosphere.decay;
 		atmosphere.Glare = settings.atmosphere.glare;
 		atmosphere.Haze = settings.atmosphere.haze;
-		atmosphere.Parent = Lighting;
+		atmosphere.Parent = folder;
 	}
 	if (settings.bloom) {
 		const bloom = new Instance("BloomEffect");
 		bloom.Intensity = settings.bloom.intensity;
 		bloom.Size = settings.bloom.size;
 		bloom.Threshold = settings.bloom.threshold;
-		bloom.Parent = Lighting;
+		bloom.Parent = folder;
 	}
 	if (settings.colorCorrection) {
 		const correction = new Instance("ColorCorrectionEffect");
@@ -245,6 +268,7 @@ export function applyLighting(settings: LightingSettings) {
 		correction.Contrast = settings.colorCorrection.contrast;
 		correction.Saturation = settings.colorCorrection.saturation;
 		correction.Brightness = settings.colorCorrection.brightness;
-		correction.Parent = Lighting;
+		correction.Parent = folder;
 	}
+	folder.Parent = map;
 }
