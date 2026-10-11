@@ -14,11 +14,9 @@ to [Engine quirks](#engine-quirks) so it isn't undone later.
 | Bunny hop   | Hold Space, or scroll, through landings                                  | `bhopWindow`, `bhopSpeedLoss`                 |
 | Double jump | Space in the air                                                         | `doubleJumpVelocity`                          |
 | Wall jump   | Space in the air next to a wall                                          | `wallJump*`, `maxWallJumps`                   |
-| Wall slide  | Hold into a wall while falling                                           | `wallSlide*`                                  |
 | Slide       | Ctrl or C while running fast; hold it on landing to slide out of the air | `slide*`                                      |
-| Dodge       | Double-tap W, A, S or D on the ground                                    | `dodge*`                                      |
 
-Every move after double jump has an `...Enabled` switch so it can be trialled and cut. Use
+Wall jump and slide have `...Enabled` switches so it can be trialled and cut. Use
 `/map MovementLab` in Studio to test them.
 
 ## Who owns velocity
@@ -61,9 +59,6 @@ from it (`wallJumpPush`) and up (`wallJumpVelocity`). The same wall can't be use
 a row, so two facing walls can be climbed but a single wall can't. Wall jumps don't use the
 double jump. Each kick climbs about 6 studs; a full climb is about 25 to 30 studs.
 
-**Wall slide.** While falling faster than `wallSlideFallSpeed` with the wish direction
-pointing into a wall in reach, fall speed is capped at `wallSlideFallSpeed`.
-
 **Slide.** Starts above `slideMinSpeed`, boosted to at least `slideStartSpeed`, and loses
 `slideFriction` of its speed per second until it drops below 75% of walk speed or lasts
 `slideMaxTime`. Each step sets the Humanoid's `WalkSpeed` to the slide speed and calls
@@ -71,11 +66,7 @@ pointing into a wall in reach, fall speed is capped at `wallSlideFallSpeed`.
 by `slideCameraDrop`; the head hitbox does not move. Jumping out carries the slide speed
 into the air.
 
-**Dodge.** Two presses of the same movement key within `dodgeDoubleTapWindow` on the ground
-launch the player in that direction relative to the camera, with `dodgeCooldown` between
-dodges.
-
-**Launches** (`launchCharacter`) are used by jump pads, dodges and body-shot knockback. From
+**Launches** (`launchCharacter`) are used by jump pads and body-shot knockback. From
 the ground they start a real jump and replace its vertical speed on the first airborne
 frame. In the air they set velocity directly.
 

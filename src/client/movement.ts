@@ -1,5 +1,5 @@
 // Movement layered on top of the default Humanoid: Quake-style air strafing and bunny
-// hopping, double jump, wall jump, wall slide, slide, and UT-style dodge.
+// hopping, double jump, wall jump, and slide.
 //
 // On the ground the Humanoid moves the character as usual, except while sliding. While
 // airborne this module owns horizontal velocity: the Humanoid's built-in air control would
@@ -26,13 +26,6 @@ const SCROLL_JUMP_BUFFER = 0.1;
 // If physics leaves us below this fraction of our intended speed, something blocked us.
 const BLOCKED_SPEED_RATIO = 0.3;
 const SLIDE_KEYS: Enum.KeyCode[] = [Enum.KeyCode.LeftControl, Enum.KeyCode.C];
-// Dodge direction per key, as [forward, right] relative to the camera.
-const DODGE_DIRECTIONS = new Map<Enum.KeyCode, [number, number]>([
-	[Enum.KeyCode.W, [1, 0]],
-	[Enum.KeyCode.S, [-1, 0]],
-	[Enum.KeyCode.D, [0, 1]],
-	[Enum.KeyCode.A, [0, -1]],
-]);
 
 const player = Players.LocalPlayer;
 
@@ -62,8 +55,6 @@ let slideDirection = Vector3.zero;
 let slideSpeed = 0;
 let slideStartedAt = 0;
 let lastSlideEndedAt = -math.huge;
-let lastDodgeAt = -math.huge;
-const lastTapAt = new Map<Enum.KeyCode, number>();
 
 const wallProbeParams = new RaycastParams();
 wallProbeParams.FilterType = Enum.RaycastFilterType.Exclude;
@@ -230,15 +221,10 @@ function onPreSimulation(dt: number) {
 		airVelocity = actualFlat;
 	}
 
-	// Wall slide: holding into a wall while falling caps the fall speed.
 	let verticalVelocity = actualVelocity.Y;
 	if (justTookOff && pendingVerticalVelocity !== undefined) {
 		verticalVelocity = pendingVerticalVelocity;
 		pendingVerticalVelocity = undefined;
-	}
-	if (Config.wallSlideEnabled && verticalVelocity < -Config.wallSlideFallSpeed) {
-		const wall = findWall(rootPart);
-		if (wall && flatten(wishDirection).Dot(wall) < -0.5) verticalVelocity = -Config.wallSlideFallSpeed;
 	}
 
 	rootPart.AssemblyLinearVelocity = new Vector3(airVelocity.X, verticalVelocity, airVelocity.Z);
@@ -283,34 +269,8 @@ function tryWallJump(rootPart: BasePart): boolean {
 	return true;
 }
 
-// Double-tapping a movement key on the ground dodges that way, relative to the camera.
-function tryDodge(key: Enum.KeyCode) {
-	const now = os.clock();
-	const lastTap = lastTapAt.get(key) ?? -math.huge;
-	lastTapAt.set(key, now);
-	if (!Config.dodgeEnabled || now - lastTap > Config.dodgeDoubleTapWindow) return;
-	if (now - lastDodgeAt < Config.dodgeCooldown) return;
-
-	const body = getLiveBody();
-	const camera = Workspace.CurrentCamera;
-	const offsets = DODGE_DIRECTIONS.get(key);
-	if (!body || !camera || !offsets || isAirborne(body[0])) return;
-
-	const forward = flatten(camera.CFrame.LookVector).Unit;
-	const right = flatten(camera.CFrame.RightVector).Unit;
-	const direction = forward.mul(offsets[0]).add(right.mul(offsets[1]));
-	lastDodgeAt = now;
-	lastTapAt.delete(key);
-	endSlide();
-	launchCharacter(direction.mul(Config.dodgeSpeed).add(new Vector3(0, Config.dodgeVelocity, 0)), false);
-}
-
 function onInputBegan(input: InputObject) {
 	if (UserInputService.GetFocusedTextBox()) return;
-	if (DODGE_DIRECTIONS.has(input.KeyCode)) {
-		tryDodge(input.KeyCode);
-		return;
-	}
 	if (SLIDE_KEYS.includes(input.KeyCode)) {
 		const body = getLiveBody();
 		if (body && !isAirborne(body[0])) startSlide(body[0], flatten(body[1].AssemblyLinearVelocity));
@@ -359,7 +319,6 @@ function onCharacterAdded(newCharacter: Model) {
 	wallJumpsUsed = 0;
 	lastWallNormal = undefined;
 	sliding = false;
-	lastTapAt.clear();
 }
 
 function trackJumpPad(pad: Instance) {
