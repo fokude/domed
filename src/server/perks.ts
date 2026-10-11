@@ -24,13 +24,14 @@ interface Orb {
 	label: BillboardGui;
 	light: PointLight;
 	availableAt: number;
+	respawn: number;
 }
 
 let orbs: Orb[] = [];
 let folder: Folder | undefined;
 let sinceTick = 0;
 
-function buildOrb(parent: Instance, perk: PerkId, position: Vector3): Orb {
+function buildOrb(parent: Instance, perk: PerkId, position: Vector3, respawn?: number): Orb {
 	const info = PERK_INFO[perk];
 	const part = new Instance("Part");
 	part.Name = `${perk}Orb`;
@@ -66,7 +67,7 @@ function buildOrb(parent: Instance, perk: PerkId, position: Vector3): Orb {
 	text.Text = info.name;
 	text.Parent = label;
 
-	return { perk, position, part, label, light, availableAt: 0 };
+	return { perk, position, part, label, light, availableAt: 0, respawn: respawn ?? PerkConfig.respawn[perk] };
 }
 
 function setOrbVisible(orb: Orb, visible: boolean) {
@@ -138,7 +139,7 @@ function tick() {
 		});
 		if (!taker) continue;
 		grant(taker, orb.perk);
-		orb.availableAt = now + PerkConfig.respawn[orb.perk];
+		orb.availableAt = now + orb.respawn;
 		setOrbVisible(orb, false);
 	}
 }
@@ -156,7 +157,7 @@ export function startPerks(map: LoadedMap) {
 	stopPerks();
 	folder = new Instance("Folder");
 	folder.Name = "Perks";
-	orbs = map.perks.map((spawn) => buildOrb(folder!, spawn.perk, spawn.position));
+	orbs = map.perks.map((spawn) => buildOrb(folder!, spawn.perk, spawn.position, spawn.respawn));
 	folder.Parent = map.arena;
 }
 

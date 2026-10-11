@@ -28,6 +28,8 @@ export const Remotes = {
 	PerkTaken: remote<(taker: Player, perk: PerkId) => void>("PerkTaken"),
 	// Client reports it used a held perk (the Super Jump is triggered by client movement).
 	UsePerk: remote<(perk: PerkId) => void>("UsePerk"),
+	// Particle burst at a killed target's head, shown to everyone (players and training dummies).
+	HeadBurst: remote<(position: Vector3) => void>("HeadBurst"),
 	CastVote: remote<(optionIndex: number) => void>("CastVote"),
 	// Client asks to leave the menu and join the match in progress.
 	Deploy: remote<() => void>("Deploy"),

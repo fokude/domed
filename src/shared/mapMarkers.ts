@@ -10,6 +10,8 @@ export const MapTag = {
 	Hazard: "Hazard",
 	ControlPoint: "ControlPoint",
 	Perk: "Perk",
+	// Training dummies, for test maps.
+	Dummy: "Dummy",
 } as const;
 
 export const MapAttribute = {
@@ -34,6 +36,12 @@ export const MapAttribute = {
 	PointMode: "PointMode",
 	// On Perk markers: which perk the orb gives (SuperJump, Shield, Overcharge, Radar).
 	PerkType: "PerkType",
+	// On Perk markers: seconds before the orb comes back, overriding the perk's default.
+	Respawn: "Respawn",
+	// On Dummy markers: how it moves (Static, Strafe, Circle, Fast, Hop), and whether it has a
+	// shield that absorbs the first headshot.
+	DummyPattern: "DummyPattern",
+	Shielded: "Shielded",
 	// Set on jump pads by the loader, read by the client.
 	Launch: "Launch",
 } as const;

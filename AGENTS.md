@@ -21,8 +21,8 @@ the rest, or a broken change can be committed.
 
 Gameplay can only be confirmed in Roblox Studio. Agents can't run Studio, so say clearly
 what is untested rather than implying it works, and list what the person testing should try.
-Studio chat commands: `/map <MapId> [mode]`, `/end`, `/openness`, and `/map MovementLab` for
-the movement test map.
+Studio chat commands: `/map <MapId> [mode]`, `/end`, `/openness`, and `/map TestRange [mode]`
+for the test map, where every feature can be tried solo against training dummies.
 
 ## Commits
 

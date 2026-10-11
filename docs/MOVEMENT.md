@@ -14,7 +14,7 @@ to [Engine quirks](#engine-quirks) so it isn't undone later.
 | Bunny hop   | Hold Space, or scroll, through landings   | `bhopWindow`, `bhopSpeedLoss`, `hopBoost*`    |
 | Double jump | Space in the air                          | `doubleJumpVelocity`                          |
 
-Use `/map MovementLab` in Studio to test movement. Wall jump, wall slide, slide and dodge
+Use `/map TestRange` in Studio to test movement on its bhop strip and jump pads. Wall jump, wall slide, slide and dodge
 were tried and cut; see the git history if they come back.
 
 ## Who owns velocity

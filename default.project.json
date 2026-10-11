@@ -56,6 +56,9 @@
 				},
 				"UsePerk": {
 					"$className": "RemoteEvent"
+				},
+				"HeadBurst": {
+					"$className": "RemoteEvent"
 				}
 			},
 			"MatchState": {

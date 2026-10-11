@@ -310,11 +310,30 @@ export function controlPointMarker(
 	return tag(marker, MapTag.ControlPoint);
 }
 
-// Perk orb standing on `position` (floor level).
-export function perkMarker(parent: Instance, position: Vector3, perk: PerkId): Part {
+// Perk orb standing on `position` (floor level). `respawn` overrides the perk's default delay.
+export function perkMarker(parent: Instance, position: Vector3, perk: PerkId, respawn?: number): Part {
 	const marker = slab(parent, position.add(new Vector3(0, 1, 0)), new Vector3(3, 1, 3), MarkerStyle, "Perk");
 	marker.SetAttribute(MapAttribute.PerkType, perk);
+	if (respawn !== undefined) marker.SetAttribute(MapAttribute.Respawn, respawn);
 	return tag(marker, MapTag.Perk);
+}
+
+export type DummyPattern = "Static" | "Strafe" | "Circle" | "Fast" | "Hop";
+
+// Training dummy standing on `position`, facing `lookAt`.
+export function dummyMarker(
+	parent: Instance,
+	position: Vector3,
+	lookAt: Vector3,
+	pattern: DummyPattern,
+	shielded = false,
+): Part {
+	const marker = spawnMarker(parent, position, lookAt);
+	CollectionService.RemoveTag(marker, MapTag.Spawn);
+	marker.Name = "Dummy";
+	marker.SetAttribute(MapAttribute.DummyPattern, pattern);
+	if (shielded) marker.SetAttribute(MapAttribute.Shielded, true);
+	return tag(marker, MapTag.Dummy);
 }
 
 export interface MapInfo {

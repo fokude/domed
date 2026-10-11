@@ -24,29 +24,30 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 
 **Server** (`src/server`)
 
-| File                  | Owns                                                           |
-| --------------------- | -------------------------------------------------------------- |
-| `main.server.ts`      | Entry point: wires the modules together                        |
-| `combat.ts`           | Validating railgun shots, kills and knockback                  |
-| `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection |
-| `hazards.ts`          | Lava and falling out of the map                                |
-| `movementCheck.ts`    | Flagging and kicking speed hacks and teleports                 |
-| `perks.ts`            | Perk orbs, granting effects, shields                           |
-| `analytics.ts`        | Onboarding funnel and custom events for the Creator Dashboard  |
-| `stats.ts`            | Kills and deaths on the leaderboard                            |
-| `data/profiles.ts`    | Loading and saving player profiles with ProfileStore           |
-| `progression.ts`      | Recording lifetime stats into profiles                         |
-| `rating.ts`           | Hidden team-mode skill rating                                  |
-| `dev.ts`              | Studio-only chat commands                                      |
-| `match/controller.ts` | The match loop: play, results, vote                            |
-| `match/voting.ts`     | Map vote options and tallying                                  |
-| `match/teams.ts`      | Red and Blue teams, balancing, team scores and spawns          |
-| `match/modes/*.ts`    | One file per game mode                                         |
-| `maps/loader.ts`      | Loading a map Model and reading its markers                    |
-| `maps/library.ts`     | Finding maps: Studio-authored, and those still built in code   |
-| `maps/kit.ts`         | Building blocks for maps built in code                         |
-| `maps/openness.ts`    | The `/openness` measurement                                    |
-| `maps/<name>.ts`      | Maps built in code, one per file                               |
+| File                  | Owns                                                                  |
+| --------------------- | --------------------------------------------------------------------- |
+| `main.server.ts`      | Entry point: wires the modules together                               |
+| `combat.ts`           | Validating railgun shots, kills and knockback                         |
+| `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection        |
+| `hazards.ts`          | Lava and falling out of the map                                       |
+| `movementCheck.ts`    | Flagging and kicking speed hacks and teleports                        |
+| `perks.ts`            | Perk orbs, granting effects, shields                                  |
+| `dummies.ts`          | Training dummies on the Test Range: movement patterns, hits, respawns |
+| `analytics.ts`        | Onboarding funnel and custom events for the Creator Dashboard         |
+| `stats.ts`            | Kills and deaths on the leaderboard                                   |
+| `data/profiles.ts`    | Loading and saving player profiles with ProfileStore                  |
+| `progression.ts`      | Recording lifetime stats into profiles                                |
+| `rating.ts`           | Hidden team-mode skill rating                                         |
+| `dev.ts`              | Studio-only chat commands                                             |
+| `match/controller.ts` | The match loop: play, results, vote                                   |
+| `match/voting.ts`     | Map vote options and tallying                                         |
+| `match/teams.ts`      | Red and Blue teams, balancing, team scores and spawns                 |
+| `match/modes/*.ts`    | One file per game mode                                                |
+| `maps/loader.ts`      | Loading a map Model and reading its markers                           |
+| `maps/library.ts`     | Finding maps: Studio-authored, and those still built in code          |
+| `maps/kit.ts`         | Building blocks for maps built in code                                |
+| `maps/openness.ts`    | The `/openness` measurement                                           |
+| `maps/<name>.ts`      | Maps built in code, one per file                                      |
 
 **Client** (`src/client`)
 

@@ -45,6 +45,15 @@ export interface PerkSpawn {
 	perk: PerkId;
 	// Floor-level position of the orb.
 	position: Vector3;
+	// Seconds before it comes back, if the map overrides the perk's default.
+	respawn?: number;
+}
+
+export interface DummySpawn {
+	// Where the dummy stands and faces.
+	cframe: CFrame;
+	pattern: string;
+	shielded: boolean;
 }
 
 export interface LoadedMap {
@@ -55,6 +64,7 @@ export interface LoadedMap {
 	// Sorted by label.
 	controlPoints: ControlPoint[];
 	perks: PerkSpawn[];
+	dummies: DummySpawn[];
 	killHeight: number;
 }
 
@@ -174,10 +184,31 @@ function collectPerks(arena: Model): PerkSpawn[] {
 	const perks: PerkSpawn[] = [];
 	for (const marker of tagged(arena, MapTag.Perk)) {
 		const perk = PERK_IDS.find((id) => id === marker.GetAttribute(MapAttribute.PerkType));
-		if (marker.IsA("BasePart") && perk) perks.push({ perk, position: feetPosition(marker) });
-		else warn(`Perk marker ${marker.GetFullName()} has no valid PerkType`);
+		const respawn = marker.GetAttribute(MapAttribute.Respawn);
+		if (marker.IsA("BasePart") && perk) {
+			perks.push({
+				perk,
+				position: feetPosition(marker),
+				respawn: typeIs(respawn, "number") ? respawn : undefined,
+			});
+		} else warn(`Perk marker ${marker.GetFullName()} has no valid PerkType`);
 	}
 	return perks;
+}
+
+function collectDummies(arena: Model): DummySpawn[] {
+	const dummies: DummySpawn[] = [];
+	for (const marker of tagged(arena, MapTag.Dummy)) {
+		if (!marker.IsA("BasePart")) continue;
+		const feet = feetPosition(marker);
+		const look = new Vector3(marker.CFrame.LookVector.X, 0, marker.CFrame.LookVector.Z);
+		dummies.push({
+			cframe: CFrame.lookAt(feet, feet.add(look)),
+			pattern: attribute(marker, MapAttribute.DummyPattern, "string", "Static"),
+			shielded: attribute(marker, MapAttribute.Shielded, "boolean", false),
+		});
+	}
+	return dummies;
 }
 
 function collectFlagBases(arena: Model): Map<TeamId, Vector3> {
@@ -209,7 +240,15 @@ export function loadMap(source: Model): LoadedMap {
 	const flagBases = collectFlagBases(arena);
 	const controlPoints = collectControlPoints(arena);
 	const perks = collectPerks(arena);
-	for (const tag of [MapTag.Spawn, MapTag.FlagBase, MapTag.PadTarget, MapTag.ControlPoint, MapTag.Perk]) {
+	const dummies = collectDummies(arena);
+	for (const tag of [
+		MapTag.Spawn,
+		MapTag.FlagBase,
+		MapTag.PadTarget,
+		MapTag.ControlPoint,
+		MapTag.Perk,
+		MapTag.Dummy,
+	]) {
 		tagged(arena, tag).forEach((marker) => marker.Destroy());
 	}
 
@@ -221,6 +260,7 @@ export function loadMap(source: Model): LoadedMap {
 		flagBases,
 		controlPoints,
 		perks,
+		dummies,
 		killHeight: attribute(arena, MapAttribute.KillHeight, "number", DEFAULT_KILL_HEIGHT),
 	};
 }

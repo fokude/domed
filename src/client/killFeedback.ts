@@ -128,9 +128,7 @@ function xpPopup(amount: number) {
 }
 
 // A burst of particles from the victim's head. Everyone sees it.
-function headBurst(victim: Player) {
-	const head = victim.Character?.FindFirstChild("Head");
-	if (!head?.IsA("BasePart")) return;
+function headBurst(position: Vector3) {
 	const anchor = new Instance("Part");
 	anchor.Anchored = true;
 	anchor.CanCollide = false;
@@ -138,7 +136,7 @@ function headBurst(victim: Player) {
 	anchor.CanTouch = false;
 	anchor.Transparency = 1;
 	anchor.Size = Vector3.one;
-	anchor.Position = head.Position;
+	anchor.Position = position;
 	anchor.Parent = Workspace;
 
 	const emitter = new Instance("ParticleEmitter");
@@ -250,8 +248,8 @@ function build() {
 export function initKillFeedback() {
 	build();
 	Remotes.HitConfirm.OnClientEvent.Connect(onHitConfirm);
+	Remotes.HeadBurst.OnClientEvent.Connect(headBurst);
 	Remotes.KillFeed.OnClientEvent.Connect((_, victim) => {
-		if (victim) headBurst(victim);
 		if (victim === player) playSound("death");
 	});
 	Remotes.PerkTaken.OnClientEvent.Connect((taker) => {

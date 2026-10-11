@@ -8,6 +8,7 @@
 import { WeaponConfig } from "shared/config";
 import { railCooldown } from "shared/perks";
 import { Remotes } from "shared/remotes";
+import { hitDummy, isDummy } from "./dummies";
 import { consumeShield } from "./perks";
 import { recordKill } from "./progression";
 import { incrementStat } from "./stats";
@@ -75,6 +76,25 @@ function isAimedAlong(character: Model, shot: Vector3): boolean {
 	return facing.Unit.Dot(flatShot.Unit) >= math.cos(MAX_AIM_ANGLE);
 }
 
+// Checks a claimed hit against where the server sees the target and the shooter. Returns why it's
+// implausible, or undefined if it holds up.
+function implausibleHit(
+	shooterCharacter: Model,
+	targetCharacter: Model,
+	hitPart: BasePart,
+	origin: Vector3,
+	hitPosition: Vector3,
+): string | undefined {
+	if (hitPosition.sub(hitPart.Position).Magnitude > hitPart.Size.Magnitude + lagTolerance(targetCharacter)) {
+		return "target position";
+	}
+	const shotVector = hitPosition.sub(origin);
+	if (!isAimedAlong(shooterCharacter, shotVector)) return "aim";
+	const obstruction = Workspace.Raycast(origin, shotVector, lineOfSightParams);
+	if (obstruction && obstruction.Position.sub(hitPosition).Magnitude > 1.5) return "line of sight";
+	return undefined;
+}
+
 function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedHitPart: unknown) {
 	if (!typeIs(origin, "Vector3") || !typeIs(hitPosition, "Vector3")) return;
 	if (claimedHitPart !== undefined && !(typeIs(claimedHitPart, "Instance") && claimedHitPart.IsA("BasePart"))) {
@@ -100,20 +120,27 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 
 	const victimCharacter = hitPart.Parent;
 	if (!victimCharacter?.IsA("Model")) return;
+	const shotVector = hitPosition.sub(origin);
+
+	// Training dummies take hits through the same validation as players.
+	if (isDummy(victimCharacter)) {
+		const reason = implausibleHit(character, victimCharacter, hitPart, origin, hitPosition);
+		if (reason !== undefined) return reject(shooter, reason);
+		const kind = hitDummy(victimCharacter, hitPart.Name === "Head");
+		if (kind === undefined) return;
+		Remotes.HitConfirm.FireClient(shooter, kind);
+		if (kind === "kill") Remotes.HeadBurst.FireAllClients(hitPart.Position);
+		return;
+	}
+
 	const victim = Players.GetPlayerFromCharacter(victimCharacter);
 	if (!victim || victim === shooter || !rules.canDamage(shooter, victim)) return;
 
 	const victimHumanoid = victimCharacter.FindFirstChildOfClass("Humanoid");
 	if (!victimHumanoid || victimHumanoid.Health <= 0) return;
 	if (victimCharacter.FindFirstChildOfClass("ForceField")) return;
-	if (hitPosition.sub(hitPart.Position).Magnitude > hitPart.Size.Magnitude + lagTolerance(victimCharacter)) {
-		return reject(shooter, "target position");
-	}
-
-	const shotVector = hitPosition.sub(origin);
-	if (!isAimedAlong(character, shotVector)) return reject(shooter, "aim");
-	const obstruction = Workspace.Raycast(origin, shotVector, lineOfSightParams);
-	if (obstruction && obstruction.Position.sub(hitPosition).Magnitude > 1.5) return reject(shooter, "line of sight");
+	const reason = implausibleHit(character, victimCharacter, hitPart, origin, hitPosition);
+	if (reason !== undefined) return reject(shooter, reason);
 
 	if (hitPart.Name === "Head" && consumeShield(victim)) {
 		// A shield absorbs the headshot and breaks, pushing the target back like a body shot.
@@ -126,6 +153,7 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 		recordKill(shooter, shotVector.Magnitude);
 		Remotes.HitConfirm.FireClient(shooter, "kill");
 		Remotes.KillFeed.FireAllClients(shooter, victim);
+		Remotes.HeadBurst.FireAllClients(hitPart.Position);
 		rules.onKill(shooter, victim);
 	} else {
 		const knockback = WeaponConfig.bodyShotKnockback;
