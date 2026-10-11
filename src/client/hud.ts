@@ -1,5 +1,7 @@
 // Crosshair, hitmarker, speedometer, rail cooldown, kill feed, and center-screen banner.
 
+import { create } from "./ui";
+
 const Players = game.GetService("Players");
 
 const MAX_FEED_ENTRIES = 5;
@@ -23,19 +25,6 @@ let hitmarkerToken = 0;
 let bannerToken = 0;
 let feedCount = 0;
 const feedEntries: TextLabel[] = [];
-
-function create<T extends keyof CreatableInstances>(
-	className: T,
-	properties: Partial<WritableInstanceProperties<CreatableInstances[T]>>,
-	parent: Instance,
-): CreatableInstances[T] {
-	const instance = new Instance(className);
-	for (const [key, value] of pairs(properties)) {
-		(instance as unknown as Record<string, unknown>)[key as string] = value;
-	}
-	instance.Parent = parent;
-	return instance;
-}
 
 function escapeRichText(text: string): string {
 	return text.gsub("&", "&amp;")[0].gsub("<", "&lt;")[0].gsub(">", "&gt;")[0];
