@@ -51,6 +51,18 @@ padProbeParams.FilterType = Enum.RaycastFilterType.Include;
 padProbeParams.FilterDescendantsInstances = [];
 let lastScrollAt = -math.huge;
 
+// Moves other modules react to, such as onboarding tips.
+export type MovementEvent = "bhop" | "doubleJump";
+const movementListeners: ((event: MovementEvent) => void)[] = [];
+
+export function onMovementEvent(listener: (event: MovementEvent) => void) {
+	movementListeners.push(listener);
+}
+
+function emit(event: MovementEvent) {
+	for (const listener of movementListeners) listener(event);
+}
+
 const wallProbeParams = new RaycastParams();
 wallProbeParams.FilterType = Enum.RaycastFilterType.Exclude;
 
@@ -156,6 +168,7 @@ function onPreSimulation(dt: number) {
 			keepVelocityOnTakeoff = false;
 		} else if (groundTime <= Config.bhopWindow) {
 			airVelocity = boostHop(airVelocity.mul(1 - Config.bhopSpeedLoss));
+			emit("bhop");
 		} else {
 			airVelocity = flatten(actualVelocity);
 		}
@@ -201,6 +214,7 @@ function onInputBegan(input: InputObject) {
 	const [currentHumanoid, rootPart] = body;
 	if (!isAirborne(currentHumanoid) || doubleJumpUsed) return;
 	doubleJumpUsed = true;
+	emit("doubleJump");
 
 	// Like UT's double jump, the second jump redirects momentum toward the input direction.
 	const wish = flatten(wishDirection);

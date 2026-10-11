@@ -40,14 +40,15 @@ features against it.
 
 ## How DOMED applies this
 
-| Principle           | Already in DOMED                                                               |
-| ------------------- | ------------------------------------------------------------------------------ |
-| Fast, cheap failure | 1.5 s respawns in free-for-all and Team Deathmatch; spawn protection           |
-| Fair deaths         | Client-side hits (what you see is what lands); visible beams show who shot you |
-| Early competence    | Body-shot knockback; teams balanced by hidden rating; warm-up and dummies      |
-| Visible improvement | Levels, lifetime stats, top speed and longest headshot records                 |
-| Friends             | Short matches suited to dropping in together                                   |
-| Depth               | Air strafing, bhop, long-range headshots in the air                            |
+| Principle           | Already in DOMED                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------- |
+| Fast, cheap failure | 1.5 s respawns in free-for-all and Team Deathmatch; spawn protection                  |
+| Fair deaths         | Client-side hits (what you see is what lands); visible beams show who shot you        |
+| Early competence    | Body-shot knockback; teams balanced by hidden rating; warm-up and dummies             |
+| Visible improvement | Levels, lifetime stats, top speed and longest headshot records                        |
+| Friends             | Short matches suited to dropping in together                                          |
+| Depth               | Air strafing, bhop, long-range headshots in the air                                   |
+| Fast first minute   | First-time players skip the menu; one lesson at a time on screen, cleared by doing it |
 
 ## Ideas that keep the identity
 
@@ -64,9 +65,11 @@ None of these change one-shot headshots or air strafing. Ranked by expected valu
    happens, from stats already saved. Visible improvement that doesn't need kills.
 5. **Knockback kill credit.** Knocking someone into a hazard or off the map counts as your
    kill. Rewards body shots near edges without body-shot damage.
-6. **Faster first impression.** Measure first-session drop-off with the onboarding funnel;
-   if players leave at the how-to-play card, drop new players straight into the warm-up and
-   teach in the world instead.
+6. **Faster first impression.** Shipped. First-time players skip the menu and drop straight
+   into the warm-up or match (spawn protection covers a mid-match landing). Instead of a card
+   of rules, one lesson shows at a time (shoot, bunny hop, air strafe, double jump) and clears
+   the moment the player does it; moves they already know are skipped. The how-to-play card
+   stays in the menu. Judge it by the funnel's joined-to-deployed step and first-kill rate.
 7. **Friends together.** Prefer keeping Roblox friends on the same team when balance allows,
    and add an invite button.
 

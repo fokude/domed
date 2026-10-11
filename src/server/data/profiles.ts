@@ -32,6 +32,12 @@ const TEMPLATE: PlayerProfile = {
 
 const store = ProfileStore.New("PlayerProfiles", TEMPLATE);
 const profiles = new Map<Player, ProfileStore.Profile<PlayerProfile>>();
+const loadedListeners: ((player: Player, data: PlayerProfile) => void)[] = [];
+
+// Runs `listener` each time a player's profile finishes loading.
+export function onProfileLoaded(listener: (player: Player, data: PlayerProfile) => void) {
+	loadedListeners.push(listener);
+}
 
 // Sends the player's profile to their client, minus the hidden rating.
 function publish(player: Player, data: PlayerProfile) {
@@ -67,6 +73,7 @@ function load(player: Player) {
 	}
 	profiles.set(player, profile);
 	publish(player, profile.Data);
+	for (const listener of loadedListeners) listener(player, profile.Data);
 }
 
 // The player's saved data, if their profile is loaded.

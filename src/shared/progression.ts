@@ -16,8 +16,16 @@ export interface LifetimeStats {
 	longestHeadshot: number;
 }
 
-export type OnboardingKey = "intro" | "strafeTip" | "bodyShotTip";
-export const ONBOARDING_KEYS: OnboardingKey[] = ["intro", "strafeTip", "bodyShotTip"];
+// "intro" marks a player's first deploy; the tip keys mark each first-minute lesson as done.
+export type OnboardingKey = "intro" | "shootTip" | "bhopTip" | "strafeTip" | "doubleJumpTip" | "bodyShotTip";
+export const ONBOARDING_KEYS: OnboardingKey[] = [
+	"intro",
+	"shootTip",
+	"bhopTip",
+	"strafeTip",
+	"doubleJumpTip",
+	"bodyShotTip",
+];
 
 // Hidden team-mode skill: estimate and uncertainty. Saved, but never sent to clients.
 export interface PlayerRating {

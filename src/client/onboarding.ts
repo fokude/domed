@@ -1,28 +1,43 @@
-// Teaches new players to move. A "how to play" card shows in the menu on first join (the menu is
-// safe; a popup mid-match would get them shot) and can be reopened from the menu. Two one-time
-// tips appear in game when they'd help. Seen steps are saved in the player's profile.
+// Teaches new players in the first minute. A first-time player skips the menu (the server
+// deploys them straight in) and gets one short lesson at a time on screen: shoot, bunny hop,
+// air strafe, double jump. Each lesson clears as soon as the player does it, in any order, and
+// is saved in their profile. A one-time body-shot tip shows on their first body hit, and the
+// how-to-play card stays in the menu for reference. See docs/SKILL_FLOOR.md.
 
+import { MovementConfig } from "shared/config";
 import { DEPLOYED_ATTRIBUTE } from "shared/matchState";
 import { OnboardingKey } from "shared/progression";
 import { Remotes } from "shared/remotes";
 import { addMenuButton, getMenuContent, openMenuPanel, registerMenuPanel, toggleMenuPanel } from "./menu";
-import { getSpeed } from "./movement";
-import { getMyProfile, onMyProfileChanged } from "./profileData";
+import { getSpeed, onMovementEvent } from "./movement";
+import { getMyProfile } from "./profileData";
 import { create } from "./ui";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
 const TweenService = game.GetService("TweenService");
+const UserInputService = game.GetService("UserInputService");
 
 const WHITE = new Color3(1, 1, 1);
 const MUTED = Color3.fromRGB(170, 175, 185);
 const ACCENT = Color3.fromRGB(255, 60, 40);
 const PANEL = Color3.fromRGB(20, 22, 28);
+const DONE_GREEN = Color3.fromRGB(80, 230, 120);
 
-// The strafing tip shows once a player has been alive this long without reaching the speed.
-const STRAFE_TIP_DELAY = 45;
-const STRAFE_TIP_SPEED = 40;
 const TIP_DURATION = 8;
+// Chained hops before the bunny hop lesson counts as learned.
+const BHOPS_TO_LEARN = 3;
+// Speed that proves air strafing: above what chained hops alone reach.
+const STRAFE_SPEED = MovementConfig.hopBoostMaxSpeed + 5;
+// Pause between finishing one lesson and showing the next.
+const LESSON_GAP = 1.2;
+
+const LESSONS: [OnboardingKey, string][] = [
+	["shootTip", "CLICK TO SHOOT. HEADSHOTS ONLY."],
+	["bhopTip", "HOLD SPACE TO BUNNY HOP: JUMP AGAIN THE MOMENT YOU LAND."],
+	["strafeTip", "IN THE AIR, HOLD A AND TURN YOUR MOUSE LEFT TO GAIN SPEED."],
+	["doubleJumpTip", "PRESS SPACE AGAIN IN THE AIR TO DOUBLE JUMP."],
+];
 
 const PANEL_ID = "howToPlay";
 
@@ -38,10 +53,11 @@ const player = Players.LocalPlayer;
 
 let panel: Frame;
 let tipLabel: TextLabel;
-let introChecked = false;
+let lessonLabel: TextLabel;
 const marked = new Set<OnboardingKey>();
-let aliveTime = 0;
-let topSpeed = 0;
+let bhops = 0;
+// Hides the lesson briefly after one is finished, so "NICE" shows before the next.
+let lessonPausedUntil = 0;
 
 function hasSeen(key: OnboardingKey): boolean {
 	return marked.has(key) || getMyProfile()?.onboarding[key] === true;
@@ -169,25 +185,55 @@ function buildTip() {
 		},
 		gui,
 	);
+	lessonLabel = create(
+		"TextLabel",
+		{
+			AnchorPoint: new Vector2(0.5, 1),
+			Position: new UDim2(0.5, 0, 1, -150),
+			Size: UDim2.fromOffset(800, 30),
+			BackgroundTransparency: 1,
+			Font: Enum.Font.GothamBlack,
+			TextSize: 22,
+			TextColor3: WHITE,
+			TextStrokeTransparency: 0.3,
+			Visible: false,
+		},
+		gui,
+	);
 }
 
-// Opens the card automatically the first time the profile shows it hasn't been seen.
-function checkIntro() {
-	if (introChecked || !getMyProfile()) return;
-	introChecked = true;
-	if (hasSeen("intro")) return;
-	openMenuPanel(PANEL_ID);
-	markSeen("intro");
+function isDeployed(): boolean {
+	return player.GetAttribute(DEPLOYED_ATTRIBUTE) === true;
 }
 
-function trackStrafeTip(dt: number) {
+// Marks a lesson learned, whether or not it was on screen: players who already know a move
+// skip its lesson.
+function learn(key: OnboardingKey) {
+	if (hasSeen(key)) return;
+	const wasShowing = currentLesson()?.[0] === key;
+	markSeen(key);
+	if (!wasShowing) return;
+	lessonLabel.Text = "NICE";
+	lessonLabel.TextColor3 = DONE_GREEN;
+	lessonPausedUntil = os.clock() + LESSON_GAP;
+}
+
+function currentLesson(): [OnboardingKey, string] | undefined {
+	return LESSONS.find(([key]) => !hasSeen(key));
+}
+
+function updateLesson() {
 	const humanoid = player.Character?.FindFirstChildOfClass("Humanoid");
-	if (!humanoid || humanoid.Health <= 0 || hasSeen("strafeTip")) return;
-	aliveTime += dt;
-	topSpeed = math.max(topSpeed, getSpeed());
-	if (aliveTime < STRAFE_TIP_DELAY) return;
-	if (topSpeed < STRAFE_TIP_SPEED) showTip("TIP: In the air, hold A and turn your mouse left to gain speed.");
-	markSeen("strafeTip");
+	const alive = humanoid !== undefined && humanoid.Health > 0;
+	if (alive && getSpeed() >= STRAFE_SPEED) learn("strafeTip");
+
+	// Lessons wait for the profile, so a returning player never sees one they've done.
+	const lesson = getMyProfile() ? currentLesson() : undefined;
+	const paused = os.clock() < lessonPausedUntil;
+	lessonLabel.Visible = isDeployed() && alive && (paused || lesson !== undefined);
+	if (paused || !lesson) return;
+	lessonLabel.Text = lesson[1];
+	lessonLabel.TextColor3 = WHITE;
 }
 
 export function initOnboarding() {
@@ -195,17 +241,25 @@ export function initOnboarding() {
 	buildTip();
 	addMenuButton("HOW TO PLAY", 5, () => toggleMenuPanel(PANEL_ID));
 
-	onMyProfileChanged(checkIntro);
-	checkIntro();
-	// The card closes when the player deploys; they've seen it.
 	player.GetAttributeChangedSignal(DEPLOYED_ATTRIBUTE).Connect(() => {
-		if (player.GetAttribute(DEPLOYED_ATTRIBUTE) === true) openMenuPanel(undefined);
+		if (!isDeployed()) return;
+		// The card closes when the player deploys, and the first deploy is their intro.
+		openMenuPanel(undefined);
+		markSeen("intro");
 	});
-
+	UserInputService.InputBegan.Connect((input, gameProcessed) => {
+		if (!gameProcessed && input.UserInputType === Enum.UserInputType.MouseButton1 && isDeployed()) {
+			learn("shootTip");
+		}
+	});
+	onMovementEvent((event) => {
+		if (event === "doubleJump") learn("doubleJumpTip");
+		else if (++bhops >= BHOPS_TO_LEARN) learn("bhopTip");
+	});
 	Remotes.HitConfirm.OnClientEvent.Connect((kind) => {
 		if (kind !== "body" || hasSeen("bodyShotTip")) return;
 		showTip("Body shots only knock enemies back. Aim for the head.");
 		markSeen("bodyShotTip");
 	});
-	RunService.Heartbeat.Connect(trackStrafeTip);
+	RunService.Heartbeat.Connect(updateLesson);
 }

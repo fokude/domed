@@ -9,6 +9,7 @@ import { getStandings } from "shared/standings";
 import { CombatRules, setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
 import { logMatchFinished, logOnboardingStep } from "../analytics";
+import { onProfileLoaded } from "../data/profiles";
 import { startDummies, stopDummies } from "../dummies";
 import { startPerks, stopPerks } from "../perks";
 import { recordMatchEnd, startMatchXp } from "../progression";
@@ -267,6 +268,11 @@ export function startMatchLoop() {
 	});
 	Remotes.Deploy.OnServerEvent.Connect((player) => deploy(player));
 	Remotes.LeaveToMenu.OnServerEvent.Connect((player) => leaveToMenu(player));
+	// First-time players skip the menu and drop straight into play, where the first-minute
+	// lessons teach them (see docs/SKILL_FLOOR.md). Returning players start in the menu.
+	onProfileLoaded((player, data) => {
+		if (data.onboarding.intro !== true) deploy(player);
+	});
 	startVoting();
 
 	task.spawn(() => {
