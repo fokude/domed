@@ -27,13 +27,15 @@ const CATWALK_HEIGHT = 14;
 const CATWALK_X = 64;
 const CORE_HEIGHT = 4;
 
-const Floor: Style = { color: Color3.fromRGB(10, 12, 16), material: Enum.Material.SmoothPlastic, reflectance: 0.2 };
-const Panel: Style = { color: Color3.fromRGB(24, 28, 38), material: Enum.Material.Metal };
-const Wall: Style = { color: Color3.fromRGB(14, 16, 22), material: Enum.Material.SmoothPlastic };
+// Three value layers keep shapes readable: a deep navy floor, mid-tone blue-grey structures,
+// and walls in between, all against a lit blue haze rather than black.
+const Floor: Style = { color: Color3.fromRGB(18, 22, 38), material: Enum.Material.SmoothPlastic, reflectance: 0.25 };
+const Panel: Style = { color: Color3.fromRGB(78, 90, 118), material: Enum.Material.Metal };
+const Wall: Style = { color: Color3.fromRGB(36, 44, 66), material: Enum.Material.SmoothPlastic };
 const Grid: Style = {
-	color: Color3.fromRGB(90, 170, 255),
+	color: Color3.fromRGB(70, 160, 255),
 	material: Enum.Material.Neon,
-	transparency: 0.35,
+	transparency: 0.15,
 	collide: false,
 	castShadow: false,
 };
@@ -230,21 +232,21 @@ export const Gridline: MapBuilder = {
 
 		setMapLighting(map, {
 			clockTime: 0,
-			brightness: 0,
-			ambient: Color3.fromRGB(25, 30, 45),
-			outdoorAmbient: Color3.fromRGB(20, 25, 40),
+			brightness: 1,
+			ambient: Color3.fromRGB(70, 80, 110),
+			outdoorAmbient: Color3.fromRGB(80, 95, 130),
 			atmosphere: {
-				density: 0.35,
-				color: Color3.fromRGB(10, 15, 30),
-				decay: Color3.fromRGB(0, 0, 10),
+				density: 0.3,
+				color: Color3.fromRGB(30, 60, 120),
+				decay: Color3.fromRGB(10, 20, 60),
 				glare: 0,
-				haze: 1,
+				haze: 1.5,
 			},
-			bloom: { intensity: 1.4, size: 32, threshold: 0.8 },
+			bloom: { intensity: 1, size: 28, threshold: 0.9 },
 			colorCorrection: {
 				tint: Color3.fromRGB(230, 240, 255),
-				contrast: 0.2,
-				saturation: 0.2,
+				contrast: 0.15,
+				saturation: 0.25,
 				brightness: 0,
 			},
 		});
