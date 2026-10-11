@@ -28,6 +28,8 @@ let groundTime = math.huge;
 let wasAirborne = false;
 let keepVelocityOnTakeoff = false;
 let doubleJumpUsed = false;
+// MoveDirection is zeroed while airborne, so input handlers read the last real value here.
+let wishDirection = Vector3.zero;
 let lastPadLaunch = 0;
 
 const wallProbeParams = new RaycastParams();
@@ -40,6 +42,14 @@ function flatten(vector: Vector3): Vector3 {
 function isAirborne(target: Humanoid): boolean {
 	const state = target.GetState();
 	return state === Enum.HumanoidStateType.Freefall || state === Enum.HumanoidStateType.Jumping;
+}
+
+function isJumpHeld(): boolean {
+	if (UserInputService.GetFocusedTextBox()) return false;
+	return (
+		UserInputService.IsKeyDown(Enum.KeyCode.Space) ||
+		UserInputService.IsGamepadButtonDown(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonA)
+	);
 }
 
 function getLiveBody(): [Humanoid, BasePart] | undefined {
@@ -94,10 +104,18 @@ function onPreSimulation(dt: number) {
 			wasAirborne = false;
 			groundTime = 0;
 			doubleJumpUsed = false;
+			// Re-jump on the landing frame itself; waiting for the Humanoid's own auto-jump
+			// leaves us on the ground long enough for friction to eat the hop.
+			if (isJumpHeld()) currentHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
 		}
 		groundTime += dt;
 		return;
 	}
+
+	// The control script has already set this frame's MoveDirection. Read it as our wish
+	// direction, then zero it so the Humanoid's air control doesn't fight our velocity.
+	wishDirection = currentHumanoid.MoveDirection;
+	currentHumanoid.Move(Vector3.zero);
 
 	const justTookOff = !wasAirborne;
 	if (justTookOff) {
@@ -111,7 +129,7 @@ function onPreSimulation(dt: number) {
 		}
 	}
 
-	airVelocity = airAccelerate(airVelocity, currentHumanoid.MoveDirection, dt);
+	airVelocity = airAccelerate(airVelocity, wishDirection, dt);
 	airVelocity = clipToWalls(airVelocity, rootPart, dt);
 
 	// Ground friction during a bhop legitimately lowers the takeoff frame's speed, so only
@@ -144,7 +162,7 @@ function onInputBegan(input: InputObject) {
 	doubleJumpUsed = true;
 
 	// Like UT's double jump, the second jump redirects momentum toward the input direction.
-	const wish = flatten(currentHumanoid.MoveDirection);
+	const wish = flatten(wishDirection);
 	if (wish.Magnitude > 0.01) {
 		airVelocity = wish.Unit.mul(math.max(airVelocity.Magnitude, Config.walkSpeed));
 	}
