@@ -36,6 +36,30 @@ let menuOpen = false;
 // Content area other menu features (map voting, loadout) render into.
 let menuContent: Frame;
 
+// Panels shown in the menu's content area, one at a time. The map vote takes the area over
+// during the Voting phase.
+const panels = new Map<string, GuiObject>();
+let openPanel: string | undefined;
+
+function refreshPanels() {
+	const voting = getMatchState("Phase") === "Voting";
+	for (const [id, panel] of panels) panel.Visible = !voting && id === openPanel;
+}
+
+export function registerMenuPanel(id: string, panel: GuiObject) {
+	panels.set(id, panel);
+	refreshPanels();
+}
+
+export function openMenuPanel(id: string | undefined) {
+	openPanel = id;
+	refreshPanels();
+}
+
+export function toggleMenuPanel(id: string) {
+	openMenuPanel(openPanel === id ? undefined : id);
+}
+
 // Adds a button to the menu's list; `order` sorts it among the others (Play is 1).
 export function addMenuButton(text: string, order: number, onClick: () => void): TextButton {
 	const button = menuButton(buttonList, text, order);
@@ -239,6 +263,7 @@ function buildMenu() {
 export function initMenu() {
 	buildMenu();
 	onMatchStateChanged(["Phase", "Mode", "MapName"], refresh);
+	onMatchStateChanged(["Phase"], refreshPanels);
 	refresh();
 
 	player.GetAttributeChangedSignal(DEPLOYED_ATTRIBUTE).Connect(() => setOpen(!isDeployed()));

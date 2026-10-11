@@ -2,10 +2,10 @@
 // safe; a popup mid-match would get them shot) and can be reopened from the menu. Two one-time
 // tips appear in game when they'd help. Seen steps are saved in the player's profile.
 
-import { DEPLOYED_ATTRIBUTE, getMatchState, onMatchStateChanged } from "shared/matchState";
+import { DEPLOYED_ATTRIBUTE } from "shared/matchState";
 import { OnboardingKey } from "shared/progression";
 import { Remotes } from "shared/remotes";
-import { addMenuButton, getMenuContent } from "./menu";
+import { addMenuButton, getMenuContent, openMenuPanel, registerMenuPanel, toggleMenuPanel } from "./menu";
 import { getSpeed } from "./movement";
 import { getMyProfile, onMyProfileChanged } from "./profileData";
 import { create } from "./ui";
@@ -24,6 +24,8 @@ const STRAFE_TIP_DELAY = 45;
 const STRAFE_TIP_SPEED = 40;
 const TIP_DURATION = 8;
 
+const PANEL_ID = "howToPlay";
+
 const STEPS: [string, string][] = [
 	["ONE SHOT. HEADSHOTS ONLY.", "Click to fire. Body shots only knock enemies back."],
 	["BUNNY HOP", "Hold SPACE, or spin the scroll wheel, to jump again the moment you land."],
@@ -35,7 +37,6 @@ const player = Players.LocalPlayer;
 
 let panel: Frame;
 let tipLabel: TextLabel;
-let introOpen = false;
 let introChecked = false;
 const marked = new Set<OnboardingKey>();
 let aliveTime = 0;
@@ -49,16 +50,6 @@ function markSeen(key: OnboardingKey) {
 	if (hasSeen(key)) return;
 	marked.add(key);
 	Remotes.MarkOnboarding.FireServer(key);
-}
-
-function refreshPanel() {
-	panel.Visible = introOpen && getMatchState("Phase") !== "Voting";
-}
-
-function setIntroOpen(open: boolean) {
-	introOpen = open;
-	if (!open) markSeen("intro");
-	refreshPanel();
 }
 
 function showTip(text: string) {
@@ -78,7 +69,7 @@ function showTip(text: string) {
 function buildPanel() {
 	panel = create(
 		"Frame",
-		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: PANEL, BackgroundTransparency: 0.15, Visible: false },
+		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: PANEL, BackgroundTransparency: 0.15 },
 		getMenuContent(),
 	);
 	create("UICorner", { CornerRadius: new UDim(0, 8) }, panel);
@@ -152,7 +143,8 @@ function buildPanel() {
 		panel,
 	);
 	create("UICorner", { CornerRadius: new UDim(0, 6) }, close);
-	close.Activated.Connect(() => setIntroOpen(false));
+	close.Activated.Connect(() => openMenuPanel(undefined));
+	registerMenuPanel(PANEL_ID, panel);
 }
 
 function buildTip() {
@@ -182,7 +174,9 @@ function buildTip() {
 function checkIntro() {
 	if (introChecked || !getMyProfile()) return;
 	introChecked = true;
-	if (!hasSeen("intro")) setIntroOpen(true);
+	if (hasSeen("intro")) return;
+	openMenuPanel(PANEL_ID);
+	markSeen("intro");
 }
 
 function trackStrafeTip(dt: number) {
@@ -198,14 +192,13 @@ function trackStrafeTip(dt: number) {
 export function initOnboarding() {
 	buildPanel();
 	buildTip();
-	addMenuButton("HOW TO PLAY", 5, () => setIntroOpen(!introOpen));
+	addMenuButton("HOW TO PLAY", 5, () => toggleMenuPanel(PANEL_ID));
 
 	onMyProfileChanged(checkIntro);
 	checkIntro();
-	onMatchStateChanged(["Phase"], refreshPanel);
-	// Pressing Play counts as having read the card.
+	// The card closes when the player deploys; they've seen it.
 	player.GetAttributeChangedSignal(DEPLOYED_ATTRIBUTE).Connect(() => {
-		if (player.GetAttribute(DEPLOYED_ATTRIBUTE) === true && introOpen) setIntroOpen(false);
+		if (player.GetAttribute(DEPLOYED_ATTRIBUTE) === true) openMenuPanel(undefined);
 	});
 
 	Remotes.HitConfirm.OnClientEvent.Connect((kind) => {
