@@ -29,7 +29,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | --------------------- | ---------------------------------------------------------------------------------------- |
 | `main.server.ts`      | Entry point: wires the modules together                                                  |
 | `combat.ts`           | Validating railgun shots, kills and knockback                                            |
-| `knockback.ts`        | The body-shot push, shared by player and bot shots                                       |
+| `knockback.ts`        | The body-shot push, shared by player and bot shots; pauses speed records                 |
 | `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection                           |
 | `hazards.ts`          | Lava and falling out of the map                                                          |
 | `movementCheck.ts`    | Flagging and kicking speed hacks and teleports                                           |

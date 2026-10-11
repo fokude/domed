@@ -10,7 +10,7 @@ import { MapTag } from "shared/mapMarkers";
 import { DEPLOYED_ATTRIBUTE } from "shared/matchState";
 import { Remotes } from "shared/remotes";
 import { LoadedMap } from "./maps/loader";
-import { knockbackImpulse } from "./knockback";
+import { knockBack, knockbackImpulse } from "./knockback";
 import { hitShield } from "./perks";
 import { addThreatSource, pickSpawnAwayFrom } from "./spawning";
 
@@ -258,7 +258,7 @@ function shoot(bot: Bot, target: Model) {
 		return;
 	}
 	if (!isHead) hitShield(victim, false);
-	Remotes.Knockback.FireClient(victim, knockbackImpulse(direction));
+	knockBack(victim, direction);
 }
 
 function requestPath(bot: Bot, goal: Vector3) {

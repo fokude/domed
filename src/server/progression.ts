@@ -31,6 +31,21 @@ const MIN_ANNOUNCED_HEADSHOT = 50;
 // A new top speed is announced once the player stops accelerating, with the peak, rather than
 // on every rising sample. Holds the record being set and whether it beat an announced level.
 const risingSpeed = new Map<Player, { speed: number; announce: boolean }>();
+// Until when each player's speed doesn't count toward their record (after being knocked back).
+const topSpeedPausedUntil = new Map<Player, number>();
+
+// Stops speed counting toward a player's top speed record for a while.
+export function pauseTopSpeed(player: Player, seconds: number) {
+	topSpeedPausedUntil.set(player, os.clock() + seconds);
+}
+
+// Announces a top speed record that just finished climbing, if it's worth announcing.
+function finishRisingSpeed(player: Player) {
+	const rising = risingSpeed.get(player);
+	if (!rising) return;
+	risingSpeed.delete(player);
+	if (rising.announce) Remotes.PersonalBest.FireClient(player, "topSpeed", rising.speed);
+}
 
 // XP earned by each player in the current match, for the per-match cap and the summary.
 const matchXp = new Map<Player, number>();
@@ -111,12 +126,10 @@ function sampleSpeeds() {
 		const speed = flatSpeed(root.AssemblyLinearVelocity);
 		const best = getProfile(player)?.stats.topSpeed;
 		const rising = risingSpeed.get(player);
-		if (best === undefined || speed <= best || speed > MAX_CREDIBLE_SPEED) {
-			// Speed stopped climbing: announce the record just set.
-			if (rising) {
-				risingSpeed.delete(player);
-				if (rising.announce) Remotes.PersonalBest.FireClient(player, "topSpeed", rising.speed);
-			}
+		const paused = os.clock() < (topSpeedPausedUntil.get(player) ?? 0);
+		if (paused || best === undefined || speed <= best || speed > MAX_CREDIBLE_SPEED) {
+			// Speed stopped climbing (or stopped counting): announce the record just set.
+			finishRisingSpeed(player);
 			continue;
 		}
 		risingSpeed.set(player, {
@@ -133,6 +146,7 @@ export function startProgression() {
 	Players.PlayerRemoving.Connect((player) => {
 		matchXp.delete(player);
 		risingSpeed.delete(player);
+		topSpeedPausedUntil.delete(player);
 	});
 	Remotes.MarkOnboarding.OnServerEvent.Connect((player, key) => {
 		const valid = ONBOARDING_KEYS.find((candidate) => candidate === key);

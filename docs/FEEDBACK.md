@@ -41,7 +41,8 @@ faked, and it's only shown to the shooter.
 
 **Personal bests** ("NEW TOP SPEED: 92", "LONGEST HEADSHOT: 140 STUDS") call out in gold the
 moment a saved record falls. Speed records announce once the player stops accelerating, with
-the peak, and low records (under 50 speed or 50 studs) stay quiet so new players aren't
+the peak, and speed doesn't count for 3 seconds after being knocked back, since a push from
+someone else isn't the player's own speed (the owner's call after playtesting), and low records (under 50 speed or 50 studs) stay quiet so new players aren't
 flooded. They show improvement that doesn't depend on winning fights (see SKILL_FLOOR.md).
 
 ## Why this design

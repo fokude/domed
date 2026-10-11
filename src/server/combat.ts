@@ -11,7 +11,7 @@ import { railCooldown } from "shared/perks";
 import { DeathCause, Remotes } from "shared/remotes";
 import { getBotName, isBot, killBot, livingBotHeads, pushBot } from "./bots";
 import { hitDummy, isDummy, livingDummyHeads } from "./dummies";
-import { knockbackImpulse } from "./knockback";
+import { knockBack } from "./knockback";
 import { hitShield } from "./perks";
 import { recordKill } from "./progression";
 import { incrementStat } from "./stats";
@@ -222,7 +222,7 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 }
 
 function push(shooter: Player, victim: Player, victimCharacter: Model, shotVector: Vector3) {
-	Remotes.Knockback.FireClient(victim, knockbackImpulse(shotVector));
+	knockBack(victim, shotVector);
 	lastPush.set(victim, { shooter, character: victimCharacter, at: os.clock(), distance: shotVector.Magnitude });
 }
 
