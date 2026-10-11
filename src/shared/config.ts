@@ -87,6 +87,13 @@ export const WeaponConfig = {
 	bodyShotKnockback: 70,
 	// Upward push as a fraction of the knockback.
 	bodyShotLift: 0.35,
+	// The shove: a close-range push that never damages (see docs/WEAPON.md).
+	shoveRange: 8,
+	// Half-angle of the cone in front of the player that a shove reaches.
+	shoveConeDegrees: 45,
+	shoveCooldown: 2,
+	// Shove strength relative to a body shot's knockback.
+	shoveKnockbackScale: 1.5,
 };
 
 // Bots fill near-empty free-for-all matches (see server/bots.ts and docs/BOTS.md).

@@ -74,6 +74,9 @@
 				},
 				"DeathRecap": {
 					"$className": "RemoteEvent"
+				},
+				"Shove": {
+					"$className": "RemoteEvent"
 				}
 			},
 			"MatchState": {

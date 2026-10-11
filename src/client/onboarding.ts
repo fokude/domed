@@ -42,6 +42,7 @@ const STEPS: [string, string][] = [
 	["BUNNY HOP", "Hold SPACE, or spin the scroll wheel, to jump again the moment you land."],
 	["AIR STRAFE", "In the air, hold A and turn your mouse left (or D and right) to gain speed."],
 	["DOUBLE JUMP", "Press SPACE again in the air."],
+	["SHOVE", "F or right-click pushes anyone right in front of you. Shove them into lava for the kill."],
 	["MENU", "Press M to open the menu any time. Leaving mid-match counts as a death."],
 ];
 

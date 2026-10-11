@@ -44,6 +44,8 @@ export const Remotes = {
 	PersonalBest: remote<(record: PersonalBestRecord, value: number) => void>("PersonalBest"),
 	// Everyone is told when a player takes a perk, so there's counterplay.
 	PerkTaken: remote<(taker: Player, perk: PerkId) => void>("PerkTaken"),
+	// Client shoves in the direction it's looking. The server picks who, if anyone, is hit.
+	Shove: remote<(direction: Vector3) => void>("Shove"),
 	// Client reports it used a held perk (the Super Jump is triggered by client movement).
 	UsePerk: remote<(perk: PerkId) => void>("UsePerk"),
 	// Particle burst at a killed target's head, shown to everyone (players and training dummies).

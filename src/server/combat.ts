@@ -9,7 +9,7 @@ import { flatSpeed, getLiveRoot } from "shared/characters";
 import { WeaponConfig } from "shared/config";
 import { railCooldown } from "shared/perks";
 import { DeathCause, Remotes } from "shared/remotes";
-import { getBotName, isBot, killBot, livingBotHeads, pushBot } from "./bots";
+import { getBotName, isBot, killBot, livingBotHeads, livingBotRoots, pushBot } from "./bots";
 import { hitDummy, isDummy, livingDummyHeads } from "./dummies";
 import { knockBack } from "./knockback";
 import { hitShield } from "./perks";
@@ -221,9 +221,70 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	}
 }
 
-function push(shooter: Player, victim: Player, victimCharacter: Model, shotVector: Vector3) {
-	knockBack(victim, shotVector);
+function push(shooter: Player, victim: Player, victimCharacter: Model, shotVector: Vector3, scale = 1) {
+	knockBack(victim, shotVector, scale);
 	lastPush.set(victim, { shooter, character: victimCharacter, at: os.clock(), distance: shotVector.Magnitude });
+}
+
+const lastShoveAt = new Map<Player, number>();
+
+// Living characters a shove could reach: enemy players past spawn protection, and bots.
+function shoveCandidates(shover: Player, currentRules: CombatRules): Model[] {
+	const candidates = livingBotRoots().mapFiltered((root) => (root.Parent?.IsA("Model") ? root.Parent : undefined));
+	for (const other of Players.GetPlayers()) {
+		const otherCharacter = other.Character;
+		if (other === shover || !otherCharacter || !getLiveRoot(other)) continue;
+		if (otherCharacter.FindFirstChildOfClass("ForceField") || !currentRules.canDamage(shover, other)) continue;
+		candidates.push(otherCharacter);
+	}
+	return candidates;
+}
+
+// A close-range push in front of the player that never damages: it fills the gap after a
+// missed shot up close, and earns the kill if it sends someone into a hazard or the void. The
+// server picks the nearest target in range, inside the cone, with line of sight.
+function onShove(shover: Player, direction: unknown) {
+	if (!typeIs(direction, "Vector3") || direction.Magnitude < 0.01 || !rules) return;
+	const character = shover.Character;
+	const head = character?.FindFirstChild("Head");
+	if (!character || !getLiveRoot(shover) || !head?.IsA("BasePart")) return;
+	const now = os.clock();
+	if (now - (lastShoveAt.get(shover) ?? -math.huge) < WeaponConfig.shoveCooldown - COOLDOWN_LENIENCY) return;
+	lastShoveAt.set(shover, now);
+	if (!isAimedAlong(character, direction)) return reject(shover, "shove aim");
+
+	const look = direction.Unit;
+	const minDot = math.cos(math.rad(WeaponConfig.shoveConeDegrees));
+	let target: Model | undefined;
+	let targetDistance = math.huge;
+	for (const candidate of shoveCandidates(shover, rules)) {
+		const offset = candidate.GetPivot().Position.sub(head.Position);
+		const reach = WeaponConfig.shoveRange + lagTolerance(candidate) * 0.5;
+		if (offset.Magnitude > reach || offset.Magnitude >= targetDistance) continue;
+		if (offset.Magnitude > 2 && offset.Unit.Dot(look) < minDot) continue;
+		// Bots live inside the arena, so a ray reaching the target itself isn't blocked.
+		const obstruction = Workspace.Raycast(head.Position, offset, lineOfSightParams);
+		if (obstruction && !obstruction.Instance.IsDescendantOf(candidate)) continue;
+		target = candidate;
+		targetDistance = offset.Magnitude;
+	}
+	if (!target) return;
+
+	// Push mostly along the look direction, flattened so a shove aimed down still sends them away.
+	const pushDirection = new Vector3(look.X, 0, look.Z).Magnitude > 0.01 ? new Vector3(look.X, 0, look.Z) : look;
+	const scale = WeaponConfig.shoveKnockbackScale;
+	if (isBot(target)) {
+		pushBot(target, pushDirection, scale);
+		lastPush.set(target, { shooter: shover, character: target, at: now, distance: targetDistance });
+		Remotes.HitConfirm.FireClient(shover, "body", false);
+		return;
+	}
+	const victim = Players.GetPlayerFromCharacter(target);
+	if (!victim) return;
+	push(shover, victim, target, pushDirection, scale);
+	// A shove counts as a hit against a shield, like a body shot.
+	const shieldBroke = hitShield(victim, false) === "broken";
+	Remotes.HitConfirm.FireClient(shover, shieldBroke ? "shield" : "body", false);
 }
 
 // Everything a kill earns: stats, XP, feedback, the kill feed, and for player victims their
@@ -264,9 +325,11 @@ export function creditEnvironmentalKill(victim: Player | Model, character: Model
 
 export function startCombat() {
 	Remotes.Fire.OnServerEvent.Connect(onFire);
+	Remotes.Shove.OnServerEvent.Connect(onShove);
 	Players.PlayerRemoving.Connect((player) => {
 		lastShotAt.delete(player);
 		rejections.delete(player);
 		lastPush.delete(player);
+		lastShoveAt.delete(player);
 	});
 }

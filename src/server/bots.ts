@@ -377,11 +377,11 @@ export function killBot(model: Model): boolean {
 	return true;
 }
 
-// Pushes a bot like a body shot pushes a player.
-export function pushBot(model: Model, direction: Vector3) {
+// Pushes a bot like a body shot (or, scaled, a shove) pushes a player.
+export function pushBot(model: Model, direction: Vector3, scale = 1) {
 	const bot = bots.get(model);
 	if (!bot || !living(bot)) return;
-	bot.root.AssemblyLinearVelocity = bot.root.AssemblyLinearVelocity.add(knockbackImpulse(direction));
+	bot.root.AssemblyLinearVelocity = bot.root.AssemblyLinearVelocity.add(knockbackImpulse(direction, scale));
 }
 
 // Studio only: sets how many players and bots to fill to, or undefined for the default.
