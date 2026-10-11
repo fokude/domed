@@ -7,20 +7,15 @@ import { CARRYING_FLAG_ATTRIBUTE, FlagStatus, getMatchState, setMatchState } fro
 import { TEAM_IDS, TeamId } from "shared/modes";
 import { Remotes } from "shared/remotes";
 import { LoadedMap } from "../../maps/loader";
-import { pickSafestSpawn } from "../../spawning";
+import { TeamRoster } from "../teams";
 import { GameMode, MatchResult } from "./types";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
-const Teams = game.GetService("Teams");
 const Workspace = game.GetService("Workspace");
 
 const TICK_INTERVAL = 0.1;
 const POLE_HEIGHT = 10;
-const TEAM_BRICK_COLORS: Record<TeamId, BrickColor> = {
-	Red: new BrickColor("Bright red"),
-	Blue: new BrickColor("Bright blue"),
-};
 const ANNOUNCE_TIME = 2.5;
 
 interface Flag {
@@ -60,31 +55,21 @@ export class CaptureTheFlag implements GameMode {
 	readonly timeLimit = CtfConfig.timeLimit;
 	readonly scoreTarget = CtfConfig.captureTarget;
 
-	private readonly teams = new Map<TeamId, Team>();
+	private readonly roster: TeamRoster;
 	private readonly flags = new Map<TeamId, Flag>();
-	private readonly scores = new Map<TeamId, number>();
-	private readonly spawns: LoadedMap["spawns"];
 	private readonly arena: Model;
 	private readonly heartbeat: RBXScriptConnection;
 	private sinceTick = 0;
 
 	constructor(map: LoadedMap) {
-		this.spawns = map.spawns;
+		this.roster = new TeamRoster(map.spawns);
 		this.arena = map.arena;
 
 		for (const teamId of TEAM_IDS) {
-			const team = new Instance("Team");
-			team.Name = teamId;
-			team.TeamColor = TEAM_BRICK_COLORS[teamId];
-			team.AutoAssignable = false;
-			team.Parent = Teams;
-			this.teams.set(teamId, team);
-
 			const home = map.flagBases.get(teamId);
 			if (!home) error(`Map ${map.info.id} has no ${teamId} FlagBase marker`);
 			this.flags.set(teamId, this.buildFlag(teamId, home));
-			this.scores.set(teamId, 0);
-			this.publishTeam(teamId);
+			this.publishFlag(teamId);
 		}
 
 		this.heartbeat = RunService.Heartbeat.Connect((dt) => {
@@ -96,7 +81,7 @@ export class CaptureTheFlag implements GameMode {
 	}
 
 	private buildFlag(team: TeamId, home: Vector3): Flag {
-		const color = this.teams.get(team)!.TeamColor.Color;
+		const color = this.roster.color(team);
 		const pole = flagPart(new Vector3(0.4, POLE_HEIGHT, 0.4), Color3.fromRGB(60, 62, 70), Enum.Material.Metal);
 		pole.Name = `${team}Flag`;
 		const cloth = flagPart(new Vector3(0.2, 3, 4.5), color, Enum.Material.Neon);
@@ -132,18 +117,13 @@ export class CaptureTheFlag implements GameMode {
 		return flag.pole.Position.sub(new Vector3(0, POLE_HEIGHT / 2, 0));
 	}
 
-	private teamOf(player: Player): TeamId | undefined {
-		return TEAM_IDS.find((id) => this.teams.get(id) === player.Team);
-	}
-
-	private publishTeam(team: TeamId) {
-		setMatchState(team === "Red" ? "RedScore" : "BlueScore", this.scores.get(team)!);
+	private publishFlag(team: TeamId) {
 		setMatchState(team === "Red" ? "RedFlag" : "BlueFlag", this.flags.get(team)?.status ?? "Home");
 	}
 
 	private setStatus(flag: Flag, status: FlagStatus) {
 		flag.status = status;
-		this.publishTeam(flag.team);
+		this.publishFlag(flag.team);
 	}
 
 	private pickUp(flag: Flag, player: Player, root: BasePart) {
@@ -206,8 +186,7 @@ export class CaptureTheFlag implements GameMode {
 
 	private capture(flag: Flag, player: Player, team: TeamId) {
 		this.returnHome(flag);
-		this.scores.set(team, this.scores.get(team)! + 1);
-		this.publishTeam(team);
+		this.roster.addScore(team);
 		Remotes.Announce.FireAllClients(`${player.DisplayName} CAPTURED THE ${flag.team.upper()} FLAG`, ANNOUNCE_TIME);
 	}
 
@@ -216,7 +195,7 @@ export class CaptureTheFlag implements GameMode {
 			if (flag.status === "Taken") {
 				const carrier = flag.carrier;
 				const root = carrier && rootOf(carrier);
-				const team = carrier && this.teamOf(carrier);
+				const team = carrier && this.roster.teamOf(carrier);
 				if (!carrier || !root || !team) continue;
 				const ownFlag = this.flags.get(team)!;
 				if (ownFlag.status === "Home" && root.Position.sub(ownFlag.home).Magnitude <= CtfConfig.captureRadius) {
@@ -234,7 +213,7 @@ export class CaptureTheFlag implements GameMode {
 			const base = this.flagBase(flag);
 			for (const player of Players.GetPlayers()) {
 				const root = rootOf(player);
-				const team = this.teamOf(player);
+				const team = this.roster.teamOf(player);
 				if (!root || !team || root.Position.sub(base).Magnitude > CtfConfig.pickupRadius) continue;
 
 				if (team !== flag.team) {
@@ -254,21 +233,13 @@ export class CaptureTheFlag implements GameMode {
 	}
 
 	canDamage(shooter: Player, victim: Player) {
-		return this.teamOf(shooter) !== this.teamOf(victim);
+		return this.roster.isEnemy(shooter, victim);
 	}
 
 	onKill() {}
 
 	addPlayer(player: Player) {
-		if (this.teamOf(player)) return;
-		const counts = TEAM_IDS.map((id) =>
-			Players.GetPlayers()
-				.filter((other) => other.Team === this.teams.get(id))
-				.size(),
-		);
-		const team = counts[0] <= counts[1] ? TEAM_IDS[0] : TEAM_IDS[1];
-		player.Neutral = false;
-		player.Team = this.teams.get(team);
+		this.roster.assign(player);
 	}
 
 	removePlayer(player: Player) {
@@ -276,10 +247,7 @@ export class CaptureTheFlag implements GameMode {
 	}
 
 	pickSpawn(player: Player) {
-		const team = this.teamOf(player);
-		const own = this.spawns.filter((spawn) => spawn.team === team).map((spawn) => spawn.cframe);
-		const candidates = own.size() > 0 ? own : this.spawns.map((spawn) => spawn.cframe);
-		return pickSafestSpawn(player, candidates, (other) => this.teamOf(other) !== team);
+		return this.roster.pickSpawn(player);
 	}
 
 	onDeath(player: Player, character: Model) {
@@ -288,17 +256,11 @@ export class CaptureTheFlag implements GameMode {
 	}
 
 	checkWinner(): MatchResult | undefined {
-		for (const team of TEAM_IDS) {
-			if (this.scores.get(team)! >= this.scoreTarget) return { title: `${team.upper()} TEAM WINS` };
-		}
-		return undefined;
+		return this.roster.winner(this.scoreTarget);
 	}
 
 	timeUpResult(): MatchResult {
-		const red = this.scores.get("Red")!;
-		const blue = this.scores.get("Blue")!;
-		if (red === blue) return { title: "DRAW" };
-		return { title: `${red > blue ? "RED" : "BLUE"} TEAM WINS` };
+		return this.roster.timeUpResult();
 	}
 
 	stop() {
@@ -310,11 +272,7 @@ export class CaptureTheFlag implements GameMode {
 		}
 		for (const player of Players.GetPlayers()) {
 			player.SetAttribute(CARRYING_FLAG_ATTRIBUTE, undefined);
-			player.Team = undefined;
-			player.Neutral = true;
 		}
-		for (const [, team] of this.teams) {
-			team.Destroy();
-		}
+		this.roster.destroy();
 	}
 }
