@@ -1,3 +1,5 @@
+import { ModeId } from "./modes";
+
 // Gameplay tuning shared by server and client.
 
 export const MovementConfig = {
@@ -46,6 +48,20 @@ export const MatchConfig = {
 export const DeathmatchConfig = {
 	timeLimit: 600,
 	killTarget: 40,
+	// Small lobbies get a shorter match with a lower target, so a near-empty server still plays well.
+	smallLobbyMaxPlayers: 3,
+	smallLobbyTimeLimit: 300,
+	smallLobbyKillTarget: 15,
+};
+
+// Players needed before a mode is offered in rotation and votes. Below this the server sticks to
+// free-for-all. Studio's /map command ignores these.
+export const ModeMinPlayers: Record<ModeId, number> = {
+	Deathmatch: 1,
+	TeamDeathmatch: 4,
+	Domination: 4,
+	Hardpoint: 4,
+	CTF: 6,
 };
 
 export const TeamDeathmatchConfig = {

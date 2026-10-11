@@ -1,7 +1,7 @@
 // Runs matches back to back: load a map, play the mode until someone wins or time runs out,
 // show results, then send everyone to the menu to vote on the next map.
 
-import { MatchConfig } from "shared/config";
+import { MatchConfig, ModeMinPlayers } from "shared/config";
 import { setMatchState } from "shared/matchState";
 import { ModeId } from "shared/modes";
 import { Remotes } from "shared/remotes";
@@ -59,9 +59,17 @@ function optionKey(option: MatchOption): string {
 	return `${option.mapId}/${option.mode}`;
 }
 
+// Options that work and suit the number of players in the server.
 function playableOptions(): MatchOption[] {
-	const options = allMatchOptions().filter((option) => !brokenOptions.has(optionKey(option)));
-	return options.size() > 0 ? options : allMatchOptions();
+	const playerCount = Players.GetPlayers().size();
+	const working = allMatchOptions().filter((option) => !brokenOptions.has(optionKey(option)));
+	const suitable = working.filter((option) => playerCount >= ModeMinPlayers[option.mode]);
+	if (suitable.size() > 0) return suitable;
+	return working.size() > 0 ? working : allMatchOptions();
+}
+
+function waitForPlayers() {
+	while (Players.GetPlayers().size() === 0) task.wait(1);
 }
 
 // Dev-only test maps are left out unless asked for.
@@ -118,6 +126,8 @@ function waitForResult(mode: GameMode): MatchResult {
 		const winner = mode.checkWinner();
 		if (winner) return winner;
 		if (endRequested || Workspace.GetServerTimeNow() >= endsAt) return mode.timeUpResult();
+		// Everyone left: end now rather than run out the clock on an empty server.
+		if (Players.GetPlayers().size() === 0) return mode.timeUpResult();
 	}
 }
 
@@ -187,8 +197,14 @@ export function startMatchLoop() {
 	startVoting();
 
 	task.spawn(() => {
+		// Matches only run while someone is here, so the first player doesn't join mid-timer.
+		waitForPlayers();
 		let option = randomOption();
 		for (;;) {
+			if (Players.GetPlayers().size() === 0) {
+				waitForPlayers();
+				option = forcedOption ?? randomOption();
+			}
 			if (!runMatchSafely(option)) {
 				forcedOption = undefined;
 				option = randomOption();

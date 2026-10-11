@@ -8,7 +8,8 @@ Written in TypeScript with [roblox-ts](https://roblox-ts.com) and synced into Ro
 with [Rojo](https://rojo.space).
 
 Built for 5v5: Team Deathmatch, Capture the Flag, Domination and Hardpoint, plus
-free-for-all Deathmatch. When
+free-for-all Deathmatch. Team modes appear once enough players are in a server (4, or 6 for
+CTF); smaller lobbies play a shorter free-for-all. When
 publishing, set **Max Players** to 10 in Studio's Game Settings (Places tab); player count
 isn't set in code.
 

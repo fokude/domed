@@ -8,11 +8,14 @@ const Players = game.GetService("Players");
 
 export class Deathmatch implements GameMode {
 	readonly id = "Deathmatch";
-	readonly timeLimit = DeathmatchConfig.timeLimit;
-	readonly scoreTarget = DeathmatchConfig.killTarget;
+	readonly timeLimit: number;
+	readonly scoreTarget: number;
 	private readonly spawns: CFrame[];
 
 	constructor(map: LoadedMap) {
+		const small = Players.GetPlayers().size() <= DeathmatchConfig.smallLobbyMaxPlayers;
+		this.timeLimit = small ? DeathmatchConfig.smallLobbyTimeLimit : DeathmatchConfig.timeLimit;
+		this.scoreTarget = small ? DeathmatchConfig.smallLobbyKillTarget : DeathmatchConfig.killTarget;
 		this.spawns = map.spawns.map((spawn) => spawn.cframe);
 	}
 

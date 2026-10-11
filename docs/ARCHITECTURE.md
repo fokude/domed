@@ -87,6 +87,11 @@ The server receives remote arguments as `unknown` and validates them before use.
 2. **Results.** Combat and respawns stop and the podium shows.
 3. **Voting.** Everyone returns to the menu and votes on the next map and mode.
 
+Matches only run while someone is in the server: the loop waits for the first player and
+ends a match early if everyone leaves. Modes are offered by player count (`ModeMinPlayers` in
+`config.ts`): below four players the server sticks to free-for-all, which shortens itself for
+small lobbies.
+
 Match state that clients need (phase, timer, scores, flag status, vote options) lives as
 attributes on `ReplicatedStorage.MatchState`, typed in `shared/matchState.ts`. Attributes
 reach players who join mid-match, which one-off remote events would miss.
