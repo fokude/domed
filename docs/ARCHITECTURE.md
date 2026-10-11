@@ -116,14 +116,9 @@ condition is met. Deathmatch, Team Deathmatch, CTF, and Domination and Hardpoint
 class, `controlPoints.ts`) live alongside it; the team modes share
 `TeamRoster` (`server/match/teams.ts`) for teams, balancing, scores and spawns.
 
-Teams are balanced within each server by a hidden skill rating (`server/rating.ts`, the
-OpenSkill Weng-Lin Bradley-Terry model). At match start the server tries the most balanced split and a set of random
-ones, keeps those close to the best balance, and picks the one that repeats the fewest
-teammate pairs from the last match, so teams stay fair but rotate; mid-match joiners go to the
-smaller team, or the weaker one if sizes match. Each mode rates its own matches (`GameMode.rateMatch`): team modes by the result,
-free-for-all head to head, from who killed whom, at half weight because free-for-all fights are
-noisier. Kills don't count in team ratings, so playing the objective is never penalized. The rating is saved in the profile but never sent to clients, so there's no visible
-number to protect.
+Teams are balanced within each server by a hidden skill rating, which each mode updates through
+`GameMode.rateMatch`. [RATING.md](RATING.md) covers the model, what each mode counts, team
+balance, and the reasoning and sources behind them.
 
 ## Movement
 

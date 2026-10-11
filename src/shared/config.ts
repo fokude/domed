@@ -51,6 +51,9 @@ export const RatingConfig = {
 	freeForAllWeight: 0.5,
 	// Duels between two players needed for their head-to-head result to count fully.
 	duelsForFullWeight: 3,
+	// Team Deathmatch adds a head-to-head update at this weight on top of the team result: kills
+	// are its objective, so rewarding them doesn't pull players off the objective.
+	teamDeathmatchHeadToHeadWeight: 0.25,
 };
 
 export const TeamBalanceConfig = {

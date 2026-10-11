@@ -86,11 +86,11 @@ export function rateTeamMatch(red: Player[], blue: Player[], winner: TeamId | un
 // Kills each player scored on each other player during a free-for-all.
 export type DuelRecord = Map<Player, Map<Player, number>>;
 
-// Rates a free-for-all head to head: for every pair who fought, the share of kills between them
-// is the result, compared with what their ratings predicted. Beating a strong player counts for
-// more than beating a weak one. Pairs with few duels count proportionally less, and the whole
-// update counts less than a team result because free-for-all fights are noisier.
-export function rateHeadToHead(players: Player[], duels: DuelRecord) {
+// Rates players head to head: for every pair who fought, the share of kills between them is the
+// result, compared with what their ratings predicted. Beating a strong player counts for more
+// than beating a weak one. Pairs with few duels count proportionally less, and `weight` scales
+// the whole update (free-for-all and Team Deathmatch use different weights). See docs/RATING.md.
+export function rateHeadToHead(players: Player[], duels: DuelRecord, weight: number) {
 	const kills = (a: Player, b: Player) => duels.get(a)?.get(b) ?? 0;
 	const updates = new Map<Player, { mu: number; sigma: number }>();
 
@@ -115,7 +115,6 @@ export function rateHeadToHead(players: Player[], duels: DuelRecord) {
 			delta += pairWeight * ((gamma * ownVariance) / c ** 2) * expected * (1 - expected);
 		}
 		if (!fought) continue;
-		const weight = RatingConfig.freeForAllWeight;
 		updates.set(player, {
 			mu: own.mu + omega * weight,
 			sigma: own.sigma * math.sqrt(math.max(1 - delta * weight, RatingConfig.kappa)),

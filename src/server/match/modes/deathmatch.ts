@@ -1,4 +1,4 @@
-import { DeathmatchConfig } from "shared/config";
+import { DeathmatchConfig, RatingConfig } from "shared/config";
 import { getStandings } from "shared/standings";
 import { LoadedMap } from "../../maps/loader";
 import { DuelRecord, rateHeadToHead } from "../../rating";
@@ -54,7 +54,7 @@ export class Deathmatch implements GameMode {
 	}
 
 	rateMatch(participants: Player[]) {
-		rateHeadToHead(participants, this.duels);
+		rateHeadToHead(participants, this.duels, RatingConfig.freeForAllWeight);
 	}
 
 	stop() {}
