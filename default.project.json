@@ -23,7 +23,8 @@
 				"HitConfirm": { "$className": "RemoteEvent" },
 				"Knockback": { "$className": "RemoteEvent" },
 				"KillFeed": { "$className": "RemoteEvent" },
-				"Announce": { "$className": "RemoteEvent" }
+				"Announce": { "$className": "RemoteEvent" },
+				"MatchEnded": { "$className": "RemoteEvent" }
 			}
 		},
 		"ServerScriptService": {

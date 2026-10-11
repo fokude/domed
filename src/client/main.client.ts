@@ -4,6 +4,7 @@ import { MatchConfig } from "shared/config";
 import { Remotes } from "shared/remotes";
 import { addKill, HudColors, initHud, setSpeed, showBanner } from "./hud";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
+import { initPodium, showMatchEnd } from "./podium";
 import { initWeapon } from "./weapon";
 
 const Players = game.GetService("Players");
@@ -19,6 +20,7 @@ StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Health, false);
 
 initHud();
+initPodium();
 initMovement();
 initWeapon();
 
@@ -30,6 +32,8 @@ Remotes.KillFeed.OnClientEvent.Connect((killer, victim) => {
 	addKill(killerName, victimName);
 	if (victim === player) showBanner(`DOMED BY ${killerName}`, HudColors.Red, MatchConfig.respawnTime);
 });
+
+Remotes.MatchEnded.OnClientEvent.Connect(showMatchEnd);
 
 Remotes.Announce.OnClientEvent.Connect((text, duration) => showBanner(text, HudColors.White, duration));
 

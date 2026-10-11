@@ -7,6 +7,7 @@
 
 import { MatchConfig, MovementConfig, WeaponConfig } from "shared/config";
 import { Remotes } from "shared/remotes";
+import { getStandings } from "shared/standings";
 import { buildArena } from "./mapBuilder";
 
 const Players = game.GetService("Players");
@@ -42,9 +43,9 @@ function lagTolerance(character: Model): number {
 	return LAG_BASE_STUDS + speed * LAG_SECONDS;
 }
 
-function endRound(winner: Player) {
+function endRound() {
 	matchState = "Intermission";
-	Remotes.Announce.FireAllClients(`${winner.DisplayName} WINS`, MatchConfig.intermissionTime);
+	Remotes.MatchEnded.FireAllClients(getStandings(Players.GetPlayers()), MatchConfig.intermissionTime);
 	task.wait(MatchConfig.intermissionTime);
 
 	for (const player of Players.GetPlayers()) {
@@ -67,7 +68,7 @@ function awardKill(shooter: Player, victim: Player) {
 	Remotes.KillFeed.FireAllClients(shooter, victim);
 
 	if (kills && kills.Value >= MatchConfig.killsToWin && matchState === "Playing") {
-		task.spawn(endRound, shooter);
+		task.spawn(endRound);
 	}
 }
 
