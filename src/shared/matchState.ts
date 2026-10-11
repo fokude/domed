@@ -54,10 +54,22 @@ export const DEPLOYED_ATTRIBUTE = "Deployed";
 // Player attribute: true while carrying a flag in CTF.
 export const CARRYING_FLAG_ATTRIBUTE = "CarryingFlag";
 
+const HttpService = game.GetService("HttpService");
+
 const folder = game.GetService("ReplicatedStorage").WaitForChild("MatchState");
 
 export function getMatchState<K extends MatchStateKey>(key: K): MatchStateValues[K] | undefined {
 	return folder.GetAttribute(key) as MatchStateValues[K] | undefined;
+}
+
+type JsonKey = "VoteOptions" | "VoteCounts" | "ControlPoints";
+
+// Decodes a JSON-encoded value, falling back when it's missing or malformed.
+export function getMatchStateJson<T>(key: JsonKey, fallback: T): T {
+	const json = getMatchState(key);
+	if (json === undefined) return fallback;
+	const [ok, value] = pcall(() => HttpService.JSONDecode(json));
+	return ok ? (value as T) : fallback;
 }
 
 export function setMatchState<K extends MatchStateKey>(key: K, value: MatchStateValues[K]) {

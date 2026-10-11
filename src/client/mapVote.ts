@@ -1,12 +1,11 @@
 // Vote cards in the menu between matches. Click a card or press 1-3.
 
-import { getMatchState, onMatchStateChanged, VoteOption } from "shared/matchState";
+import { getMatchState, getMatchStateJson, onMatchStateChanged, VoteOption } from "shared/matchState";
 import { MODE_NAMES } from "shared/modes";
 import { Remotes } from "shared/remotes";
 import { getMenuContent } from "./menu";
 import { create } from "./ui";
 
-const HttpService = game.GetService("HttpService");
 const UserInputService = game.GetService("UserInputService");
 
 const WHITE = new Color3(1, 1, 1);
@@ -24,12 +23,6 @@ let cardRow: Frame;
 let cards: Card[] = [];
 let choice: number | undefined;
 
-function decode<T>(json: string | undefined, fallback: T): T {
-	if (json === undefined) return fallback;
-	const [ok, value] = pcall(() => HttpService.JSONDecode(json));
-	return ok ? (value as T) : fallback;
-}
-
 function vote(index: number) {
 	if (getMatchState("Phase") !== "Voting" || index >= cards.size()) return;
 	choice = index;
@@ -38,7 +31,7 @@ function vote(index: number) {
 }
 
 function refreshCounts() {
-	const counts = decode<number[]>(getMatchState("VoteCounts"), []);
+	const counts = getMatchStateJson<number[]>("VoteCounts", []);
 	cards.forEach((card, index) => {
 		const count = counts[index] ?? 0;
 		card.votes.Text = `${count} ${count === 1 ? "VOTE" : "VOTES"}`;
@@ -139,7 +132,7 @@ function rebuildCards() {
 		cardRow,
 	);
 	choice = undefined;
-	cards = decode<VoteOption[]>(getMatchState("VoteOptions"), []).map(buildCard);
+	cards = getMatchStateJson<VoteOption[]>("VoteOptions", []).map(buildCard);
 	refreshCounts();
 }
 

@@ -1,11 +1,10 @@
 // Control point strip under the match bar in Domination and Hardpoint: one box per point,
 // colored by owner, outlined when contested, with a bar showing capture progress.
 
-import { ControlPointState, getMatchState, onMatchStateChanged } from "shared/matchState";
+import { ControlPointState, getMatchState, getMatchStateJson, onMatchStateChanged } from "shared/matchState";
 import { TEAM_COLORS } from "shared/modes";
 import { create } from "./ui";
 
-const HttpService = game.GetService("HttpService");
 const Players = game.GetService("Players");
 
 const BOX_SIZE = 40;
@@ -14,12 +13,6 @@ const WHITE = new Color3(1, 1, 1);
 const CONTESTED = Color3.fromRGB(255, 210, 60);
 
 let strip: Frame;
-
-function decode(json: string | undefined): ControlPointState[] {
-	if (json === undefined) return [];
-	const [ok, value] = pcall(() => HttpService.JSONDecode(json));
-	return ok ? (value as ControlPointState[]) : [];
-}
 
 function buildBox(state: ControlPointState, order: number) {
 	const box = create(
@@ -76,7 +69,7 @@ function refresh() {
 	const mode = getMatchState("Mode");
 	const objectiveMode = (mode === "Domination" || mode === "Hardpoint") && getMatchState("Phase") === "Playing";
 	if (!objectiveMode) return;
-	decode(getMatchState("ControlPoints"))
+	getMatchStateJson<ControlPointState[]>("ControlPoints", [])
 		.filter((state) => state.active)
 		.forEach(buildBox);
 }
