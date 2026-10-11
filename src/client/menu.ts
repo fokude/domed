@@ -4,7 +4,7 @@
 import { DEPLOYED_ATTRIBUTE, getMatchState, onMatchStateChanged } from "shared/matchState";
 import { MODE_NAMES } from "shared/modes";
 import { Remotes } from "shared/remotes";
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
@@ -16,11 +16,6 @@ const ORBIT_RADIUS = 170;
 const ORBIT_HEIGHT = 70;
 const ORBIT_SPEED = 0.04;
 const ORBIT_FOCUS = new Vector3(0, 10, 0);
-
-const WHITE = new Color3(1, 1, 1);
-const MUTED = Color3.fromRGB(170, 175, 185);
-const ACCENT = Color3.fromRGB(255, 60, 40);
-const PANEL = Color3.fromRGB(20, 22, 28);
 
 // In-game HUD that would clutter the menu.
 // Opens the menu during play, and returns to the match from it.
@@ -85,12 +80,12 @@ function menuButton(parent: Instance, text: string, order: number): TextButton {
 		{
 			LayoutOrder: order,
 			Size: UDim2.fromOffset(280, 52),
-			BackgroundColor3: PANEL,
+			BackgroundColor3: Palette.Panel,
 			BackgroundTransparency: 0.15,
 			AutoButtonColor: true,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 22,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Left,
 			Text: `   ${text}`,
 		},
@@ -168,7 +163,7 @@ function buildMenu() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 76,
-			TextColor3: ACCENT,
+			TextColor3: Palette.Accent,
 			TextXAlignment: Enum.TextXAlignment.Left,
 			Text: "DOMED",
 		},
@@ -182,7 +177,7 @@ function buildMenu() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBold,
 			TextSize: 16,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Left,
 			Text: "HEADSHOT ARENA",
 		},
@@ -198,7 +193,7 @@ function buildMenu() {
 	create("UIListLayout", { Padding: new UDim(0, 10), SortOrder: Enum.SortOrder.LayoutOrder }, buttons);
 
 	playButton = menuButton(buttons, "PLAY", 1);
-	playButton.BackgroundColor3 = ACCENT;
+	playButton.BackgroundColor3 = Palette.Accent;
 	playButton.Activated.Connect(() => Remotes.Deploy.FireServer());
 
 	// Hard games stick when played with friends (docs/SKILL_FLOOR.md). Hidden where Roblox
@@ -213,7 +208,7 @@ function buildMenu() {
 
 	const loadout = menuButton(buttons, "LOADOUT", 10);
 	loadout.AutoButtonColor = false;
-	loadout.TextColor3 = MUTED;
+	loadout.TextColor3 = Palette.Muted;
 	create(
 		"TextLabel",
 		{
@@ -223,7 +218,7 @@ function buildMenu() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBold,
 			TextSize: 12,
-			TextColor3: MUTED,
+			TextColor3: Palette.Muted,
 			TextXAlignment: Enum.TextXAlignment.Right,
 			Text: "COMING SOON",
 		},
@@ -239,7 +234,7 @@ function buildMenu() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 18,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Left,
 		},
 		sidebar,
@@ -253,7 +248,7 @@ function buildMenu() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBold,
 			TextSize: 14,
-			TextColor3: MUTED,
+			TextColor3: Palette.Muted,
 			TextXAlignment: Enum.TextXAlignment.Left,
 		},
 		sidebar,

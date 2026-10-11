@@ -4,7 +4,7 @@ import { MatchConfig } from "shared/config";
 import { getMatchState } from "shared/matchState";
 import { Combatant, Remotes } from "shared/remotes";
 import { initDeathRecap } from "./deathRecap";
-import { addKill, hideRespawnCountdown, HudColors, initHud, showBanner, showRespawnCountdown } from "./hud";
+import { addKill, hideRespawnCountdown, initHud, showBanner, showRespawnCountdown } from "./hud";
 import { initKillFeedback } from "./killFeedback";
 import { initMapVote } from "./mapVote";
 import { initMatchBar } from "./matchBar";
@@ -13,6 +13,7 @@ import { getSpeed, initMovement, launchCharacter } from "./movement";
 import { initObjectives } from "./objectives";
 import { initOnboarding } from "./onboarding";
 import { initPerks } from "./perks";
+import { Palette } from "./ui";
 import { initPodium, setMatchXp, showMatchEnd } from "./podium";
 import { initProfileScreen } from "./profileScreen";
 import { initSettingsScreen } from "./settingsScreen";
@@ -70,12 +71,12 @@ Remotes.KillFeed.OnClientEvent.Connect((killer, victim) => {
 	const killerName = combatantName(killer);
 	const victimName = combatantName(victim);
 	addKill(killerName, victimName);
-	if (victim === player) showBanner(`DOMED BY ${killerName}`, HudColors.Red, currentRespawnTime());
+	if (victim === player) showBanner(`DOMED BY ${killerName}`, Palette.Accent, currentRespawnTime());
 });
 
 Remotes.MatchEnded.OnClientEvent.Connect(showMatchEnd);
 Remotes.MatchXp.OnClientEvent.Connect(setMatchXp);
 
-Remotes.Announce.OnClientEvent.Connect((text, duration) => showBanner(text, HudColors.White, duration));
+Remotes.Announce.OnClientEvent.Connect((text, duration) => showBanner(text, Palette.White, duration));
 
 RunService.RenderStepped.Connect(() => setSpeed(getSpeed()));

@@ -3,15 +3,13 @@
 
 import { FlagStatus, getMatchState, onMatchStateChanged } from "shared/matchState";
 import { MODE_NAMES, TEAM_COLORS, TeamId } from "shared/modes";
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
 const Workspace = game.GetService("Workspace");
 
 const PANEL_COLOR = Color3.fromRGB(20, 22, 28);
-const WHITE = new Color3(1, 1, 1);
-const MUTED = Color3.fromRGB(170, 175, 185);
 
 const FLAG_LABELS: Record<FlagStatus, string> = { Home: "FLAG HOME", Taken: "FLAG TAKEN", Dropped: "FLAG DROPPED" };
 
@@ -51,7 +49,7 @@ function buildTeamBox(parent: Frame, team: TeamId, side: number): TeamBox {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 26,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			Text: "0",
 		},
 		frame,
@@ -64,7 +62,7 @@ function buildTeamBox(parent: Frame, team: TeamId, side: number): TeamBox {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBold,
 			TextSize: 10,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 		},
 		frame,
 	);
@@ -135,7 +133,7 @@ export function initMatchBar() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 24,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			Text: "",
 		},
 		timerBox,
@@ -149,7 +147,7 @@ export function initMatchBar() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBold,
 			TextSize: 12,
-			TextColor3: MUTED,
+			TextColor3: Palette.Muted,
 			TextStrokeTransparency: 0.6,
 		},
 		bar,

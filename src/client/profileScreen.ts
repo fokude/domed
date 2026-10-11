@@ -3,13 +3,9 @@
 import { LifetimeStats, levelForXp } from "shared/progression";
 import { addMenuButton, getMenuContent, registerMenuPanel, toggleMenuPanel } from "./menu";
 import { getMyProfile, onMyProfileChanged } from "./profileData";
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const PANEL_ID = "profile";
-const WHITE = new Color3(1, 1, 1);
-const MUTED = Color3.fromRGB(170, 175, 185);
-const ACCENT = Color3.fromRGB(255, 60, 40);
-const PANEL = Color3.fromRGB(20, 22, 28);
 const TRACK = Color3.fromRGB(45, 48, 56);
 
 function formatDuration(seconds: number): string {
@@ -69,7 +65,7 @@ function refresh() {
 			{
 				...text,
 				Font: Enum.Font.GothamBold,
-				TextColor3: MUTED,
+				TextColor3: Palette.Muted,
 				TextXAlignment: Enum.TextXAlignment.Left,
 				Text: label,
 			},
@@ -80,7 +76,7 @@ function refresh() {
 			{
 				...text,
 				Font: Enum.Font.GothamBlack,
-				TextColor3: WHITE,
+				TextColor3: Palette.White,
 				TextXAlignment: Enum.TextXAlignment.Right,
 				Text: value,
 			},
@@ -92,7 +88,7 @@ function refresh() {
 function build() {
 	const panel = create(
 		"Frame",
-		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: PANEL, BackgroundTransparency: 0.15 },
+		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: Palette.Panel, BackgroundTransparency: 0.15 },
 		getMenuContent(),
 	);
 	create("UICorner", { CornerRadius: new UDim(0, 8) }, panel);
@@ -109,7 +105,7 @@ function build() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 30,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Left,
 		},
 		panel,
@@ -123,7 +119,7 @@ function build() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBold,
 			TextSize: 15,
-			TextColor3: MUTED,
+			TextColor3: Palette.Muted,
 			TextXAlignment: Enum.TextXAlignment.Right,
 		},
 		panel,
@@ -134,7 +130,11 @@ function build() {
 		panel,
 	);
 	create("UICorner", { CornerRadius: new UDim(1, 0) }, track);
-	xpFill = create("Frame", { Size: UDim2.fromScale(0, 1), BackgroundColor3: ACCENT, BorderSizePixel: 0 }, track);
+	xpFill = create(
+		"Frame",
+		{ Size: UDim2.fromScale(0, 1), BackgroundColor3: Palette.Accent, BorderSizePixel: 0 },
+		track,
+	);
 	create("UICorner", { CornerRadius: new UDim(1, 0) }, xpFill);
 
 	grid = create(

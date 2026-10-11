@@ -11,14 +11,11 @@ import {
 import { MODE_NAMES } from "shared/modes";
 import { Remotes } from "shared/remotes";
 import { getMenuContent } from "./menu";
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
 const UserInputService = game.GetService("UserInputService");
 
-const WHITE = new Color3(1, 1, 1);
-const MUTED = Color3.fromRGB(170, 175, 185);
-const PANEL = Color3.fromRGB(20, 22, 28);
 const VOTE_KEYS: Enum.KeyCode[] = [Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three];
 
 interface Card {
@@ -67,7 +64,7 @@ function buildCard(option: VoteOption, index: number): Card {
 		{
 			LayoutOrder: index,
 			Size: new UDim2(1 / 3, -11, 1, 0),
-			BackgroundColor3: PANEL,
+			BackgroundColor3: Palette.Panel,
 			BackgroundTransparency: 0.1,
 			AutoButtonColor: true,
 			Text: "",
@@ -99,7 +96,7 @@ function buildCard(option: VoteOption, index: number): Card {
 		Font: Enum.Font.GothamBlack,
 		TextSize: 26,
 		TextWrapped: true,
-		TextColor3: WHITE,
+		TextColor3: Palette.White,
 		Text: option.mapName.upper(),
 	});
 	text({
@@ -116,7 +113,7 @@ function buildCard(option: VoteOption, index: number): Card {
 		Font: Enum.Font.Gotham,
 		TextSize: 14,
 		TextWrapped: true,
-		TextColor3: MUTED,
+		TextColor3: Palette.Muted,
 		Text: option.tagline,
 	});
 	const votes = text({
@@ -125,7 +122,7 @@ function buildCard(option: VoteOption, index: number): Card {
 		Size: new UDim2(1, -36, 0, 24),
 		Font: Enum.Font.GothamBlack,
 		TextSize: 20,
-		TextColor3: WHITE,
+		TextColor3: Palette.White,
 	});
 	text({
 		AnchorPoint: new Vector2(1, 1),
@@ -133,7 +130,7 @@ function buildCard(option: VoteOption, index: number): Card {
 		Size: UDim2.fromOffset(40, 24),
 		Font: Enum.Font.GothamBold,
 		TextSize: 16,
-		TextColor3: MUTED,
+		TextColor3: Palette.Muted,
 		TextXAlignment: Enum.TextXAlignment.Right,
 		Text: `[${index + 1}]`,
 	});
@@ -146,12 +143,12 @@ function buildRow(option: VoteOption, index: number): ListRow {
 	const theme = Color3.fromHex(option.themeColor);
 	const frame = create(
 		"Frame",
-		{ LayoutOrder: index, Size: new UDim2(1, 0, 0, 34), BackgroundColor3: PANEL, BorderSizePixel: 0 },
+		{ LayoutOrder: index, Size: new UDim2(1, 0, 0, 34), BackgroundColor3: Palette.Panel, BorderSizePixel: 0 },
 		list,
 	);
 	create("UICorner", { CornerRadius: new UDim(0, 6) }, frame);
 	create("Frame", { Size: new UDim2(0, 4, 1, 0), BackgroundColor3: theme, BorderSizePixel: 0 }, frame);
-	const text = { BackgroundTransparency: 1, Font: Enum.Font.GothamBold, TextSize: 15, TextColor3: WHITE };
+	const text = { BackgroundTransparency: 1, Font: Enum.Font.GothamBold, TextSize: 15, TextColor3: Palette.White };
 	create(
 		"TextLabel",
 		{
@@ -190,7 +187,7 @@ function rebuildList(options: VoteOption[]) {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 15,
-			TextColor3: MUTED,
+			TextColor3: Palette.Muted,
 			TextXAlignment: Enum.TextXAlignment.Left,
 			Text: "NEXT MAP: PRESS 1-3 TO VOTE",
 		},
@@ -251,7 +248,7 @@ export function initMapVote() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 24,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Left,
 			Text: "VOTE FOR THE NEXT MAP",
 		},

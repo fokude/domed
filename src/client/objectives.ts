@@ -3,13 +3,11 @@
 
 import { ControlPointState, getMatchState, getMatchStateJson, onMatchStateChanged } from "shared/matchState";
 import { TEAM_COLORS } from "shared/modes";
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
 
 const BOX_SIZE = 40;
-const PANEL = Color3.fromRGB(20, 22, 28);
-const WHITE = new Color3(1, 1, 1);
 const CONTESTED = Color3.fromRGB(255, 210, 60);
 
 let strip: Frame;
@@ -20,7 +18,7 @@ function buildBox(state: ControlPointState, order: number) {
 		{
 			LayoutOrder: order,
 			Size: UDim2.fromOffset(BOX_SIZE, BOX_SIZE),
-			BackgroundColor3: state.owner ? TEAM_COLORS[state.owner] : PANEL,
+			BackgroundColor3: state.owner ? TEAM_COLORS[state.owner] : Palette.Panel,
 			BackgroundTransparency: state.owner ? 0.1 : 0.25,
 		},
 		strip,
@@ -34,7 +32,7 @@ function buildBox(state: ControlPointState, order: number) {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 22,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			Text: state.label,
 		},
 		box,

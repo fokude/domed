@@ -1,20 +1,13 @@
 // Crosshair (drawn by crosshair.ts), hitmarker, rail cooldown, kill feed, and center-screen banner.
 
 import { initCrosshair } from "./crosshair";
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
 
 const MAX_FEED_ENTRIES = 5;
 const FEED_LIFETIME = 6;
 const HITMARKER_TIME = 0.15;
-
-export const HudColors = {
-	White: new Color3(1, 1, 1),
-	Black: new Color3(0, 0, 0),
-	Red: Color3.fromRGB(255, 60, 40),
-	Cyan: Color3.fromRGB(0, 220, 255),
-};
 
 let hitmarker: Frame;
 let cooldownFill: Frame;
@@ -55,7 +48,7 @@ function buildCrosshair(gui: ScreenGui) {
 				Position: UDim2.fromScale(0.5, 0.5),
 				Size: new UDim2(1, 0, 0, 2),
 				Rotation: rotation,
-				BackgroundColor3: HudColors.White,
+				BackgroundColor3: Palette.White,
 				BorderSizePixel: 0,
 			},
 			hitmarker,
@@ -68,7 +61,7 @@ function buildCrosshair(gui: ScreenGui) {
 			AnchorPoint: new Vector2(0.5, 0),
 			Position: new UDim2(0.5, 0, 0.5, 18),
 			Size: UDim2.fromOffset(40, 3),
-			BackgroundColor3: HudColors.Black,
+			BackgroundColor3: Palette.Black,
 			BackgroundTransparency: 0.5,
 			BorderSizePixel: 0,
 		},
@@ -76,7 +69,7 @@ function buildCrosshair(gui: ScreenGui) {
 	);
 	cooldownFill = create(
 		"Frame",
-		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: HudColors.Cyan, BorderSizePixel: 0 },
+		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: Palette.Cyan, BorderSizePixel: 0 },
 		cooldownTrack,
 	);
 }
@@ -111,7 +104,7 @@ function buildPanels(gui: ScreenGui) {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 64,
-			TextColor3: HudColors.White,
+			TextColor3: Palette.White,
 			TextStrokeTransparency: 0.3,
 			Visible: false,
 		},
@@ -127,7 +120,7 @@ function buildPanels(gui: ScreenGui) {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBold,
 			TextSize: 24,
-			TextColor3: HudColors.White,
+			TextColor3: Palette.White,
 			TextStrokeTransparency: 0.3,
 			Visible: false,
 		},
@@ -163,7 +156,7 @@ export function initHud() {
 export function showHitmarker(isHeadshot: boolean) {
 	const token = ++hitmarkerToken;
 	for (const bar of hitmarker.GetChildren()) {
-		if (bar.IsA("Frame")) bar.BackgroundColor3 = isHeadshot ? HudColors.Red : HudColors.White;
+		if (bar.IsA("Frame")) bar.BackgroundColor3 = isHeadshot ? Palette.Accent : Palette.White;
 	}
 	hitmarker.Visible = true;
 	task.delay(HITMARKER_TIME, () => {
@@ -221,12 +214,12 @@ function addFeedLine(richText: string) {
 		{
 			LayoutOrder: ++feedCount,
 			Size: UDim2.fromOffset(320, 24),
-			BackgroundColor3: HudColors.Black,
+			BackgroundColor3: Palette.Black,
 			BackgroundTransparency: 0.5,
 			BorderSizePixel: 0,
 			Font: Enum.Font.GothamBold,
 			TextSize: 16,
-			TextColor3: HudColors.White,
+			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Right,
 			RichText: true,
 			Text: richText,

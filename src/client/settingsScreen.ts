@@ -16,13 +16,9 @@ import {
 	setCrosshairSettings,
 } from "./crosshair";
 import { addMenuButton, getMenuContent, registerMenuPanel, toggleMenuPanel } from "./menu";
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const PANEL_ID = "settings";
-const WHITE = new Color3(1, 1, 1);
-const MUTED = Color3.fromRGB(170, 175, 185);
-const ACCENT = Color3.fromRGB(255, 60, 40);
-const PANEL = Color3.fromRGB(20, 22, 28);
 const OPTION = Color3.fromRGB(45, 48, 56);
 const ROW_HEIGHT = 56;
 
@@ -48,7 +44,7 @@ function optionRow(parent: Instance, order: number, title: string): Frame {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBold,
 			TextSize: 14,
-			TextColor3: MUTED,
+			TextColor3: Palette.Muted,
 			TextXAlignment: Enum.TextXAlignment.Left,
 			Text: title,
 		},
@@ -73,7 +69,7 @@ function option(parent: Instance, text: string, isSelected: () => boolean, onCli
 			AutoButtonColor: true,
 			Font: Enum.Font.GothamBold,
 			TextSize: 14,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			Text: swatch ? "" : text,
 		},
 		parent,
@@ -81,7 +77,7 @@ function option(parent: Instance, text: string, isSelected: () => boolean, onCli
 	create("UICorner", { CornerRadius: new UDim(0, 4) }, button);
 	const stroke = create(
 		"UIStroke",
-		{ Color: ACCENT, Thickness: 2, ApplyStrokeMode: Enum.ApplyStrokeMode.Border },
+		{ Color: Palette.Accent, Thickness: 2, ApplyStrokeMode: Enum.ApplyStrokeMode.Border },
 		button,
 	);
 	button.Activated.Connect(onClick);
@@ -95,7 +91,7 @@ function refresh() {
 function build() {
 	const panel = create(
 		"Frame",
-		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: PANEL, BackgroundTransparency: 0.15 },
+		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: Palette.Panel, BackgroundTransparency: 0.15 },
 		getMenuContent(),
 	);
 	create("UICorner", { CornerRadius: new UDim(0, 8) }, panel);
@@ -111,7 +107,7 @@ function build() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 30,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Left,
 			Text: "CROSSHAIR",
 		},

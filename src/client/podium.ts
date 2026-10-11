@@ -3,14 +3,13 @@
 
 import { getMatchState, onMatchStateChanged } from "shared/matchState";
 import { getStandings, Standing } from "shared/standings";
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
 
 const RANK_COLORS = [Color3.fromRGB(255, 196, 0), Color3.fromRGB(200, 205, 215), Color3.fromRGB(205, 127, 50)];
 const PANEL_COLOR = Color3.fromRGB(20, 22, 28);
 const LOCAL_HIGHLIGHT = Color3.fromRGB(0, 220, 255);
-const WHITE = new Color3(1, 1, 1);
 
 // Screen order is 2nd, 1st, 3rd. Index into these with the rank (0 = first place).
 const LIVE_SLOT_LAYOUT = [
@@ -78,7 +77,7 @@ function buildLiveSlot(parent: Frame, rank: number): LiveSlot {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBold,
 			TextSize: layout.textSize - 2,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Left,
 			TextTruncate: Enum.TextTruncate.AtEnd,
 		},
@@ -93,7 +92,7 @@ function buildLiveSlot(parent: Frame, rank: number): LiveSlot {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: layout.textSize,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Right,
 		},
 		frame,
@@ -159,7 +158,7 @@ function buildFinalScreen(gui: ScreenGui) {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 56,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			Text: "MATCH OVER",
 		},
 		finalScreen,
@@ -222,7 +221,7 @@ function buildFinalColumn(standing: Standing, rank: number) {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: rank === 0 ? 26 : 20,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextTruncate: Enum.TextTruncate.AtEnd,
 			Text: standing.name,
 		},

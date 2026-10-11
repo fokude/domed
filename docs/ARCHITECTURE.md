@@ -75,14 +75,14 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `speedometer.ts`    | Speed readout and its effects                                                 |
 | `sounds.ts`         | Every sound cue, in one table                                                 |
 | `teammates.ts`      | Teammate outlines                                                             |
-| `ui.ts`             | The `create` helper for building UI                                           |
+| `ui.ts`             | The `create` helper for building UI, and the shared color `Palette`           |
 
 ## Rules of the codebase
 
 - **One owner per concern.** Before writing a helper, check `shared/`, `maps/kit.ts` and the
   owning module above; extend them rather than copying code.
 - **Names and numbers live in one place.** Tuning goes in `config.ts`, marker names in
-  `mapMarkers.ts`, replicated state in `matchState.ts`. Don't hard-code strings or numbers
+  `mapMarkers.ts`, replicated state in `matchState.ts`, UI colors in `Palette` (`ui.ts`). Don't hard-code strings or numbers
   that another file also uses.
 - **The server never trusts the client.** Remote arguments arrive as `unknown` and are
   validated; gameplay outcomes (kills, scores, captures) are decided on the server.

@@ -1,7 +1,7 @@
 // Speed readout at the bottom of the screen. Past a threshold it picks up an electric
 // effect that intensifies with speed: a cyan glow, a moving shimmer, sparks, and jitter.
 
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
 const TweenService = game.GetService("TweenService");
@@ -19,7 +19,6 @@ const SHIMMER_SPEED = 1.5;
 const JITTER_START = 0.6;
 const MAX_JITTER_PIXELS = 2;
 
-const WHITE = new Color3(1, 1, 1);
 const BLACK = new Color3(0, 0, 0);
 const ELECTRIC = Color3.fromRGB(0, 220, 255);
 const ELECTRIC_PALE = Color3.fromRGB(170, 240, 255);
@@ -56,7 +55,7 @@ function spawnSpark() {
 				Position: new UDim2(0.5, x, 0.5, y),
 				Size: UDim2.fromOffset(length, 2),
 				Rotation: rotation,
-				BackgroundColor3: math.random() < 0.5 ? ELECTRIC : WHITE,
+				BackgroundColor3: math.random() < 0.5 ? ELECTRIC : Palette.White,
 				BorderSizePixel: 0,
 			},
 			label,
@@ -79,7 +78,7 @@ export function setSpeed(speed: number) {
 	const intensity = effectIntensity(speed);
 	label.Text = tostring(math.round(speed));
 	label.TextSize = BASE_TEXT_SIZE + MAX_TEXT_GROWTH * intensity;
-	label.TextColor3 = WHITE.Lerp(ELECTRIC_PALE, intensity);
+	label.TextColor3 = Palette.White.Lerp(ELECTRIC_PALE, intensity);
 
 	glow.Color = BLACK.Lerp(ELECTRIC, intensity);
 	glow.Thickness = 1 + 2 * intensity;
@@ -116,7 +115,7 @@ export function initSpeedometer() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: BASE_TEXT_SIZE,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			Text: "0",
 		},
 		gui,
@@ -127,9 +126,9 @@ export function initSpeedometer() {
 		{
 			Enabled: false,
 			Color: new ColorSequence([
-				new ColorSequenceKeypoint(0, WHITE),
+				new ColorSequenceKeypoint(0, Palette.White),
 				new ColorSequenceKeypoint(0.5, ELECTRIC),
-				new ColorSequenceKeypoint(1, WHITE),
+				new ColorSequenceKeypoint(1, Palette.White),
 			]),
 		},
 		label,

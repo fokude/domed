@@ -11,17 +11,13 @@ import { Remotes } from "shared/remotes";
 import { addMenuButton, getMenuContent, openMenuPanel, registerMenuPanel, toggleMenuPanel } from "./menu";
 import { getSpeed, onMovementEvent } from "./movement";
 import { getMyProfile } from "./profileData";
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
 const TweenService = game.GetService("TweenService");
 const UserInputService = game.GetService("UserInputService");
 
-const WHITE = new Color3(1, 1, 1);
-const MUTED = Color3.fromRGB(170, 175, 185);
-const ACCENT = Color3.fromRGB(255, 60, 40);
-const PANEL = Color3.fromRGB(20, 22, 28);
 const DONE_GREEN = Color3.fromRGB(80, 230, 120);
 
 const TIP_DURATION = 8;
@@ -86,7 +82,7 @@ function showTip(text: string) {
 function buildPanel() {
 	panel = create(
 		"Frame",
-		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: PANEL, BackgroundTransparency: 0.15 },
+		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: Palette.Panel, BackgroundTransparency: 0.15 },
 		getMenuContent(),
 	);
 	create("UICorner", { CornerRadius: new UDim(0, 8) }, panel);
@@ -105,7 +101,7 @@ function buildPanel() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 26,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Left,
 			Text: "HOW TO PLAY",
 		},
@@ -124,7 +120,7 @@ function buildPanel() {
 				BackgroundTransparency: 1,
 				Font: Enum.Font.GothamBlack,
 				TextSize: 18,
-				TextColor3: ACCENT,
+				TextColor3: Palette.Accent,
 				TextXAlignment: Enum.TextXAlignment.Left,
 				Text: title,
 			},
@@ -138,7 +134,7 @@ function buildPanel() {
 				BackgroundTransparency: 1,
 				Font: Enum.Font.Gotham,
 				TextSize: 16,
-				TextColor3: MUTED,
+				TextColor3: Palette.Muted,
 				TextXAlignment: Enum.TextXAlignment.Left,
 				TextWrapped: true,
 				Text: body,
@@ -151,10 +147,10 @@ function buildPanel() {
 		{
 			LayoutOrder: STEPS.size() + 1,
 			Size: UDim2.fromOffset(140, 40),
-			BackgroundColor3: ACCENT,
+			BackgroundColor3: Palette.Accent,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 18,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			Text: "GOT IT",
 		},
 		panel,
@@ -179,7 +175,7 @@ function buildTip() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBold,
 			TextSize: 20,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextStrokeTransparency: 0.4,
 			Visible: false,
 		},
@@ -194,7 +190,7 @@ function buildTip() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 22,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextStrokeTransparency: 0.3,
 			Visible: false,
 		},
@@ -233,7 +229,7 @@ function updateLesson() {
 	lessonLabel.Visible = isDeployed() && alive && (paused || lesson !== undefined);
 	if (paused || !lesson) return;
 	lessonLabel.Text = lesson[1];
-	lessonLabel.TextColor3 = WHITE;
+	lessonLabel.TextColor3 = Palette.White;
 }
 
 export function initOnboarding() {

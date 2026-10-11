@@ -6,7 +6,7 @@
 import { XpConfig } from "shared/config";
 import { HitKind, Remotes } from "shared/remotes";
 import { playSound } from "./sounds";
-import { create } from "./ui";
+import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
 const TweenService = game.GetService("TweenService");
@@ -30,7 +30,6 @@ const KILL_RED = Color3.fromRGB(255, 60, 40);
 const MULTI_GOLD = Color3.fromRGB(255, 200, 40);
 const STREAK_PURPLE = Color3.fromRGB(200, 120, 255);
 const SHIELD_BLUE = Color3.fromRGB(80, 200, 255);
-const WHITE = new Color3(1, 1, 1);
 
 const player = Players.LocalPlayer;
 
@@ -115,7 +114,7 @@ function nearMiss() {
 			BackgroundTransparency: 1,
 			Font: Enum.Font.GothamBlack,
 			TextSize: 16,
-			TextColor3: WHITE,
+			TextColor3: Palette.White,
 			TextStrokeTransparency: 0.4,
 			Text: "CLOSE",
 		},
@@ -166,7 +165,7 @@ function headBurst(position: Vector3) {
 	anchor.Parent = Workspace;
 
 	const emitter = new Instance("ParticleEmitter");
-	emitter.Color = new ColorSequence(KILL_RED, WHITE);
+	emitter.Color = new ColorSequence(KILL_RED, Palette.White);
 	emitter.LightEmission = 1;
 	emitter.Size = new NumberSequence([new NumberSequenceKeypoint(0, 0.6), new NumberSequenceKeypoint(1, 0)]);
 	emitter.Speed = new NumberRange(18, 34);
