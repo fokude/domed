@@ -7,6 +7,10 @@ Body shots knock the target back.
 Written in TypeScript with [roblox-ts](https://roblox-ts.com) and synced into Roblox Studio
 with [Rojo](https://rojo.space).
 
+Built for 5v5: Team Deathmatch and Capture the Flag, plus free-for-all Deathmatch. When
+publishing, set **Max Players** to 10 in Studio's Game Settings (Places tab); player count
+isn't set in code.
+
 ## Prerequisites
 
 - [Roblox Studio](https://create.roblox.com)

@@ -22,7 +22,9 @@ movement test map.
 
 - docs/MOVEMENT.md: any change to movement or physics. Add new engine workarounds to its
   Engine quirks list.
-- docs/MAPPING.md: map markers, attributes and design guidelines.
+- docs/MAPPING.md: map markers and attributes.
+- docs/MAP_DESIGN.md: researched layout principles and targets. Check new or changed maps
+  against it, and ask the owner to run `/openness` in Studio to measure them.
 - docs/ARCHITECTURE.md: structure and match flow.
 
 ## Commits
