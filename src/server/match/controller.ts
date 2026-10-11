@@ -1,5 +1,5 @@
 // Runs matches back to back: load a map, play the mode until someone wins or time runs out,
-// show results, then move on to the next map.
+// show results, then send everyone to the menu to vote on the next map.
 
 import { MatchConfig } from "shared/config";
 import { setMatchState } from "shared/matchState";
@@ -24,6 +24,7 @@ import { resetStats } from "../stats";
 import { CaptureTheFlag } from "./modes/ctf";
 import { Deathmatch } from "./modes/deathmatch";
 import { GameMode, MatchResult } from "./modes/types";
+import { pickVoteOptions, runVote, startVoting } from "./voting";
 
 const Players = game.GetService("Players");
 const Workspace = game.GetService("Workspace");
@@ -100,10 +101,11 @@ function showResults(result: MatchResult) {
 	task.wait(MatchConfig.resultsTime);
 }
 
-function intermission() {
+function voteForNext(previous: MatchOption): MatchOption {
+	const choices = pickVoteOptions(allMatchOptions(), previous);
 	setMatchState("Phase", "Voting");
 	setMatchState("EndsAt", Workspace.GetServerTimeNow() + MatchConfig.intermissionTime);
-	task.wait(MatchConfig.intermissionTime);
+	return runVote(choices, MatchConfig.intermissionTime);
 }
 
 function runMatch(option: MatchOption) {
@@ -115,7 +117,6 @@ function runMatch(option: MatchOption) {
 	mode.stop();
 	currentMode = undefined;
 	returnAllToMenu();
-	intermission();
 }
 
 export function startMatchLoop() {
@@ -124,10 +125,13 @@ export function startMatchLoop() {
 		forgetPlayer(player);
 	});
 	Remotes.Deploy.OnServerEvent.Connect((player) => deploy(player));
+	startVoting();
 
 	task.spawn(() => {
+		let option = randomOption();
 		for (;;) {
-			runMatch(randomOption());
+			runMatch(option);
+			option = voteForNext(option);
 		}
 	});
 }

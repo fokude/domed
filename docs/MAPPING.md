@@ -32,6 +32,7 @@ Set these on the map Model itself.
 | `Modes` | string | Comma-separated: `Deathmatch`, `CTF` |
 | `Gravity` | number | Workspace gravity while this map is loaded (default 196.2) |
 | `KillHeight` | number | Players below this Y die, for lava and drops into the void |
+| `ThemeColor` | Color3 | Accent color of the map's card in the vote |
 
 ## Markers
 

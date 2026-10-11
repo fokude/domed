@@ -222,6 +222,7 @@ export const Gridline: MapBuilder = {
 			modes: ["CTF", "Deathmatch"],
 			gravity: 196.2,
 			killHeight: -20,
+			themeColor: Color3.fromRGB(70, 160, 255),
 		});
 
 		buildShell(map);

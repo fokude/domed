@@ -22,6 +22,7 @@ export const ProvingGrounds: MapBuilder = {
 			modes: ["Deathmatch"],
 			gravity: 196.2,
 			killHeight: -50,
+			themeColor: Color3.fromRGB(200, 205, 215),
 		});
 		const half = ARENA_SIZE / 2;
 		slab(arena, Vector3.zero, new Vector3(ARENA_SIZE, 4, ARENA_SIZE), Floor, "Floor");

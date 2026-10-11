@@ -16,6 +16,8 @@ export const MapAttribute = {
 	Modes: "Modes",
 	Gravity: "Gravity",
 	KillHeight: "KillHeight",
+	// Accent color for the map's vote card.
+	ThemeColor: "ThemeColor",
 	// On Spawn and FlagBase markers.
 	Team: "Team",
 	// On jump pads: how far above the higher end the arc peaks.

@@ -33,7 +33,11 @@ let playButton: TextButton;
 let menuOpen = false;
 
 // Content area other menu features (map voting, loadout) render into.
-export let menuContent: Frame;
+let menuContent: Frame;
+
+export function getMenuContent(): Frame {
+	return menuContent;
+}
 
 function isDeployed(): boolean {
 	return player.GetAttribute(DEPLOYED_ATTRIBUTE) === true;
@@ -157,8 +161,6 @@ function buildMenu() {
 
 	playButton = menuButton(buttons, "PLAY", 1);
 	playButton.BackgroundColor3 = ACCENT;
-	// A visible Modal button frees the mouse even in first-person camera mode.
-	playButton.Modal = true;
 	playButton.Activated.Connect(() => Remotes.Deploy.FireServer());
 
 	const loadout = menuButton(buttons, "LOADOUT", 2);
@@ -208,6 +210,10 @@ function buildMenu() {
 		},
 		sidebar,
 	);
+
+	// A visible Modal button frees the mouse even in first-person camera mode. This one is
+	// invisible and always shown with the menu, so the cursor works in every phase.
+	create("TextButton", { Size: UDim2.fromOffset(0, 0), BackgroundTransparency: 1, Text: "", Modal: true }, gui);
 
 	menuContent = create(
 		"Frame",

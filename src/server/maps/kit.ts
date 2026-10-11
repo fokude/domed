@@ -216,6 +216,7 @@ export interface MapInfo {
 	modes: ModeId[];
 	gravity: number;
 	killHeight: number;
+	themeColor: Color3;
 }
 
 export function setMapInfo(map: Model, info: MapInfo) {
@@ -224,6 +225,7 @@ export function setMapInfo(map: Model, info: MapInfo) {
 	map.SetAttribute(MapAttribute.Modes, info.modes.join(","));
 	map.SetAttribute(MapAttribute.Gravity, info.gravity);
 	map.SetAttribute(MapAttribute.KillHeight, info.killHeight);
+	map.SetAttribute(MapAttribute.ThemeColor, info.themeColor);
 }
 
 export interface LightingSettings {

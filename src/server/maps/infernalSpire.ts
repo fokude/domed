@@ -161,6 +161,7 @@ export const InfernalSpire: MapBuilder = {
 			modes: ["Deathmatch"],
 			gravity: 196.2,
 			killHeight: -2,
+			themeColor: Color3.fromRGB(255, 100, 30),
 		});
 		hazard(slab(arena, Vector3.zero, new Vector3(320, 4, 320), Lava, "Lava"));
 		buildRampart(arena);

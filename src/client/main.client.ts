@@ -3,6 +3,7 @@
 import { MatchConfig } from "shared/config";
 import { Remotes } from "shared/remotes";
 import { addKill, HudColors, initHud, showBanner } from "./hud";
+import { initMapVote } from "./mapVote";
 import { initMatchBar } from "./matchBar";
 import { initMenu } from "./menu";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
@@ -28,6 +29,7 @@ initSpeedometer();
 initMovement();
 initWeapon();
 initMenu();
+initMapVote();
 initTeammates();
 
 Remotes.Knockback.OnClientEvent.Connect((impulse) => launchCharacter(impulse, true));

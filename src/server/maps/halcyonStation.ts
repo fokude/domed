@@ -198,6 +198,7 @@ export const HalcyonStation: MapBuilder = {
 			modes: ["CTF", "Deathmatch"],
 			gravity: 120,
 			killHeight: -60,
+			themeColor: Color3.fromRGB(90, 230, 220),
 		});
 
 		buildBay(map, "Red", 1);

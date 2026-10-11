@@ -19,6 +19,17 @@ export interface MatchStateValues {
 	BlueScore: number;
 	RedFlag: FlagStatus;
 	BlueFlag: FlagStatus;
+	// JSON-encoded VoteOption[] and number[] during the Voting phase.
+	VoteOptions: string;
+	VoteCounts: string;
+}
+
+export interface VoteOption {
+	mapName: string;
+	tagline: string;
+	mode: ModeId;
+	// Hex color, since Color3 doesn't survive JSON.
+	themeColor: string;
 }
 
 export type MatchStateKey = keyof MatchStateValues;

@@ -18,6 +18,7 @@ export const Remotes = {
 	Knockback: remote<(impulse: Vector3) => void>("Knockback"),
 	// Either player may have left by the time a client receives this.
 	KillFeed: remote<(killer?: Player, victim?: Player) => void>("KillFeed"),
+	CastVote: remote<(optionIndex: number) => void>("CastVote"),
 	// Client asks to leave the menu and join the match in progress.
 	Deploy: remote<() => void>("Deploy"),
 	Announce: remote<(text: string, duration: number) => void>("Announce"),
