@@ -34,6 +34,15 @@ Then in Studio:
 2. Open **Plugins → Rojo** and click **Connect**.
 3. Press **Play**. Use **Test → Clients and Servers** with two or more players to test combat.
 
+### Testing in Studio
+
+Type these in chat during a Studio playtest. They're ignored on live servers.
+
+| Command                   | Does                                              |
+| ------------------------- | ------------------------------------------------- |
+| `/map <MapId> [Deathmatch | CTF]`                                             | Switch to that map right away, e.g. `/map InfernalSpire` |
+| `/end`                    | End the match, then show results and the map vote |
+
 ## Scripts
 
 | Command         | Does                       |
