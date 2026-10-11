@@ -47,7 +47,8 @@ Add tags in the **Tag Editor** (View, then Tags) or the Properties panel.
 
 `Spawn`, `FlagBase` and `PadTarget` parts are removed when the map loads, so they can be as
 visible as you like while editing. Jump pad strength is computed from the pad, the target and
-the map's gravity, so move either end freely.
+the map's gravity, so move either end freely. A player standing still lands on the target;
+players keep their own momentum on top of the pad's push, so fast players carry further.
 
 ## Lighting
 

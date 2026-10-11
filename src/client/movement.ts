@@ -209,7 +209,10 @@ function hookJumpPad(pad: Instance) {
 		const launch = pad.GetAttribute("Launch");
 		if (!typeIs(launch, "Vector3") || os.clock() - lastPadLaunch < JUMP_PAD_DEBOUNCE) return;
 		lastPadLaunch = os.clock();
-		launchCharacter(launch, false);
+		// The pad sets vertical speed and adds its push to the player's own momentum, so they keep
+		// the direction they were moving in rather than being redirected onto a fixed path.
+		const momentum = root ? flatten(root.AssemblyLinearVelocity) : Vector3.zero;
+		launchCharacter(new Vector3(momentum.X + launch.X, launch.Y, momentum.Z + launch.Z), false);
 	});
 }
 
