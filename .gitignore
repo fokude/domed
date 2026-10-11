@@ -5,3 +5,4 @@ include/
 *.rbxlx
 *.rbxl.lock
 *.rbxlx.lock
+project_artefacts/
