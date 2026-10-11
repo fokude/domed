@@ -6,6 +6,7 @@
 // then save each model under ServerStorage.BakedMaps to maps/<Name>.rbxmx (right-click,
 // Save to File). See docs/MAPPING.md.
 
+import { Bastion } from "./bastion";
 import { Gridline } from "./gridline";
 import { HalcyonStation } from "./halcyonStation";
 import { InfernalSpire } from "./infernalSpire";
@@ -15,7 +16,7 @@ import { MapBuilder } from "./types";
 
 const ServerStorage = game.GetService("ServerStorage");
 
-const CODE_MAPS: MapBuilder[] = [InfernalSpire, Gridline, HalcyonStation, MovementLab];
+const CODE_MAPS: MapBuilder[] = [InfernalSpire, Gridline, HalcyonStation, Bastion, MovementLab];
 
 export function bakeMaps(): Folder {
 	ServerStorage.FindFirstChild("BakedMaps")?.Destroy();
