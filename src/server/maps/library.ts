@@ -6,13 +6,14 @@
 // then save each model under ServerStorage.BakedMaps to maps/<Name>.rbxmx (right-click,
 // Save to File). See docs/MAPPING.md.
 
+import { InfernalSpire } from "./infernalSpire";
 import { readMapInfo, MapInfo } from "./loader";
 import { ProvingGrounds } from "./provingGrounds";
 import { MapBuilder } from "./types";
 
 const ServerStorage = game.GetService("ServerStorage");
 
-const CODE_MAPS: MapBuilder[] = [ProvingGrounds];
+const CODE_MAPS: MapBuilder[] = [ProvingGrounds, InfernalSpire];
 
 export function bakeMaps(): Folder {
 	ServerStorage.FindFirstChild("BakedMaps")?.Destroy();
