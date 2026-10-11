@@ -11,6 +11,7 @@ import { getSpeed, initMovement, launchCharacter } from "./movement";
 import { initObjectives } from "./objectives";
 import { initOnboarding } from "./onboarding";
 import { initPodium, setMatchXp, showMatchEnd } from "./podium";
+import { initProfileScreen } from "./profileScreen";
 import { initSpeedometer, setSpeed } from "./speedometer";
 import { initTeammates } from "./teammates";
 import { initWeapon } from "./weapon";
@@ -35,6 +36,7 @@ initWeapon();
 initMenu();
 initMapVote();
 initOnboarding();
+initProfileScreen();
 initTeammates();
 
 Remotes.Knockback.OnClientEvent.Connect((impulse) => launchCharacter(impulse, true));
