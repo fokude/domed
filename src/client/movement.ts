@@ -33,6 +33,8 @@ let groundTime = math.huge;
 let wasAirborne = false;
 let keepVelocityOnTakeoff = false;
 let doubleJumpUsed = false;
+let wallJumpsUsed = 0;
+let lastWallNormal: Vector3 | undefined;
 // MoveDirection is zeroed while airborne, so input handlers read the last real value here.
 let wishDirection = Vector3.zero;
 let lastPadLaunch = 0;
@@ -119,6 +121,8 @@ function onPreSimulation(dt: number) {
 			wasAirborne = false;
 			groundTime = 0;
 			doubleJumpUsed = false;
+			wallJumpsUsed = 0;
+			lastWallNormal = undefined;
 			// Re-jump on the landing frame itself; waiting for the Humanoid's own auto-jump
 			// leaves us on the ground long enough for friction to eat the hop.
 			if (wantsToJump()) currentHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
@@ -169,6 +173,36 @@ function onRenderStepped(dt: number) {
 	camera.FieldOfView += (targetFov - camera.FieldOfView) * math.min(1, dt * 8);
 }
 
+// Nearest wall within reach, probed in eight directions at root height.
+function findWall(rootPart: BasePart): Vector3 | undefined {
+	// The root is about a stud from the body's edge, so reach is measured from there.
+	const reach = Config.wallJumpRange + 1;
+	let nearest: RaycastResult | undefined;
+	for (let i = 0; i < 8; i++) {
+		const angle = (i / 8) * 2 * math.pi;
+		const direction = new Vector3(math.sin(angle), 0, math.cos(angle)).mul(reach);
+		const hit = Workspace.Raycast(rootPart.Position, direction, wallProbeParams);
+		if (hit && math.abs(hit.Normal.Y) < 0.3 && (!nearest || hit.Distance < nearest.Distance)) nearest = hit;
+	}
+	return nearest ? flatten(nearest.Normal).Unit : undefined;
+}
+
+// Kicks off a nearby wall: speed along the wall is kept, and the player is pushed away from it
+// and up. The same wall can't be used twice in a row, so chimneys can be climbed but single
+// walls can't.
+function tryWallJump(rootPart: BasePart): boolean {
+	if (wallJumpsUsed >= Config.maxWallJumps) return false;
+	const normal = findWall(rootPart);
+	if (!normal || (lastWallNormal && normal.Dot(lastWallNormal) > 0.9)) return false;
+
+	wallJumpsUsed += 1;
+	lastWallNormal = normal;
+	const alongWall = airVelocity.sub(normal.mul(airVelocity.Dot(normal)));
+	airVelocity = alongWall.add(normal.mul(Config.wallJumpPush));
+	rootPart.AssemblyLinearVelocity = new Vector3(airVelocity.X, Config.wallJumpVelocity, airVelocity.Z);
+	return true;
+}
+
 function onInputBegan(input: InputObject) {
 	const isJumpKey = input.KeyCode === Enum.KeyCode.Space || input.KeyCode === Enum.KeyCode.ButtonA;
 	if (!isJumpKey || UserInputService.GetFocusedTextBox()) return;
@@ -176,7 +210,8 @@ function onInputBegan(input: InputObject) {
 	const body = getLiveBody();
 	if (!body) return;
 	const [currentHumanoid, rootPart] = body;
-	if (!isAirborne(currentHumanoid) || doubleJumpUsed) return;
+	if (!isAirborne(currentHumanoid)) return;
+	if (tryWallJump(rootPart) || doubleJumpUsed) return;
 	doubleJumpUsed = true;
 
 	// Like UT's double jump, the second jump redirects momentum toward the input direction.
@@ -206,6 +241,8 @@ function onCharacterAdded(newCharacter: Model) {
 	wasAirborne = false;
 	keepVelocityOnTakeoff = false;
 	doubleJumpUsed = false;
+	wallJumpsUsed = 0;
+	lastWallNormal = undefined;
 }
 
 function trackJumpPad(pad: Instance) {

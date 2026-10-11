@@ -16,6 +16,12 @@ export const MovementConfig = {
 
 	doubleJumpVelocity: 55,
 
+	// Wall jump: Space in the air near a wall kicks off it. Doesn't use the double jump.
+	wallJumpRange: 2.5,
+	wallJumpPush: 42,
+	wallJumpVelocity: 50,
+	maxWallJumps: 3,
+
 	// Roblox FieldOfView is vertical; 80 is roughly 110 horizontal at 16:9.
 	baseFov: 80,
 	speedFovBoost: 12,
