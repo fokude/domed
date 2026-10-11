@@ -23,6 +23,29 @@ or with `gh run list`. `npm run check` runs the same lint and compile locally.
 CI doesn't run the game: a green check means the code compiles and is consistent, not that
 it plays correctly. Test gameplay in Studio.
 
+## Releasing
+
+Pushing a version tag publishes the game. The release workflow runs the CI checks, builds the
+place, publishes it to Roblox through Open Cloud, and creates a GitHub release with generated
+notes:
+
+```sh
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+Use semantic versions: bump the patch for fixes, the minor for features. Only tag commits
+you've tested in Studio. New servers get the update immediately; to move players off old
+servers, use **Restart servers for updates** on the Creator Dashboard. Roblox keeps every
+published version, so a bad release can be rolled back from the dashboard.
+
+The repository is the source of truth: each release replaces the whole place with what the
+repo builds, so changes made only in a Studio copy of the place are lost. Experience settings
+(max players, avatar type, permissions) live on Roblox and aren't affected.
+
+The workflow needs the `ROBLOX_API_KEY` secret and the `ROBLOX_UNIVERSE_ID` and
+`ROBLOX_PLACE_ID` variables in the repository's Actions settings.
+
 ## Recipes
 
 **Tune a number** (speeds, timers, score targets). Change it in `src/shared/config.ts`.

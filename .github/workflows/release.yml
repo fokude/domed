@@ -1,0 +1,59 @@
+# Publishes the game to Roblox when a version tag (v1.2.3) is pushed.
+#
+# Needs, in the repository's Actions settings:
+#   secret   ROBLOX_API_KEY      Open Cloud key with universe-places write access
+#   variable ROBLOX_UNIVERSE_ID  the experience's universe ID
+#   variable ROBLOX_PLACE_ID     the start place's ID
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Compile
+        run: npm run build
+
+      - name: Install Rojo
+        run: |
+          curl -sSL -o rojo.zip https://github.com/rojo-rbx/rojo/releases/download/v7.7.1/rojo-7.7.1-linux-x86_64.zip
+          unzip -q rojo.zip -d "$RUNNER_TEMP/rojo"
+          echo "$RUNNER_TEMP/rojo" >> "$GITHUB_PATH"
+
+      - name: Build place
+        run: rojo build -o "$RUNNER_TEMP/domed.rbxl"
+
+      - name: Publish to Roblox
+        env:
+          ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+          UNIVERSE_ID: ${{ vars.ROBLOX_UNIVERSE_ID }}
+          PLACE_ID: ${{ vars.ROBLOX_PLACE_ID }}
+        run: |
+          curl --fail-with-body -sS -X POST \
+            "https://apis.roblox.com/universes/v1/$UNIVERSE_ID/places/$PLACE_ID/versions?versionType=Published" \
+            -H "x-api-key: $ROBLOX_API_KEY" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @"$RUNNER_TEMP/domed.rbxl"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes
