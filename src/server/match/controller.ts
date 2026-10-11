@@ -10,7 +10,16 @@ import { setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
 import { getMapModel, listMaps } from "../maps/library";
 import { LoadedMap, loadMap } from "../maps/loader";
-import { setDeathHandler, setSpawnPicker } from "../spawning";
+import {
+	closeSpawning,
+	deploy,
+	deployAll,
+	forgetPlayer,
+	returnAllToMenu,
+	setDeathHandler,
+	setDeployHandler,
+	setSpawnPicker,
+} from "../spawning";
 import { resetStats } from "../stats";
 import { Deathmatch } from "./modes/deathmatch";
 import { GameMode, MatchResult } from "./modes/types";
@@ -55,6 +64,7 @@ function startMatch(option: MatchOption): GameMode {
 	setKillHeight(map.killHeight);
 	setSpawnPicker((player) => mode.pickSpawn(player));
 	setDeathHandler((player, character) => mode.onDeath(player, character));
+	setDeployHandler((player) => mode.addPlayer(player));
 
 	setMatchState("Phase", "Playing");
 	setMatchState("Mode", mode.id);
@@ -64,9 +74,8 @@ function startMatch(option: MatchOption): GameMode {
 
 	for (const player of Players.GetPlayers()) {
 		resetStats(player);
-		mode.addPlayer(player);
-		player.LoadCharacter();
 	}
+	deployAll();
 	setCombatRules(mode);
 	Remotes.Announce.FireAllClients("FIGHT", 1.5);
 	return mode;
@@ -89,18 +98,30 @@ function showResults(result: MatchResult) {
 	task.wait(MatchConfig.resultsTime);
 }
 
+function intermission() {
+	setMatchState("Phase", "Voting");
+	setMatchState("EndsAt", Workspace.GetServerTimeNow() + MatchConfig.intermissionTime);
+	task.wait(MatchConfig.intermissionTime);
+}
+
 function runMatch(option: MatchOption) {
 	const mode = startMatch(option);
 	const result = waitForResult(mode);
 	setCombatRules(undefined);
+	closeSpawning();
 	showResults(result);
 	mode.stop();
 	currentMode = undefined;
+	returnAllToMenu();
+	intermission();
 }
 
 export function startMatchLoop() {
-	Players.PlayerAdded.Connect((player) => currentMode?.addPlayer(player));
-	Players.PlayerRemoving.Connect((player) => currentMode?.removePlayer(player));
+	Players.PlayerRemoving.Connect((player) => {
+		currentMode?.removePlayer(player);
+		forgetPlayer(player);
+	});
+	Remotes.Deploy.OnServerEvent.Connect((player) => deploy(player));
 
 	task.spawn(() => {
 		for (;;) {

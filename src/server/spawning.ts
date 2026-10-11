@@ -1,6 +1,9 @@
-// Character setup on spawn: movement stats, spawn position, and spawn protection.
+// Who is in the match and when they spawn. Players start in the menu; deploying puts them in
+// the match and spawns them, and they respawn after dying until everyone returns to the menu.
+// Characters never load on their own (Players.CharacterAutoLoads is off).
 
 import { MatchConfig, MovementConfig } from "shared/config";
+import { DEPLOYED_ATTRIBUTE } from "shared/matchState";
 import { incrementStat } from "./stats";
 
 const Debris = game.GetService("Debris");
@@ -11,6 +14,9 @@ export type DeathHandler = (player: Player, character: Model) => void;
 
 let pickSpawn: SpawnPicker = () => undefined;
 let onDeath: DeathHandler = () => {};
+let onDeploy: (player: Player) => void = () => {};
+let spawningOpen = false;
+const deployed = new Set<Player>();
 
 export function setSpawnPicker(picker: SpawnPicker) {
 	pickSpawn = picker;
@@ -18,6 +24,10 @@ export function setSpawnPicker(picker: SpawnPicker) {
 
 export function setDeathHandler(handler: DeathHandler) {
 	onDeath = handler;
+}
+
+export function setDeployHandler(handler: (player: Player) => void) {
+	onDeploy = handler;
 }
 
 function livingCharacterPositions(exclude: Player, isThreat: (other: Player) => boolean): Vector3[] {
@@ -73,10 +83,50 @@ function onCharacterAdded(player: Player, character: Model) {
 	humanoid.Died.Connect(() => {
 		incrementStat(player, "Deaths");
 		onDeath(player, character);
+		task.delay(MatchConfig.respawnTime, () => {
+			if (spawningOpen && deployed.has(player) && player.Parent && player.Character === character) {
+				player.LoadCharacter();
+			}
+		});
 	});
+}
+
+export function deploy(player: Player) {
+	if (!spawningOpen || deployed.has(player)) return;
+	deployed.add(player);
+	player.SetAttribute(DEPLOYED_ATTRIBUTE, true);
+	onDeploy(player);
+	player.LoadCharacter();
+}
+
+// Opens spawning for a new match and drops every player in.
+export function deployAll() {
+	spawningOpen = true;
+	for (const player of Players.GetPlayers()) {
+		deploy(player);
+	}
+}
+
+// Stops respawns without removing anyone, for the results screen.
+export function closeSpawning() {
+	spawningOpen = false;
+}
+
+// Closes spawning and sends every player back to the menu.
+export function returnAllToMenu() {
+	spawningOpen = false;
+	deployed.clear();
+	for (const player of Players.GetPlayers()) {
+		player.SetAttribute(DEPLOYED_ATTRIBUTE, false);
+		player.Character?.Destroy();
+		player.Character = undefined;
+	}
+}
+
+export function forgetPlayer(player: Player) {
+	deployed.delete(player);
 }
 
 export function watchCharacters(player: Player) {
 	player.CharacterAdded.Connect((character) => onCharacterAdded(player, character));
-	if (player.Character) onCharacterAdded(player, player.Character);
 }

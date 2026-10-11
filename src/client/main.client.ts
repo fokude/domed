@@ -4,6 +4,7 @@ import { MatchConfig } from "shared/config";
 import { Remotes } from "shared/remotes";
 import { addKill, HudColors, initHud, showBanner } from "./hud";
 import { initMatchBar } from "./matchBar";
+import { initMenu } from "./menu";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
 import { initPodium, showMatchEnd } from "./podium";
 import { initSpeedometer, setSpeed } from "./speedometer";
@@ -12,12 +13,10 @@ import { initWeapon } from "./weapon";
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
 const StarterGui = game.GetService("StarterGui");
-const UserInputService = game.GetService("UserInputService");
 
 const player = Players.LocalPlayer;
 
 player.CameraMode = Enum.CameraMode.LockFirstPerson;
-UserInputService.MouseIconEnabled = false;
 StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Health, false);
 
@@ -27,6 +26,7 @@ initPodium();
 initSpeedometer();
 initMovement();
 initWeapon();
+initMenu();
 
 Remotes.Knockback.OnClientEvent.Connect((impulse) => launchCharacter(impulse, true));
 

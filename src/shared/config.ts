@@ -32,6 +32,8 @@ export const MatchConfig = {
 	spawnProtection: 1.5,
 	// Seconds the end-of-match podium stays up.
 	resultsTime: 8,
+	// Seconds in the menu between matches.
+	intermissionTime: 15,
 };
 
 export const DeathmatchConfig = {

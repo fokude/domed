@@ -41,6 +41,9 @@
 				},
 				"MatchEnded": {
 					"$className": "RemoteEvent"
+				},
+				"Deploy": {
+					"$className": "RemoteEvent"
 				}
 			},
 			"MatchState": {

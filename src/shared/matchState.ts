@@ -23,6 +23,9 @@ export interface MatchStateValues {
 
 export type MatchStateKey = keyof MatchStateValues;
 
+// Player attribute: true while the player is in the match rather than the menu.
+export const DEPLOYED_ATTRIBUTE = "Deployed";
+
 const folder = game.GetService("ReplicatedStorage").WaitForChild("MatchState");
 
 export function getMatchState<K extends MatchStateKey>(key: K): MatchStateValues[K] | undefined {

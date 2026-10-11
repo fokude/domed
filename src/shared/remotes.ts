@@ -18,6 +18,8 @@ export const Remotes = {
 	Knockback: remote<(impulse: Vector3) => void>("Knockback"),
 	// Either player may have left by the time a client receives this.
 	KillFeed: remote<(killer?: Player, victim?: Player) => void>("KillFeed"),
+	// Client asks to leave the menu and join the match in progress.
+	Deploy: remote<() => void>("Deploy"),
 	Announce: remote<(text: string, duration: number) => void>("Announce"),
 	MatchEnded: remote<(title: string, standings: Standing[], duration: number) => void>("MatchEnded"),
 };

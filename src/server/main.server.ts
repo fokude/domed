@@ -7,6 +7,7 @@ import { createLeaderstats } from "./stats";
 
 const Players = game.GetService("Players");
 
+Players.CharacterAutoLoads = false;
 Players.RespawnTime = MatchConfig.respawnTime;
 
 function onPlayerAdded(player: Player) {
