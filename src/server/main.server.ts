@@ -1,4 +1,3 @@
-import { MatchConfig } from "shared/config";
 import { startCombat } from "./combat";
 import { startDevCommands } from "./dev";
 import { startHazards } from "./hazards";
@@ -8,8 +7,8 @@ import { createLeaderstats } from "./stats";
 
 const Players = game.GetService("Players");
 
+// Spawning is server-controlled; see spawning.ts.
 Players.CharacterAutoLoads = false;
-Players.RespawnTime = MatchConfig.respawnTime;
 
 function onPlayerAdded(player: Player) {
 	createLeaderstats(player);
