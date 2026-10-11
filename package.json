@@ -3,6 +3,9 @@
 	"version": "0.1.0",
 	"private": true,
 	"description": "DOMED: Headshot Arena, a headshot-only movement shooter for Roblox",
+	"engines": {
+		"node": ">=20.19"
+	},
 	"scripts": {
 		"build": "rbxtsc",
 		"watch": "rbxtsc -w",
