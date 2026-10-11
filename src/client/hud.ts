@@ -1,5 +1,6 @@
-// Crosshair, hitmarker, rail cooldown, kill feed, and center-screen banner.
+// Crosshair (drawn by crosshair.ts), hitmarker, rail cooldown, kill feed, and center-screen banner.
 
+import { initCrosshair } from "./crosshair";
 import { create } from "./ui";
 
 const Players = game.GetService("Players");
@@ -32,18 +33,7 @@ function escapeRichText(text: string): string {
 }
 
 function buildCrosshair(gui: ScreenGui) {
-	const dot = create(
-		"Frame",
-		{
-			AnchorPoint: new Vector2(0.5, 0.5),
-			Position: UDim2.fromScale(0.5, 0.5),
-			Size: UDim2.fromOffset(4, 4),
-			BackgroundColor3: HudColors.White,
-			BorderSizePixel: 0,
-		},
-		gui,
-	);
-	create("UIStroke", { Color: HudColors.Black, Thickness: 1 }, dot);
+	initCrosshair(gui);
 
 	hitmarker = create(
 		"Frame",

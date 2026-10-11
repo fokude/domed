@@ -1,3 +1,5 @@
+import { PlayerSettings } from "./settings";
+
 // Saved player progression: lifetime stats, XP and levels. The server saves it; each player's
 // client reads it from the PROFILE_ATTRIBUTE player attribute (JSON).
 
@@ -28,6 +30,7 @@ export interface PlayerProfile {
 	stats: LifetimeStats;
 	onboarding: Partial<Record<OnboardingKey, boolean>>;
 	rating: PlayerRating;
+	settings: PlayerSettings;
 }
 
 // What the client receives: everything except the hidden rating.

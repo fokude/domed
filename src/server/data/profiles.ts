@@ -5,6 +5,7 @@
 import ProfileStore from "@rbxts/profile-store";
 import { RatingConfig } from "shared/config";
 import { levelForXp, PlayerProfile, PROFILE_ATTRIBUTE, VisibleProfile } from "shared/progression";
+import { DEFAULT_SETTINGS } from "shared/settings";
 import { setLevelStat } from "../stats";
 
 const HttpService = game.GetService("HttpService");
@@ -26,6 +27,7 @@ const TEMPLATE: PlayerProfile = {
 	},
 	onboarding: {},
 	rating: { mu: RatingConfig.initialMu, sigma: RatingConfig.initialSigma },
+	settings: DEFAULT_SETTINGS,
 };
 
 const store = ProfileStore.New("PlayerProfiles", TEMPLATE);
@@ -33,7 +35,12 @@ const profiles = new Map<Player, ProfileStore.Profile<PlayerProfile>>();
 
 // Sends the player's profile to their client, minus the hidden rating.
 function publish(player: Player, data: PlayerProfile) {
-	const visible: VisibleProfile = { xp: data.xp, stats: data.stats, onboarding: data.onboarding };
+	const visible: VisibleProfile = {
+		xp: data.xp,
+		stats: data.stats,
+		onboarding: data.onboarding,
+		settings: data.settings,
+	};
 	player.SetAttribute(PROFILE_ATTRIBUTE, HttpService.JSONEncode(visible));
 	setLevelStat(player, levelForXp(data.xp).level);
 }

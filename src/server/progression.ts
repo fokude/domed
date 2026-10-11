@@ -4,6 +4,7 @@ import { getLiveRoot } from "shared/characters";
 import { MovementConfig, XpConfig } from "shared/config";
 import { levelForXp, ONBOARDING_KEYS } from "shared/progression";
 import { Remotes } from "shared/remotes";
+import { sanitizeSettings } from "shared/settings";
 import { logOnboardingStep } from "./analytics";
 import { getProfile, updateProfile } from "./data/profiles";
 
@@ -109,6 +110,13 @@ export function startProgression() {
 		if (!valid) return;
 		updateProfile(player, (data) => {
 			data.onboarding[valid] = true;
+		});
+	});
+
+	Remotes.SaveSettings.OnServerEvent.Connect((player, settings) => {
+		const clean = sanitizeSettings(settings);
+		updateProfile(player, (data) => {
+			data.settings = clean;
 		});
 	});
 

@@ -48,6 +48,7 @@ Update these in the same commit as the change they describe:
 - docs/PERKS.md: perks, their design rules, and the reasoning behind them.
 - docs/FEEDBACK.md: kill feedback and sounds, and the reasoning behind them.
 - docs/WEAPON.md: railgun tuning and the reasoning behind it.
+- docs/SETTINGS.md: player settings, their options and defaults, and the reasoning behind them.
 - docs/MAP_DESIGN.md: researched layout principles and targets. Check new or changed maps
   against it; ask the owner to run `/openness` in Studio to measure them.
 - README.md: setup, scripts, Studio commands, modes.

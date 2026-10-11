@@ -59,6 +59,9 @@
 				},
 				"HeadBurst": {
 					"$className": "RemoteEvent"
+				},
+				"SaveSettings": {
+					"$className": "RemoteEvent"
 				}
 			},
 			"MatchState": {

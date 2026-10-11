@@ -20,6 +20,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `standings.ts`   | Player ranking (kills, then deaths)                             |
 | `characters.ts`  | Safe reads of player characters                                 |
 | `perks.ts`       | Perk definitions, effect attributes and the Overcharge cooldown |
+| `settings.ts`    | Player settings: options, defaults and validation               |
 | `progression.ts` | Saved profile types, and the XP-to-level curve                  |
 
 **Server** (`src/server`)
@@ -51,26 +52,28 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 
 **Client** (`src/client`)
 
-| File               | Owns                                                                  |
-| ------------------ | --------------------------------------------------------------------- |
-| `main.client.ts`   | Entry point: camera setup and wiring server events to the UI          |
-| `movement.ts`      | All movement (see MOVEMENT.md)                                        |
-| `weapon.ts`        | Firing the railgun and drawing beams                                  |
-| `menu.ts`          | Main menu and the orbiting menu camera                                |
-| `mapVote.ts`       | Vote cards in the menu                                                |
-| `hud.ts`           | Crosshair, hitmarker, cooldown, kill feed, banners, respawn countdown |
-| `killFeedback.ts`  | Kill, multi-kill and streak feedback (see FEEDBACK.md)                |
-| `matchBar.ts`      | Timer and team scores at the top of the screen                        |
-| `objectives.ts`    | Control point strip in Domination and Hardpoint                       |
-| `onboarding.ts`    | The how-to-play card in the menu and one-time in-game tips            |
-| `perks.ts`         | Perk panel, Radar outlines, pickup announcements                      |
-| `profileData.ts`   | Reading the local player's saved profile                              |
-| `profileScreen.ts` | The Profile panel in the menu: level, XP and lifetime stats           |
-| `podium.ts`        | Live top three in Deathmatch, and the end-of-match podium             |
-| `speedometer.ts`   | Speed readout and its effects                                         |
-| `sounds.ts`        | Every sound cue, in one table                                         |
-| `teammates.ts`     | Teammate outlines                                                     |
-| `ui.ts`            | The `create` helper for building UI                                   |
+| File                | Owns                                                                  |
+| ------------------- | --------------------------------------------------------------------- |
+| `main.client.ts`    | Entry point: camera setup and wiring server events to the UI          |
+| `movement.ts`       | All movement (see MOVEMENT.md)                                        |
+| `weapon.ts`         | Firing the railgun and drawing beams                                  |
+| `menu.ts`           | Main menu and the orbiting menu camera                                |
+| `mapVote.ts`        | Vote cards in the menu                                                |
+| `hud.ts`            | Crosshair, hitmarker, cooldown, kill feed, banners, respawn countdown |
+| `killFeedback.ts`   | Kill, multi-kill and streak feedback (see FEEDBACK.md)                |
+| `matchBar.ts`       | Timer and team scores at the top of the screen                        |
+| `objectives.ts`     | Control point strip in Domination and Hardpoint                       |
+| `onboarding.ts`     | The how-to-play card in the menu and one-time in-game tips            |
+| `perks.ts`          | Perk panel, Radar outlines, pickup announcements                      |
+| `profileData.ts`    | Reading the local player's saved profile                              |
+| `profileScreen.ts`  | The Profile panel in the menu: level, XP and lifetime stats           |
+| `settingsScreen.ts` | The Settings panel in the menu (see SETTINGS.md)                      |
+| `crosshair.ts`      | Drawing the crosshair from the player's settings, and saving changes  |
+| `podium.ts`         | Live top three in Deathmatch, and the end-of-match podium             |
+| `speedometer.ts`    | Speed readout and its effects                                         |
+| `sounds.ts`         | Every sound cue, in one table                                         |
+| `teammates.ts`      | Teammate outlines                                                     |
+| `ui.ts`             | The `create` helper for building UI                                   |
 
 ## Rules of the codebase
 

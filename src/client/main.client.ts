@@ -14,6 +14,7 @@ import { initOnboarding } from "./onboarding";
 import { initPerks } from "./perks";
 import { initPodium, setMatchXp, showMatchEnd } from "./podium";
 import { initProfileScreen } from "./profileScreen";
+import { initSettingsScreen } from "./settingsScreen";
 import { initSpeedometer, setSpeed } from "./speedometer";
 import { initTeammates } from "./teammates";
 import { initWeapon } from "./weapon";
@@ -41,6 +42,7 @@ initMapVote();
 initOnboarding();
 initPerks();
 initProfileScreen();
+initSettingsScreen();
 initTeammates();
 
 Remotes.Knockback.OnClientEvent.Connect((impulse) => launchCharacter(impulse, true));

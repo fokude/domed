@@ -3,6 +3,7 @@
 
 import { PerkId } from "./perks";
 import { OnboardingKey } from "./progression";
+import { PlayerSettings } from "./settings";
 import { Standing } from "./standings";
 
 const folder = game.GetService("ReplicatedStorage").WaitForChild("Remotes");
@@ -30,6 +31,8 @@ export const Remotes = {
 	UsePerk: remote<(perk: PerkId) => void>("UsePerk"),
 	// Particle burst at a killed target's head, shown to everyone (players and training dummies).
 	HeadBurst: remote<(position: Vector3) => void>("HeadBurst"),
+	// Client saves the player's settings. The server sanitizes them.
+	SaveSettings: remote<(settings: PlayerSettings) => void>("SaveSettings"),
 	CastVote: remote<(optionIndex: number) => void>("CastVote"),
 	// Client asks to leave the menu and join the match in progress.
 	Deploy: remote<() => void>("Deploy"),
