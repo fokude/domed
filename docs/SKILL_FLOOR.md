@@ -71,7 +71,8 @@ None of these change one-shot headshots or air strafing. Ranked by expected valu
    of rules, one lesson shows at a time (shoot, bunny hop, air strafe, double jump) and clears
    the moment the player does it; moves they already know are skipped. The how-to-play card
    stays in the menu. Judge it by the funnel's joined-to-deployed step and first-kill rate.
-7. **Friends together.** Shipped for teams; the invite button is still to do. Prefer keeping Roblox friends on the same team when balance allows,
+7. **Friends together.** Shipped: friends share a team when it stays fair, and the menu has
+   an Invite Friends button. Prefer keeping Roblox friends on the same team when balance allows,
    and add an invite button.
 
 Rejected: body-shot damage, which makes spraying at bodies a strategy and dilutes every

@@ -8,6 +8,7 @@ import { create } from "./ui";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
+const SocialService = game.GetService("SocialService");
 const UserInputService = game.GetService("UserInputService");
 const Workspace = game.GetService("Workspace");
 
@@ -199,6 +200,16 @@ function buildMenu() {
 	playButton = menuButton(buttons, "PLAY", 1);
 	playButton.BackgroundColor3 = ACCENT;
 	playButton.Activated.Connect(() => Remotes.Deploy.FireServer());
+
+	// Hard games stick when played with friends (docs/SKILL_FLOOR.md). Hidden where Roblox
+	// doesn't allow invites, such as for some accounts and in Studio.
+	const invite = menuButton(buttons, "INVITE FRIENDS", 8);
+	invite.Visible = false;
+	task.spawn(() => {
+		const [ok, allowed] = pcall(() => SocialService.CanSendGameInviteAsync(player));
+		invite.Visible = ok && allowed;
+	});
+	invite.Activated.Connect(() => pcall(() => SocialService.PromptGameInvite(player)));
 
 	const loadout = menuButton(buttons, "LOADOUT", 10);
 	loadout.AutoButtonColor = false;
