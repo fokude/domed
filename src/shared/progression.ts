@@ -17,11 +17,21 @@ export interface LifetimeStats {
 export type OnboardingKey = "intro" | "strafeTip" | "bodyShotTip";
 export const ONBOARDING_KEYS: OnboardingKey[] = ["intro", "strafeTip", "bodyShotTip"];
 
+// Hidden team-mode skill: estimate and uncertainty. Saved, but never sent to clients.
+export interface PlayerRating {
+	mu: number;
+	sigma: number;
+}
+
 export interface PlayerProfile {
 	xp: number;
 	stats: LifetimeStats;
 	onboarding: Partial<Record<OnboardingKey, boolean>>;
+	rating: PlayerRating;
 }
+
+// What the client receives: everything except the hidden rating.
+export type VisibleProfile = Omit<PlayerProfile, "rating">;
 
 // Player attribute holding the player's own profile as JSON.
 export const PROFILE_ATTRIBUTE = "Profile";

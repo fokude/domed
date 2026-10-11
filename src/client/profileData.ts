@@ -1,6 +1,6 @@
 // The local player's saved profile, as sent by the server in the Profile attribute.
 
-import { PlayerProfile, PROFILE_ATTRIBUTE } from "shared/progression";
+import { PROFILE_ATTRIBUTE, VisibleProfile } from "shared/progression";
 
 const HttpService = game.GetService("HttpService");
 const Players = game.GetService("Players");
@@ -8,11 +8,11 @@ const Players = game.GetService("Players");
 const player = Players.LocalPlayer;
 
 // Undefined until the server has loaded the profile.
-export function getMyProfile(): PlayerProfile | undefined {
+export function getMyProfile(): VisibleProfile | undefined {
 	const json = player.GetAttribute(PROFILE_ATTRIBUTE);
 	if (!typeIs(json, "string")) return undefined;
 	const [ok, value] = pcall(() => HttpService.JSONDecode(json));
-	return ok ? (value as PlayerProfile) : undefined;
+	return ok ? (value as VisibleProfile) : undefined;
 }
 
 export function onMyProfileChanged(callback: () => void): RBXScriptConnection {

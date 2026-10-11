@@ -39,6 +39,16 @@ export const XpConfig = {
 	matchCap: 800,
 };
 
+// Hidden team-mode skill rating (see server/rating.ts). Defaults follow OpenSkill.
+export const RatingConfig = {
+	initialMu: 25,
+	initialSigma: 25 / 3,
+	// Skill gap that gives the stronger side roughly a 75% chance to win.
+	beta: 25 / 6,
+	// Floor on how far one match can shrink a player's uncertainty.
+	kappa: 0.0001,
+};
+
 export const WeaponConfig = {
 	cooldown: 0.9,
 	range: 1000,

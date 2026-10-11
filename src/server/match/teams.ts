@@ -4,6 +4,7 @@
 import { setMatchState } from "shared/matchState";
 import { TEAM_IDS, TeamId } from "shared/modes";
 import { SpawnPoint } from "../maps/loader";
+import { getRating } from "../rating";
 import { pickSafestSpawn } from "../spawning";
 import { MatchResult } from "./modes/types";
 
@@ -30,6 +31,11 @@ export class TeamRoster {
 			this.scores.set(id, 0);
 			this.publishScore(id);
 		}
+
+		// Split everyone already here by skill before the match starts: strongest first, each to
+		// whichever team keeps sizes within one and has less total skill.
+		const bySkill = [...Players.GetPlayers()].sort((a, b) => getRating(a).mu > getRating(b).mu);
+		for (const player of bySkill) this.assign(player);
 	}
 
 	teamOf(player: Player): TeamId | undefined {
@@ -44,16 +50,24 @@ export class TeamRoster {
 		return this.teamOf(a) !== this.teamOf(b);
 	}
 
-	// Puts a player without a team on the smaller one.
+	members(team: TeamId): Player[] {
+		return Players.GetPlayers().filter((player) => player.Team === this.teams.get(team));
+	}
+
+	// Puts a player without a team on the smaller team, or if they're level, the one with less
+	// total hidden skill.
 	assign(player: Player) {
 		if (this.teamOf(player)) return;
-		const counts = TEAM_IDS.map((id) =>
-			Players.GetPlayers()
-				.filter((other) => other.Team === this.teams.get(id))
-				.size(),
-		);
+		const [red, blue] = TEAM_IDS.map((id) => this.members(id));
+		let team: TeamId;
+		if (red.size() !== blue.size()) {
+			team = red.size() < blue.size() ? "Red" : "Blue";
+		} else {
+			const skill = (members: Player[]) => members.reduce((sum, member) => sum + getRating(member).mu, 0);
+			team = skill(red) <= skill(blue) ? "Red" : "Blue";
+		}
 		player.Neutral = false;
-		player.Team = this.teams.get(counts[0] <= counts[1] ? TEAM_IDS[0] : TEAM_IDS[1]);
+		player.Team = this.teams.get(team);
 	}
 
 	// Team spawns when the map has them, otherwise any spawn, away from enemies.
@@ -82,7 +96,7 @@ export class TeamRoster {
 	}
 
 	private teamWin(team: TeamId): MatchResult {
-		const winners = Players.GetPlayers().filter((player) => this.teamOf(player) === team);
+		const winners = this.members(team);
 		return { title: `${team.upper()} TEAM WINS`, winners };
 	}
 

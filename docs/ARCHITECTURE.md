@@ -34,6 +34,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `stats.ts`            | Kills and deaths on the leaderboard                            |
 | `data/profiles.ts`    | Loading and saving player profiles with ProfileStore           |
 | `progression.ts`      | Recording lifetime stats into profiles                         |
+| `rating.ts`           | Hidden team-mode skill rating                                  |
 | `dev.ts`              | Studio-only chat commands                                      |
 | `match/controller.ts` | The match loop: play, results, vote                            |
 | `match/voting.ts`     | Map vote options and tallying                                  |
@@ -114,6 +115,13 @@ combat rules (who can damage whom), picks spawns, reacts to deaths, and reports 
 condition is met. Deathmatch, Team Deathmatch, CTF, and Domination and Hardpoint (one
 class, `controlPoints.ts`) live alongside it; the team modes share
 `TeamRoster` (`server/match/teams.ts`) for teams, balancing, scores and spawns.
+
+Teams are balanced within each server by a hidden skill rating (`server/rating.ts`, the
+OpenSkill Weng-Lin Bradley-Terry model). At match start players are split strongest first, each
+to the team with less total skill while sizes stay within one; mid-match joiners go to the
+smaller team, or the weaker one if sizes match. Team matches update the rating; free-for-all
+doesn't. The rating is saved in the profile but never sent to clients, so there's no visible
+number to protect.
 
 ## Movement
 
