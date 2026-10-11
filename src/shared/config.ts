@@ -6,13 +6,13 @@ export const MovementConfig = {
 
 	// Air strafing follows the Quake/Half-Life model: the air speed cap is tiny,
 	// so speed is only gained by strafing while turning the camera.
-	airAccelerate: 12,
-	airSpeedCap: 3,
+	airAccelerate: 30,
+	airSpeedCap: 6,
 	maxAirSpeed: 140,
 
 	// Seconds you can touch the ground after landing and still keep air speed.
-	bhopWindow: 0.12,
-	bhopSpeedLoss: 0.02,
+	bhopWindow: 0.2,
+	bhopSpeedLoss: 0,
 
 	doubleJumpVelocity: 55,
 
