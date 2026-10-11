@@ -42,6 +42,9 @@ export interface MatchOption {
 }
 
 let currentMode: GameMode | undefined;
+// Set by dev commands to cut the current match short.
+let endRequested = false;
+let forcedOption: MatchOption | undefined;
 
 export function allMatchOptions(): MatchOption[] {
 	const options: MatchOption[] = [];
@@ -90,7 +93,7 @@ function waitForResult(mode: GameMode): MatchResult {
 		task.wait(POLL_INTERVAL);
 		const winner = mode.checkWinner();
 		if (winner) return winner;
-		if (Workspace.GetServerTimeNow() >= endsAt) return mode.timeUpResult();
+		if (endRequested || Workspace.GetServerTimeNow() >= endsAt) return mode.timeUpResult();
 	}
 }
 
@@ -105,18 +108,30 @@ function voteForNext(previous: MatchOption): MatchOption {
 	const choices = pickVoteOptions(allMatchOptions(), previous);
 	setMatchState("Phase", "Voting");
 	setMatchState("EndsAt", Workspace.GetServerTimeNow() + MatchConfig.intermissionTime);
-	return runVote(choices, MatchConfig.intermissionTime);
+	return runVote(choices, MatchConfig.intermissionTime, () => forcedOption !== undefined);
 }
 
 function runMatch(option: MatchOption) {
+	endRequested = false;
 	const mode = startMatch(option);
 	const result = waitForResult(mode);
 	setCombatRules(undefined);
 	closeSpawning();
-	showResults(result);
+	if (!forcedOption) showResults(result);
 	mode.stop();
 	currentMode = undefined;
 	returnAllToMenu();
+}
+
+// Ends the current match now, with normal results and voting.
+export function endMatch() {
+	endRequested = true;
+}
+
+// Skips straight to `option`, cutting short whatever is happening.
+export function forceMatch(option: MatchOption) {
+	forcedOption = option;
+	endRequested = true;
 }
 
 export function startMatchLoop() {
@@ -131,7 +146,10 @@ export function startMatchLoop() {
 		let option = randomOption();
 		for (;;) {
 			runMatch(option);
-			option = voteForNext(option);
+			if (!forcedOption) option = voteForNext(option);
+			// A dev command during the match or the vote overrides the vote.
+			option = forcedOption ?? option;
+			forcedOption = undefined;
 		}
 	});
 }

@@ -50,14 +50,16 @@ export function pickVoteOptions(all: MatchOption[], previous: MatchOption | unde
 	return picked;
 }
 
-// Runs a vote for `duration` seconds and returns the winning option.
-export function runVote(choices: MatchOption[], duration: number): MatchOption {
+// Runs a vote for `duration` seconds, or until `cancelled` returns true, and returns the
+// winning option.
+export function runVote(choices: MatchOption[], duration: number, cancelled: () => boolean): MatchOption {
 	options = choices;
 	votes.clear();
 	setMatchState("VoteOptions", HttpService.JSONEncode(choices.map(describe)));
 	publishCounts();
 
-	task.wait(duration);
+	const endsAt = os.clock() + duration;
+	while (os.clock() < endsAt && !cancelled()) task.wait(0.25);
 
 	const counts = choices.map(() => 0);
 	for (const [player, choice] of votes) {

@@ -1,5 +1,6 @@
 import { MatchConfig } from "shared/config";
 import { startCombat } from "./combat";
+import { startDevCommands } from "./dev";
 import { startHazards } from "./hazards";
 import { startMatchLoop } from "./match/controller";
 import { watchCharacters } from "./spawning";
@@ -23,3 +24,4 @@ for (const player of Players.GetPlayers()) {
 startCombat();
 startHazards();
 startMatchLoop();
+startDevCommands();
