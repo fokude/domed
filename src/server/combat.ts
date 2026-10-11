@@ -207,10 +207,10 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	if (reason !== undefined) return reject(shooter, reason);
 
 	const isHead = hitPart.Name === "Head";
-	if (hitShield(victim, isHead) === "broken") {
-		// A breaking shield absorbs the hit, pushing the target back like a body shot.
-		push(shooter, victim, victimCharacter, shotVector);
-		Remotes.HitConfirm.FireClient(shooter, "shield", false);
+	// A shield takes rail hits whole: no kill and no knockback, just wear (see docs/PERKS.md).
+	const shield = hitShield(victim, isHead);
+	if (shield !== undefined) {
+		Remotes.HitConfirm.FireClient(shooter, shield === "broken" ? "shield" : "body", false);
 	} else if (isHead) {
 		victimHumanoid.Health = 0;
 		Remotes.HeadBurst.FireAllClients(hitPart.Position);

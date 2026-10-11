@@ -244,7 +244,9 @@ function shoot(bot: Bot, target: Model) {
 	if (victim.Character?.FindFirstChildOfClass("ForceField")) return;
 
 	const isHead = result.Instance.Name === "Head";
-	if (isHead && hitShield(victim, true) === undefined) {
+	// A shield takes the hit whole: no kill and no knockback.
+	if (hitShield(victim, isHead) !== undefined) return;
+	if (isHead) {
 		victimHumanoid.Health = 0;
 		Remotes.HeadBurst.FireAllClients(result.Position);
 		Remotes.KillFeed.FireAllClients(bot.humanoid.DisplayName, victim);
@@ -257,7 +259,6 @@ function shoot(bot: Bot, target: Model) {
 		);
 		return;
 	}
-	if (!isHead) hitShield(victim, false);
 	knockBack(victim, direction);
 }
 
