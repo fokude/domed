@@ -91,9 +91,10 @@ function buildDodgeGap(map: Model) {
 // A tall wall with a pad up to its top, for dropping down it while holding into the wall.
 function buildWallSlide(map: Model) {
 	slab(map, new Vector3(-30, 40, 60), new Vector3(20, 40, 2), Wall, "SlideWall");
-	slab(map, new Vector3(-30, 40, 56), new Vector3(20, 1, 6), Goal, "SlideWallTop");
-	jumpPad(map, new Vector3(-30, 0, 40), new Vector3(-30, 40, 56), 6, Pad);
-	label(map, new Vector3(-30, 46, 56), "WALL SLIDE: drop off and hold W into the wall");
+	// A narrow ledge, so dropping off any side keeps the player within reach of the wall.
+	slab(map, new Vector3(-30, 40, 57.5), new Vector3(20, 1, 3), Goal, "SlideWallTop");
+	jumpPad(map, new Vector3(-30, 0, 40), new Vector3(-30, 40, 57.5), 6, Pad);
+	label(map, new Vector3(-30, 46, 57), "WALL SLIDE: step off the ledge facing the wall, hold W");
 }
 
 function buildPads(map: Model) {

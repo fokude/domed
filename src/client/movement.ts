@@ -41,6 +41,8 @@ let airVelocity = Vector3.zero;
 let groundTime = math.huge;
 let wasAirborne = false;
 let keepVelocityOnTakeoff = false;
+// Vertical speed to apply on the first airborne frame of a launch from the ground.
+let pendingVerticalVelocity: number | undefined;
 let doubleJumpUsed = false;
 let wallJumpsUsed = 0;
 let lastWallNormal: Vector3 | undefined;
@@ -54,7 +56,8 @@ padProbeParams.FilterDescendantsInstances = [];
 let lastScrollAt = -math.huge;
 
 let sliding = false;
-let slideVelocity = Vector3.zero;
+let slideDirection = Vector3.zero;
+let slideSpeed = 0;
 let slideStartedAt = 0;
 let lastSlideEndedAt = -math.huge;
 let lastDodgeAt = -math.huge;
@@ -136,7 +139,8 @@ function startSlide(currentHumanoid: Humanoid, horizontal: Vector3): boolean {
 
 	sliding = true;
 	slideStartedAt = os.clock();
-	slideVelocity = horizontal.Unit.mul(math.max(speed, Config.slideStartSpeed));
+	slideDirection = horizontal.Unit;
+	slideSpeed = math.max(speed, Config.slideStartSpeed);
 	currentHumanoid.CameraOffset = new Vector3(0, -Config.slideCameraDrop, 0);
 	return true;
 }
@@ -145,20 +149,27 @@ function endSlide() {
 	if (!sliding) return;
 	sliding = false;
 	lastSlideEndedAt = os.clock();
-	if (humanoid) humanoid.CameraOffset = Vector3.zero;
+	if (humanoid) {
+		humanoid.CameraOffset = Vector3.zero;
+		humanoid.WalkSpeed = Config.walkSpeed;
+	}
 }
 
-// A grounded slide keeps momentum with light friction instead of the Humanoid's instant stop.
-function updateSlide(currentHumanoid: Humanoid, rootPart: BasePart, actualVelocity: Vector3, dt: number) {
-	currentHumanoid.Move(Vector3.zero);
-	const slowed = slideVelocity.mul(math.max(0, 1 - Config.slideFriction * dt));
-	slideVelocity = clipToWalls(slowed, rootPart, dt);
-	if (slideVelocity.Magnitude < Config.walkSpeed * 0.75 || os.clock() - slideStartedAt > Config.slideMaxTime) {
+// A grounded slide keeps momentum with light friction. On the ground the Humanoid brakes any
+// velocity it didn't choose, so the slide is driven through it: it walks in the slide
+// direction at the slide speed.
+function updateSlide(currentHumanoid: Humanoid, rootPart: BasePart, dt: number) {
+	slideSpeed *= math.max(0, 1 - Config.slideFriction * dt);
+	const velocity = clipToWalls(slideDirection.mul(slideSpeed), rootPart, dt);
+	if (velocity.Magnitude < Config.walkSpeed * 0.75 || os.clock() - slideStartedAt > Config.slideMaxTime) {
 		endSlide();
 		return;
 	}
-	airVelocity = slideVelocity;
-	rootPart.AssemblyLinearVelocity = new Vector3(slideVelocity.X, actualVelocity.Y, slideVelocity.Z);
+	slideDirection = velocity.Unit;
+	slideSpeed = velocity.Magnitude;
+	currentHumanoid.WalkSpeed = slideSpeed;
+	currentHumanoid.Move(slideDirection, false);
+	airVelocity = velocity;
 }
 
 function onPreSimulation(dt: number) {
@@ -182,7 +193,7 @@ function onPreSimulation(dt: number) {
 			else if (isSlideHeld()) startSlide(currentHumanoid, airVelocity);
 		}
 		groundTime += dt;
-		if (sliding) updateSlide(currentHumanoid, rootPart, actualVelocity, dt);
+		if (sliding) updateSlide(currentHumanoid, rootPart, dt);
 		return;
 	}
 	endSlide();
@@ -219,6 +230,10 @@ function onPreSimulation(dt: number) {
 
 	// Wall slide: holding into a wall while falling caps the fall speed.
 	let verticalVelocity = actualVelocity.Y;
+	if (justTookOff && pendingVerticalVelocity !== undefined) {
+		verticalVelocity = pendingVerticalVelocity;
+		pendingVerticalVelocity = undefined;
+	}
 	if (Config.wallSlideEnabled && verticalVelocity < -Config.wallSlideFallSpeed) {
 		const wall = findWall(rootPart);
 		if (wall && flatten(wishDirection).Dot(wall) < -0.5) verticalVelocity = -Config.wallSlideFallSpeed;
@@ -388,9 +403,12 @@ export function launchCharacter(velocity: Vector3, additive: boolean) {
 	if (!additive) doubleJumpUsed = false;
 
 	if (!isAirborne(currentHumanoid)) {
+		// A real jump is the only reliable way off the ground: in any other state the Humanoid
+		// sees the floor and snaps back to walking. The jump's own vertical speed is replaced on
+		// the first airborne frame.
 		keepVelocityOnTakeoff = true;
-		// Freefall rather than Jumping: entering Jumping would overwrite our vertical velocity.
-		currentHumanoid.ChangeState(Enum.HumanoidStateType.Freefall);
+		pendingVerticalVelocity = newVelocity.Y;
+		currentHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
 	}
 	rootPart.AssemblyLinearVelocity = newVelocity;
 }
