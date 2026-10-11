@@ -57,7 +57,7 @@ export const DominationConfig = {
 	timeLimit: 600,
 	scoreTarget: 200,
 	// Seconds for one player to capture a point; each extra teammate (up to 3) speeds it up.
-	captureTime: 6,
+	captureTime: 12,
 };
 
 export const HardpointConfig = {
