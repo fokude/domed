@@ -2,9 +2,10 @@
 
 import { MatchConfig } from "shared/config";
 import { Remotes } from "shared/remotes";
-import { addKill, HudColors, initHud, setSpeed, showBanner } from "./hud";
+import { addKill, HudColors, initHud, showBanner } from "./hud";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
 import { initPodium, showMatchEnd } from "./podium";
+import { initSpeedometer, setSpeed } from "./speedometer";
 import { initWeapon } from "./weapon";
 
 const Players = game.GetService("Players");
@@ -21,6 +22,7 @@ StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Health, false);
 
 initHud();
 initPodium();
+initSpeedometer();
 initMovement();
 initWeapon();
 

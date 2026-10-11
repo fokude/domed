@@ -1,4 +1,4 @@
-// Crosshair, hitmarker, speedometer, rail cooldown, kill feed, and center-screen banner.
+// Crosshair, hitmarker, rail cooldown, kill feed, and center-screen banner.
 
 import { create } from "./ui";
 
@@ -16,7 +16,6 @@ export const HudColors = {
 };
 
 let hitmarker: Frame;
-let speedLabel: TextLabel;
 let cooldownFill: Frame;
 let feed: Frame;
 let banner: TextLabel;
@@ -90,22 +89,6 @@ function buildCrosshair(gui: ScreenGui) {
 }
 
 function buildPanels(gui: ScreenGui) {
-	speedLabel = create(
-		"TextLabel",
-		{
-			AnchorPoint: new Vector2(0.5, 1),
-			Position: new UDim2(0.5, 0, 1, -40),
-			Size: UDim2.fromOffset(200, 40),
-			BackgroundTransparency: 1,
-			Font: Enum.Font.GothamBlack,
-			TextSize: 32,
-			TextColor3: HudColors.White,
-			TextStrokeTransparency: 0.5,
-			Text: "0",
-		},
-		gui,
-	);
-
 	feed = create(
 		"Frame",
 		{
@@ -172,10 +155,6 @@ export function showBanner(text: string, color: Color3, duration: number) {
 	task.delay(duration, () => {
 		if (bannerToken === token) banner.Visible = false;
 	});
-}
-
-export function setSpeed(speed: number) {
-	speedLabel.Text = tostring(math.round(speed));
 }
 
 export function setCooldown(fraction: number) {
