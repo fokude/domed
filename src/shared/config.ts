@@ -77,7 +77,9 @@ export const PerkConfig = {
 };
 
 export const WeaponConfig = {
-	cooldown: 0.9,
+	// Seconds between shots. Long enough that a miss costs something, so careful aim beats
+	// spamming; see docs/WEAPON.md.
+	cooldown: 0.75,
 	range: 1000,
 	bodyShotKnockback: 70,
 };
