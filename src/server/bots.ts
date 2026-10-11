@@ -10,6 +10,7 @@ import { MapTag } from "shared/mapMarkers";
 import { DEPLOYED_ATTRIBUTE } from "shared/matchState";
 import { Remotes } from "shared/remotes";
 import { LoadedMap } from "./maps/loader";
+import { knockbackImpulse } from "./knockback";
 import { hitShield } from "./perks";
 import { addThreatSource, pickSpawnAwayFrom } from "./spawning";
 
@@ -29,7 +30,6 @@ const HOP_INTERVAL = 1.2;
 const STRAFE_STUDS = 10;
 const STRAFE_SWITCH = 0.8;
 const HAZARD_LABEL = "Hazard";
-const KNOCKBACK_LIFT = 0.35;
 
 interface Bot {
 	name: string;
@@ -258,8 +258,7 @@ function shoot(bot: Bot, target: Model) {
 		return;
 	}
 	if (!isHead) hitShield(victim, false);
-	const push = direction.Unit.mul(WeaponConfig.bodyShotKnockback);
-	Remotes.Knockback.FireClient(victim, push.add(new Vector3(0, WeaponConfig.bodyShotKnockback * KNOCKBACK_LIFT, 0)));
+	Remotes.Knockback.FireClient(victim, knockbackImpulse(direction));
 }
 
 function requestPath(bot: Bot, goal: Vector3) {
@@ -382,10 +381,7 @@ export function killBot(model: Model): boolean {
 export function pushBot(model: Model, direction: Vector3) {
 	const bot = bots.get(model);
 	if (!bot || !living(bot)) return;
-	const push = direction.Unit.mul(WeaponConfig.bodyShotKnockback);
-	bot.root.AssemblyLinearVelocity = bot.root.AssemblyLinearVelocity.add(
-		push.add(new Vector3(0, WeaponConfig.bodyShotKnockback * KNOCKBACK_LIFT, 0)),
-	);
+	bot.root.AssemblyLinearVelocity = bot.root.AssemblyLinearVelocity.add(knockbackImpulse(direction));
 }
 
 // Studio only: sets how many players and bots to fill to, or undefined for the default.

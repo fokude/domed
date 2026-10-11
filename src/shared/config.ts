@@ -85,6 +85,8 @@ export const WeaponConfig = {
 	cooldown: 0.75,
 	range: 1000,
 	bodyShotKnockback: 70,
+	// Upward push as a fraction of the knockback.
+	bodyShotLift: 0.35,
 };
 
 // Bots fill near-empty free-for-all matches (see server/bots.ts and docs/BOTS.md).

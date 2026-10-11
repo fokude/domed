@@ -1,6 +1,6 @@
 // Records lifetime stats and awards XP into each player's saved profile as they play.
 
-import { getLiveRoot } from "shared/characters";
+import { flatSpeed, getLiveRoot } from "shared/characters";
 import { MovementConfig, XpConfig } from "shared/config";
 import { levelForXp, ONBOARDING_KEYS } from "shared/progression";
 import { Remotes } from "shared/remotes";
@@ -108,8 +108,7 @@ function sampleSpeeds() {
 	for (const player of Players.GetPlayers()) {
 		const root = getLiveRoot(player);
 		if (!root) continue;
-		const velocity = root.AssemblyLinearVelocity;
-		const speed = math.floor(new Vector3(velocity.X, 0, velocity.Z).Magnitude);
+		const speed = flatSpeed(root.AssemblyLinearVelocity);
 		const best = getProfile(player)?.stats.topSpeed;
 		const rising = risingSpeed.get(player);
 		if (best === undefined || speed <= best || speed > MAX_CREDIBLE_SPEED) {

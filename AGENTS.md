@@ -8,8 +8,8 @@ lives and the codebase rules). CONTRIBUTING.md has recipes for common changes.
 
 ## Commands
 
-- `npm run check`: check remotes match the project file, lint, and compile. Run it before every commit; CI runs the same steps plus a
-  Rojo place build on every push and pull request.
+- `npm run check`: check remotes match the project file, lint, and compile. Run it before
+  every commit; CI runs the same steps plus a Rojo place build on every push and pull request.
 - `npm run format`: fix lint formatting and format the Markdown docs.
 - `rojo build -o <temp file>`: run when `default.project.json` changes.
 

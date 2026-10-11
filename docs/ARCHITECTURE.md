@@ -29,10 +29,11 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | --------------------- | ---------------------------------------------------------------------------------------- |
 | `main.server.ts`      | Entry point: wires the modules together                                                  |
 | `combat.ts`           | Validating railgun shots, kills and knockback                                            |
+| `knockback.ts`        | The body-shot push, shared by player and bot shots                                       |
 | `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection                           |
 | `hazards.ts`          | Lava and falling out of the map                                                          |
 | `movementCheck.ts`    | Flagging and kicking speed hacks and teleports                                           |
-| `perks.ts`            | Perk orbs, granting effects, shields                                                     |
+| `perks.ts`            | Perk orbs, granting effects, shields and the shield rule (also used by dummies)          |
 | `dummies.ts`          | Training dummies on the Test Range and in the warm-up: movement patterns, hits, respawns |
 | `bots.ts`             | Bots that fill near-empty free-for-all matches (see BOTS.md)                             |
 | `analytics.ts`        | Onboarding funnel and custom events for the Creator Dashboard                            |

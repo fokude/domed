@@ -5,14 +5,13 @@
 import { PerkConfig } from "shared/config";
 import { HitKind } from "shared/remotes";
 import { DummySpawn, LoadedMap } from "./maps/loader";
-import { shieldTransparency } from "./perks";
+import { addShieldBubble, setShieldBubbleStrength, shieldHitsAfter } from "./perks";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
 
 const DUMMY_TAG = "TrainingDummy";
 const RESPAWN_DELAY = 2;
-const SHIELD_BUBBLE = "DummyShield";
 
 interface Dummy {
 	spawn: DummySpawn;
@@ -41,25 +40,6 @@ function patternOffset(pattern: string, t: number): Vector3 {
 	return Vector3.zero;
 }
 
-function addShield(model: Model, root: BasePart) {
-	const bubble = new Instance("Part");
-	bubble.Name = SHIELD_BUBBLE;
-	bubble.Shape = Enum.PartType.Ball;
-	bubble.Size = Vector3.one.mul(7);
-	bubble.Material = Enum.Material.ForceField;
-	bubble.Color = Color3.fromRGB(80, 200, 255);
-	bubble.CanCollide = false;
-	bubble.CanQuery = false;
-	bubble.CanTouch = false;
-	bubble.Massless = true;
-	bubble.CFrame = root.CFrame;
-	const weld = new Instance("WeldConstraint");
-	weld.Part0 = root;
-	weld.Part1 = bubble;
-	weld.Parent = bubble;
-	bubble.Parent = model;
-}
-
 function spawnDummy(spawn: DummySpawn) {
 	if (!folder) return;
 	const model = Players.CreateHumanoidModelFromDescription(
@@ -73,7 +53,7 @@ function spawnDummy(spawn: DummySpawn) {
 	root.Anchored = true;
 	model.PivotTo(spawn.cframe.add(new Vector3(0, 3, 0)));
 	model.AddTag(DUMMY_TAG);
-	if (spawn.shielded) addShield(model, root);
+	if (spawn.shielded) addShieldBubble(model);
 	model.Parent = folder;
 
 	dummies.set(model, {
@@ -122,14 +102,9 @@ export function hitDummy(model: Model, isHead: boolean): HitKind | undefined {
 	if (!dummy || !dummy.alive) return undefined;
 	// Shields work as on players: a headshot breaks one, body shots wear it down.
 	if (dummy.shieldHits > 0) {
-		dummy.shieldHits = isHead ? 0 : dummy.shieldHits - 1;
-		const bubble = model.FindFirstChild(SHIELD_BUBBLE);
-		if (dummy.shieldHits === 0) {
-			bubble?.Destroy();
-			return "shield";
-		}
-		if (bubble?.IsA("BasePart")) bubble.Transparency = shieldTransparency(dummy.shieldHits);
-		return "body";
+		dummy.shieldHits = shieldHitsAfter(dummy.shieldHits, isHead);
+		setShieldBubbleStrength(model, dummy.shieldHits);
+		return dummy.shieldHits === 0 ? "shield" : "body";
 	}
 	if (!isHead) return "body";
 

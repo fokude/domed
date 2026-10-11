@@ -11,6 +11,7 @@ import { railCooldown } from "shared/perks";
 import { DeathCause, Remotes } from "shared/remotes";
 import { getBotName, isBot, killBot, livingBotHeads, pushBot } from "./bots";
 import { hitDummy, isDummy, livingDummyHeads } from "./dummies";
+import { knockbackImpulse } from "./knockback";
 import { hitShield } from "./perks";
 import { recordKill } from "./progression";
 import { incrementStat } from "./stats";
@@ -105,7 +106,7 @@ function implausibleHit(
 	return undefined;
 }
 
-export function sendDeathRecap(victim: Player, killer: Player, cause: DeathCause, distance: number) {
+function sendDeathRecap(victim: Player, killer: Player, cause: DeathCause, distance: number) {
 	const speed = flatSpeed(getLiveRoot(killer)?.AssemblyLinearVelocity ?? Vector3.zero);
 	Remotes.DeathRecap.FireClient(victim, killer.Character, cause, math.floor(distance), speed);
 }
@@ -221,8 +222,7 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 }
 
 function push(shooter: Player, victim: Player, victimCharacter: Model, shotVector: Vector3) {
-	const knockback = WeaponConfig.bodyShotKnockback;
-	Remotes.Knockback.FireClient(victim, shotVector.Unit.mul(knockback).add(new Vector3(0, knockback * 0.35, 0)));
+	Remotes.Knockback.FireClient(victim, knockbackImpulse(shotVector));
 	lastPush.set(victim, { shooter, character: victimCharacter, at: os.clock(), distance: shotVector.Magnitude });
 }
 

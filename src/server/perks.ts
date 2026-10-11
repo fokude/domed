@@ -76,7 +76,8 @@ function setOrbVisible(orb: Orb, visible: boolean) {
 	orb.light.Enabled = visible;
 }
 
-function addShieldBubble(character: Model) {
+// A see-through bubble welded around a character, showing they're shielded.
+export function addShieldBubble(character: Model) {
 	const root = character.FindFirstChild("HumanoidRootPart");
 	if (!root?.IsA("BasePart") || character.FindFirstChild(SHIELD_BUBBLE)) return;
 	const bubble = new Instance("Part");
@@ -107,7 +108,7 @@ function grant(player: Player, perk: PerkId) {
 	else {
 		player.SetAttribute(PerkAttribute.Shield, PerkConfig.shieldHits);
 		if (player.Character) addShieldBubble(player.Character);
-		fadeShieldBubble(player, PerkConfig.shieldHits);
+		setShieldBubbleStrength(player.Character, PerkConfig.shieldHits);
 	}
 	Remotes.PerkTaken.FireAllClients(player, perk);
 }
@@ -147,13 +148,21 @@ function tick() {
 }
 
 // The bubble fades as the shield weakens, so attackers can see it's about to break.
-export function shieldTransparency(hitsLeft: number): number {
+function shieldTransparency(hitsLeft: number): number {
 	return (1 - hitsLeft / PerkConfig.shieldHits) * 0.6;
 }
 
-function fadeShieldBubble(player: Player, hitsLeft: number) {
-	const bubble = player.Character?.FindFirstChild(SHIELD_BUBBLE);
-	if (bubble?.IsA("BasePart")) bubble.Transparency = shieldTransparency(hitsLeft);
+// Shows a shield's strength on its bubble: fainter as it weakens, gone at zero.
+export function setShieldBubbleStrength(character: Model | undefined, hitsLeft: number) {
+	const bubble = character?.FindFirstChild(SHIELD_BUBBLE);
+	if (hitsLeft <= 0) bubble?.Destroy();
+	else if (bubble?.IsA("BasePart")) bubble.Transparency = shieldTransparency(hitsLeft);
+}
+
+// Hits a shield has left after taking a hit: a headshot breaks it outright, other hits wear it
+// down by one. The one rule for players and training dummies.
+export function shieldHitsAfter(hitsLeft: number, isHead: boolean): number {
+	return isHead ? 0 : math.max(0, hitsLeft - 1);
 }
 
 // "absorbed": the shield took the hit and holds. "broken": it took the hit and broke.
@@ -164,15 +173,10 @@ export type ShieldHit = "absorbed" | "broken";
 export function hitShield(player: Player, isHead: boolean): ShieldHit | undefined {
 	const hits = player.GetAttribute(PerkAttribute.Shield);
 	if (!typeIs(hits, "number") || hits <= 0) return undefined;
-	const left = isHead ? 0 : hits - 1;
-	if (left <= 0) {
-		player.SetAttribute(PerkAttribute.Shield, undefined);
-		player.Character?.FindFirstChild(SHIELD_BUBBLE)?.Destroy();
-		return "broken";
-	}
-	player.SetAttribute(PerkAttribute.Shield, left);
-	fadeShieldBubble(player, left);
-	return "absorbed";
+	const left = shieldHitsAfter(hits, isHead);
+	player.SetAttribute(PerkAttribute.Shield, left > 0 ? left : undefined);
+	setShieldBubbleStrength(player.Character, left);
+	return left > 0 ? "absorbed" : "broken";
 }
 
 // Places the map's orbs for a new match.
