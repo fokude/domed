@@ -18,7 +18,7 @@ requests too.
 GitHub Actions runs `.github/workflows/ci.yml` on every push to `main` and every pull
 request. It lints, compiles, and builds the Roblox place with Rojo, in about 20 seconds.
 Results show as a check mark or cross next to each commit, in the repository's Actions tab,
-or with `gh run list`. `npm run check` runs the same lint and compile locally.
+or with `gh run list`. `npm run check` runs the same checks locally.
 
 CI doesn't run the game: a green check means the code compiles and is consistent, not that
 it plays correctly. Test gameplay in Studio.

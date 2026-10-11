@@ -10,8 +10,9 @@
 		"build": "rbxtsc",
 		"watch": "rbxtsc -w",
 		"lint": "eslint src",
-		"check": "eslint src && rbxtsc",
-		"format": "eslint src --fix && prettier --write \"*.md\" \"docs/*.md\""
+		"check": "node scripts/check-remotes.js && eslint src && rbxtsc",
+		"format": "eslint src --fix && prettier --write \"*.md\" \"docs/*.md\"",
+		"check:remotes": "node scripts/check-remotes.js"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

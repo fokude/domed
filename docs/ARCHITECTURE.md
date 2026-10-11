@@ -82,8 +82,8 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 - **One owner per concern.** Before writing a helper, check `shared/`, `maps/kit.ts` and the
   owning module above; extend them rather than copying code.
 - **Names and numbers live in one place.** Tuning goes in `config.ts`, marker names in
-  `mapMarkers.ts`, replicated state in `matchState.ts`, UI colors in `Palette` (`ui.ts`). Don't hard-code strings or numbers
-  that another file also uses.
+  `mapMarkers.ts`, replicated state in `matchState.ts`, UI colors in `Palette` (`ui.ts`).
+  Don't hard-code strings or numbers that another file also uses.
 - **The server never trusts the client.** Remote arguments arrive as `unknown` and are
   validated; gameplay outcomes (kills, scores, captures) are decided on the server.
 - **No circular imports.** If two modules need each other, move the shared piece into a third
@@ -94,7 +94,8 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 RemoteEvents are declared as instances in `default.project.json` under
 `ReplicatedStorage.Remotes`, and given TypeScript signatures in `src/shared/remotes.ts`.
 Adding a remote means updating both; a remote missing from the project file makes
-`WaitForChild` hang forever.
+`WaitForChild` hang forever. `npm run check` fails if the two lists disagree
+(`scripts/check-remotes.js`).
 
 The server receives remote arguments as `unknown` and validates them before use.
 

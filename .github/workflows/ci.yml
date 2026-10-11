@@ -20,6 +20,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Check remotes
+        run: npm run check:remotes
+
       - name: Lint
         run: npm run lint
 
