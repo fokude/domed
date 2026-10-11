@@ -78,7 +78,22 @@ function buildStrip(map: Model) {
 		slab(map, new Vector3(x, 0.1, 80), new Vector3(0.6, 0.1, 20), Marker, "StripMarker");
 		label(map, new Vector3(x, 4, 92), tostring(x + 100));
 	}
-	label(map, new Vector3(0, 10, 80), "BHOP STRIP");
+	label(map, new Vector3(0, 10, 80), "BHOP STRIP. Run and press Ctrl or C to slide");
+}
+
+// Two low platforms 14 studs apart: too far to jump from a standstill, easy with a dodge.
+function buildDodgeGap(map: Model) {
+	slab(map, new Vector3(30, 4, 40), new Vector3(10, 4, 10), Wall, "DodgeStart");
+	slab(map, new Vector3(54, 4, 40), new Vector3(10, 4, 10), Goal, "DodgeEnd");
+	label(map, new Vector3(42, 10, 40), "DODGE: double-tap D on the left block");
+}
+
+// A tall wall with a pad up to its top, for dropping down it while holding into the wall.
+function buildWallSlide(map: Model) {
+	slab(map, new Vector3(-30, 40, 60), new Vector3(20, 40, 2), Wall, "SlideWall");
+	slab(map, new Vector3(-30, 40, 56), new Vector3(20, 1, 6), Goal, "SlideWallTop");
+	jumpPad(map, new Vector3(-30, 0, 40), new Vector3(-30, 40, 56), 6, Pad);
+	label(map, new Vector3(-30, 46, 56), "WALL SLIDE: drop off and hold W into the wall");
 }
 
 function buildPads(map: Model) {
@@ -109,6 +124,8 @@ export const MovementLab: MapBuilder = {
 		buildGap(map);
 		buildStrip(map);
 		buildPads(map);
+		buildDodgeGap(map);
+		buildWallSlide(map);
 
 		for (const x of [-10, 10]) {
 			for (const z of [-10, 10]) {
