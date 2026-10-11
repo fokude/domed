@@ -8,23 +8,20 @@ to [Engine quirks](#engine-quirks) so it isn't undone later.
 
 ## Moves
 
-| Move        | Input                                                                    | Config                                        |
-| ----------- | ------------------------------------------------------------------------ | --------------------------------------------- |
-| Air strafe  | A or D while turning the mouse in the air                                | `airAccelerate`, `airSpeedCap`, `maxAirSpeed` |
-| Bunny hop   | Hold Space, or scroll, through landings                                  | `bhopWindow`, `bhopSpeedLoss`                 |
-| Double jump | Space in the air                                                         | `doubleJumpVelocity`                          |
-| Wall jump   | Space in the air next to a wall                                          | `wallJump*`, `maxWallJumps`                   |
-| Slide       | Ctrl or C while running fast; hold it on landing to slide out of the air | `slide*`                                      |
+| Move        | Input                                     | Config                                        |
+| ----------- | ----------------------------------------- | --------------------------------------------- |
+| Air strafe  | A or D while turning the mouse in the air | `airAccelerate`, `airSpeedCap`, `maxAirSpeed` |
+| Bunny hop   | Hold Space, or scroll, through landings   | `bhopWindow`, `bhopSpeedLoss`                 |
+| Double jump | Space in the air                          | `doubleJumpVelocity`                          |
 
-Wall jump and slide have `...Enabled` switches so it can be trialled and cut. Use
-`/map MovementLab` in Studio to test them.
+Use `/map MovementLab` in Studio to test movement. Wall jump, wall slide, slide and dodge
+were tried and cut; see the git history if they come back.
 
 ## Who owns velocity
 
 The Humanoid and this module take turns, and most bugs come from both trying at once.
 
-- **On the ground**, the Humanoid moves the character. The exception is a slide, which is
-  driven _through_ the Humanoid rather than around it (see Slide).
+- **On the ground**, the Humanoid moves the character.
 - **In the air**, the module owns horizontal velocity. Every `RunService.PreSimulation` it
   reads the control script's `MoveDirection` as the wish direction, zeroes it so the
   Humanoid's air control does nothing, and writes `AssemblyLinearVelocity` itself. Vertical
@@ -53,19 +50,6 @@ player and the module adopts the measured velocity.
 **Double jump** sets vertical speed and redirects horizontal momentum toward the input
 direction, keeping at least walk speed.
 
-**Wall jump.** Space in the air probes eight horizontal directions for a wall within
-`wallJumpRange` of the body. Speed along the wall is kept, and the player is pushed away
-from it (`wallJumpPush`) and up (`wallJumpVelocity`). The same wall can't be used twice in
-a row, so two facing walls can be climbed but a single wall can't. Wall jumps don't use the
-double jump. Each kick climbs about 6 studs; a full climb is about 25 to 30 studs.
-
-**Slide.** Starts above `slideMinSpeed`, boosted to at least `slideStartSpeed`, and loses
-`slideFriction` of its speed per second until it drops below 75% of walk speed or lasts
-`slideMaxTime`. Each step sets the Humanoid's `WalkSpeed` to the slide speed and calls
-`Move` with the slide direction, so the Humanoid itself carries the slide. The camera drops
-by `slideCameraDrop`; the head hitbox does not move. Jumping out carries the slide speed
-into the air.
-
 **Launches** (`launchCharacter`) are used by jump pads and body-shot knockback. From
 the ground they start a real jump and replace its vertical speed on the first airborne
 frame. In the air they set velocity directly.
@@ -86,8 +70,8 @@ simplifying the code it explains.
    `PreSimulation` and kills bunny hopping. Fix: zero `MoveDirection` with
    `Humanoid:Move(Vector3.zero)` every airborne `PreSimulation`, after reading it.
 2. **The Humanoid brakes foreign velocity on the ground.** Velocity written while the
-   Humanoid is walking is cancelled within a physics step. Fix: drive ground movement
-   through the Humanoid by setting `WalkSpeed` and calling `Move`.
+   Humanoid is walking is cancelled within a physics step. To script ground movement,
+   drive it through the Humanoid by setting `WalkSpeed` and calling `Move`.
 3. **`ChangeState(Freefall)` on the ground snaps back to walking.** The Humanoid sees the
    floor and lands again before a small upward velocity can lift it. Fix: start launches
    with `ChangeState(Jumping)`, then replace the vertical speed on the first airborne frame.

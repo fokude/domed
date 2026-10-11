@@ -1,8 +1,7 @@
 // Movement layered on top of the default Humanoid: Quake-style air strafing and bunny
-// hopping, double jump, wall jump, and slide.
+// hopping, and a double jump.
 //
-// On the ground the Humanoid moves the character as usual, except while sliding. While
-// airborne this module owns horizontal velocity: the Humanoid's built-in air control would
+// On the ground the Humanoid moves the character as usual. While airborne this module owns horizontal velocity: the Humanoid's built-in air control would
 // otherwise drag the player back toward WalkSpeed and make bunny hopping impossible.
 //
 // docs/MOVEMENT.md explains each move and the engine quirks this code works around.
@@ -25,7 +24,6 @@ const PAD_PROBE_DEPTH = 5;
 const SCROLL_JUMP_BUFFER = 0.1;
 // If physics leaves us below this fraction of our intended speed, something blocked us.
 const BLOCKED_SPEED_RATIO = 0.3;
-const SLIDE_KEYS: Enum.KeyCode[] = [Enum.KeyCode.LeftControl, Enum.KeyCode.C];
 
 const player = Players.LocalPlayer;
 
@@ -39,8 +37,6 @@ let keepVelocityOnTakeoff = false;
 // Vertical speed to apply on the first airborne frame of a launch from the ground.
 let pendingVerticalVelocity: number | undefined;
 let doubleJumpUsed = false;
-let wallJumpsUsed = 0;
-let lastWallNormal: Vector3 | undefined;
 // MoveDirection is zeroed while airborne, so input handlers read the last real value here.
 let wishDirection = Vector3.zero;
 let lastPadLaunch = 0;
@@ -49,12 +45,6 @@ const padProbeParams = new RaycastParams();
 padProbeParams.FilterType = Enum.RaycastFilterType.Include;
 padProbeParams.FilterDescendantsInstances = [];
 let lastScrollAt = -math.huge;
-
-let sliding = false;
-let slideDirection = Vector3.zero;
-let slideSpeed = 0;
-let slideStartedAt = 0;
-let lastSlideEndedAt = -math.huge;
 
 const wallProbeParams = new RaycastParams();
 wallProbeParams.FilterType = Enum.RaycastFilterType.Exclude;
@@ -74,10 +64,6 @@ function isJumpHeld(): boolean {
 		UserInputService.IsKeyDown(Enum.KeyCode.Space) ||
 		UserInputService.IsGamepadButtonDown(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonA)
 	);
-}
-
-function isSlideHeld(): boolean {
-	return SLIDE_KEYS.some((key) => UserInputService.IsKeyDown(key));
 }
 
 function wantsToJump(): boolean {
@@ -125,46 +111,6 @@ function clipToWalls(velocity: Vector3, rootPart: BasePart, dt: number): Vector3
 	return intoWall < 0 ? velocity.sub(normal.mul(intoWall)) : velocity;
 }
 
-function startSlide(currentHumanoid: Humanoid, horizontal: Vector3): boolean {
-	if (!Config.slideEnabled || sliding || os.clock() - lastSlideEndedAt < Config.slideCooldown) return false;
-	const speed = horizontal.Magnitude;
-	if (speed < Config.slideMinSpeed) return false;
-
-	sliding = true;
-	slideStartedAt = os.clock();
-	slideDirection = horizontal.Unit;
-	slideSpeed = math.max(speed, Config.slideStartSpeed);
-	currentHumanoid.CameraOffset = new Vector3(0, -Config.slideCameraDrop, 0);
-	return true;
-}
-
-function endSlide() {
-	if (!sliding) return;
-	sliding = false;
-	lastSlideEndedAt = os.clock();
-	if (humanoid) {
-		humanoid.CameraOffset = Vector3.zero;
-		humanoid.WalkSpeed = Config.walkSpeed;
-	}
-}
-
-// A grounded slide keeps momentum with light friction. On the ground the Humanoid brakes any
-// velocity it didn't choose, so the slide is driven through it: it walks in the slide
-// direction at the slide speed.
-function updateSlide(currentHumanoid: Humanoid, rootPart: BasePart, dt: number) {
-	slideSpeed *= math.max(0, 1 - Config.slideFriction * dt);
-	const velocity = clipToWalls(slideDirection.mul(slideSpeed), rootPart, dt);
-	if (velocity.Magnitude < Config.walkSpeed * 0.75 || os.clock() - slideStartedAt > Config.slideMaxTime) {
-		endSlide();
-		return;
-	}
-	slideDirection = velocity.Unit;
-	slideSpeed = velocity.Magnitude;
-	currentHumanoid.WalkSpeed = slideSpeed;
-	currentHumanoid.Move(slideDirection, false);
-	airVelocity = velocity;
-}
-
 function onPreSimulation(dt: number) {
 	const body = getLiveBody();
 	if (!body) return;
@@ -177,19 +123,13 @@ function onPreSimulation(dt: number) {
 			wasAirborne = false;
 			groundTime = 0;
 			doubleJumpUsed = false;
-			wallJumpsUsed = 0;
-			lastWallNormal = undefined;
 			// Re-jump on the landing frame itself; waiting for the Humanoid's own auto-jump
 			// leaves us on the ground long enough for friction to eat the hop.
-			// Holding slide on landing turns air speed straight into a slide.
 			if (wantsToJump()) currentHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
-			else if (isSlideHeld()) startSlide(currentHumanoid, airVelocity);
 		}
 		groundTime += dt;
-		if (sliding) updateSlide(currentHumanoid, rootPart, dt);
 		return;
 	}
-	endSlide();
 
 	// The control script has already set this frame's MoveDirection. Read it as our wish
 	// direction, then zero it so the Humanoid's air control doesn't fight our velocity.
@@ -239,50 +179,14 @@ function onRenderStepped(dt: number) {
 	camera.FieldOfView += (targetFov - camera.FieldOfView) * math.min(1, dt * 8);
 }
 
-// Nearest wall within reach, probed in eight directions at root height.
-function findWall(rootPart: BasePart): Vector3 | undefined {
-	// The root is about a stud from the body's edge, so reach is measured from there.
-	const reach = Config.wallJumpRange + 1;
-	let nearest: RaycastResult | undefined;
-	for (let i = 0; i < 8; i++) {
-		const angle = (i / 8) * 2 * math.pi;
-		const direction = new Vector3(math.sin(angle), 0, math.cos(angle)).mul(reach);
-		const hit = Workspace.Raycast(rootPart.Position, direction, wallProbeParams);
-		if (hit && math.abs(hit.Normal.Y) < 0.3 && (!nearest || hit.Distance < nearest.Distance)) nearest = hit;
-	}
-	return nearest ? flatten(nearest.Normal).Unit : undefined;
-}
-
-// Kicks off a nearby wall: speed along the wall is kept, and the player is pushed away from it
-// and up. The same wall can't be used twice in a row, so chimneys can be climbed but single
-// walls can't.
-function tryWallJump(rootPart: BasePart): boolean {
-	if (!Config.wallJumpEnabled || wallJumpsUsed >= Config.maxWallJumps) return false;
-	const normal = findWall(rootPart);
-	if (!normal || (lastWallNormal && normal.Dot(lastWallNormal) > 0.9)) return false;
-
-	wallJumpsUsed += 1;
-	lastWallNormal = normal;
-	const alongWall = airVelocity.sub(normal.mul(airVelocity.Dot(normal)));
-	airVelocity = alongWall.add(normal.mul(Config.wallJumpPush));
-	rootPart.AssemblyLinearVelocity = new Vector3(airVelocity.X, Config.wallJumpVelocity, airVelocity.Z);
-	return true;
-}
-
 function onInputBegan(input: InputObject) {
 	if (UserInputService.GetFocusedTextBox()) return;
-	if (SLIDE_KEYS.includes(input.KeyCode)) {
-		const body = getLiveBody();
-		if (body && !isAirborne(body[0])) startSlide(body[0], flatten(body[1].AssemblyLinearVelocity));
-		return;
-	}
 	if (input.KeyCode !== Enum.KeyCode.Space && input.KeyCode !== Enum.KeyCode.ButtonA) return;
 
 	const body = getLiveBody();
 	if (!body) return;
 	const [currentHumanoid, rootPart] = body;
-	if (!isAirborne(currentHumanoid)) return;
-	if (tryWallJump(rootPart) || doubleJumpUsed) return;
+	if (!isAirborne(currentHumanoid) || doubleJumpUsed) return;
 	doubleJumpUsed = true;
 
 	// Like UT's double jump, the second jump redirects momentum toward the input direction.
@@ -302,10 +206,6 @@ function onInputChanged(input: InputObject, gameProcessed: boolean) {
 	if (body && !isAirborne(body[0])) body[0].ChangeState(Enum.HumanoidStateType.Jumping);
 }
 
-function onInputEnded(input: InputObject) {
-	if (SLIDE_KEYS.includes(input.KeyCode)) endSlide();
-}
-
 function onCharacterAdded(newCharacter: Model) {
 	humanoid = newCharacter.WaitForChild("Humanoid") as Humanoid;
 	root = newCharacter.WaitForChild("HumanoidRootPart") as BasePart;
@@ -316,9 +216,6 @@ function onCharacterAdded(newCharacter: Model) {
 	wasAirborne = false;
 	keepVelocityOnTakeoff = false;
 	doubleJumpUsed = false;
-	wallJumpsUsed = 0;
-	lastWallNormal = undefined;
-	sliding = false;
 }
 
 function trackJumpPad(pad: Instance) {
@@ -385,6 +282,5 @@ export function initMovement() {
 	RunService.PreSimulation.Connect(onPreSimulation);
 	RunService.RenderStepped.Connect(onRenderStepped);
 	UserInputService.InputBegan.Connect(onInputBegan);
-	UserInputService.InputEnded.Connect(onInputEnded);
 	UserInputService.InputChanged.Connect(onInputChanged);
 }

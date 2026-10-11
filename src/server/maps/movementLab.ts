@@ -1,14 +1,13 @@
 // Test map for trying movement features. Load it in Studio with /map MovementLab; it never
 // appears in rotation or votes. Floor lines are every 10 studs for judging distances.
 
-import { block, jumpPad, ramp, setMapInfo, setMapLighting, slab, spawnMarker, Style } from "./kit";
+import { block, jumpPad, setMapInfo, setMapLighting, slab, spawnMarker, Style } from "./kit";
 import { MapBuilder } from "./types";
 
 const FLOOR_SIZE = 240;
 
 const Floor: Style = { color: Color3.fromRGB(150, 155, 165), material: Enum.Material.Concrete };
 const Line: Style = { color: Color3.fromRGB(90, 95, 105), collide: false, castShadow: false };
-const Wall: Style = { color: Color3.fromRGB(70, 110, 170), material: Enum.Material.SmoothPlastic };
 const Goal: Style = { color: Color3.fromRGB(80, 200, 120), material: Enum.Material.SmoothPlastic };
 const Marker: Style = { color: Color3.fromRGB(255, 190, 40), material: Enum.Material.Neon, collide: false };
 const Pad: Style = { color: Color3.fromRGB(0, 220, 255), material: Enum.Material.Neon };
@@ -43,42 +42,13 @@ function buildFloor(map: Model) {
 	}
 }
 
-// Two walls 10 studs apart: climb by kicking back and forth, then step onto the goal. The top
-// is set within reach: a jump, three wall kicks and the double jump climb about 25 to 30 studs.
-const CHIMNEY_HEIGHT = 26;
-
-function buildChimney(map: Model) {
-	for (const x of [-76, -64]) {
-		slab(map, new Vector3(x, CHIMNEY_HEIGHT, 0), new Vector3(2, CHIMNEY_HEIGHT, 30), Wall, "ChimneyWall");
-	}
-	slab(map, new Vector3(-70, CHIMNEY_HEIGHT, -21), new Vector3(14, 1, 10), Goal, "ChimneyGoal");
-	label(map, new Vector3(-70, CHIMNEY_HEIGHT + 6, 0), "CHIMNEY: wall jump between the walls");
-}
-
-// A block whose top is a ledge, with a pillar 7 studs out to kick off.
-function buildLedge(map: Model) {
-	slab(map, new Vector3(-84, 24, -70), new Vector3(10, 24, 20), Wall, "LedgeBlock");
-	slab(map, new Vector3(-84, 24.2, -70), new Vector3(10, 0.2, 20), Goal, "LedgeTop");
-	slab(map, new Vector3(-71, 24, -70), new Vector3(2, 24, 4), Wall, "LedgePillar");
-	label(map, new Vector3(-78, 32, -70), "LEDGE: wall and pillar to the top");
-}
-
-// A 20 stud gap between platforms, with a wall alongside to kick off mid-air.
-function buildGap(map: Model) {
-	ramp(map, new Vector3(70, 0, -100), new Vector3(70, 10, -70), 16, Wall);
-	slab(map, new Vector3(70, 10, -60), new Vector3(16, 10, 20), Wall, "GapStart");
-	slab(map, new Vector3(70, 10, -20), new Vector3(16, 10, 20), Goal, "GapEnd");
-	slab(map, new Vector3(81, 30, -40), new Vector3(2, 30, 60), Wall, "GapWall");
-	label(map, new Vector3(70, 20, -40), "GAP: kick off the side wall");
-}
-
 // Long straight with a marker every 20 studs for judging bhop speed.
 function buildStrip(map: Model) {
 	for (let x = -100; x <= 100; x += 20) {
 		slab(map, new Vector3(x, 0.1, 80), new Vector3(0.6, 0.1, 20), Marker, "StripMarker");
 		label(map, new Vector3(x, 4, 92), tostring(x + 100));
 	}
-	label(map, new Vector3(0, 10, 80), "BHOP STRIP. Run and press Ctrl or C to slide");
+	label(map, new Vector3(0, 10, 80), "BHOP STRIP");
 }
 
 function buildPads(map: Model) {
@@ -104,9 +74,6 @@ export const MovementLab: MapBuilder = {
 		});
 
 		buildFloor(map);
-		buildChimney(map);
-		buildLedge(map);
-		buildGap(map);
 		buildStrip(map);
 		buildPads(map);
 
