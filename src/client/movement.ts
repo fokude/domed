@@ -6,9 +6,11 @@
 //
 // docs/MOVEMENT.md explains each move and the engine quirks this code works around.
 
-import { MovementConfig as Config, CtfConfig } from "shared/config";
+import { MovementConfig as Config, CtfConfig, PerkConfig } from "shared/config";
 import { MapAttribute, MapTag } from "shared/mapMarkers";
 import { CARRYING_FLAG_ATTRIBUTE } from "shared/matchState";
+import { PerkAttribute } from "shared/perks";
+import { Remotes } from "shared/remotes";
 
 const CollectionService = game.GetService("CollectionService");
 const Players = game.GetService("Players");
@@ -38,6 +40,8 @@ let keepVelocityOnTakeoff = false;
 // Vertical speed to apply on the first airborne frame of a launch from the ground.
 let pendingVerticalVelocity: number | undefined;
 let doubleJumpUsed = false;
+// Set when a Super Jump is used, until the server clears the perk, so it can't fire twice.
+let superJumpSpent = false;
 // MoveDirection is zeroed while airborne, so input handlers read the last real value here.
 let wishDirection = Vector3.zero;
 let lastPadLaunch = 0;
@@ -203,7 +207,14 @@ function onInputBegan(input: InputObject) {
 	if (wish.Magnitude > 0.01) {
 		airVelocity = wish.Unit.mul(math.max(airVelocity.Magnitude, Config.walkSpeed));
 	}
-	rootPart.AssemblyLinearVelocity = new Vector3(airVelocity.X, Config.doubleJumpVelocity, airVelocity.Z);
+	// A held Super Jump perk turns this double jump into a much bigger one.
+	let jumpVelocity = Config.doubleJumpVelocity;
+	if (player.GetAttribute(PerkAttribute.SuperJump) === true && !superJumpSpent) {
+		superJumpSpent = true;
+		jumpVelocity = PerkConfig.superJumpVelocity;
+		Remotes.UsePerk.FireServer("SuperJump");
+	}
+	rootPart.AssemblyLinearVelocity = new Vector3(airVelocity.X, jumpVelocity, airVelocity.Z);
 }
 
 // Scroll wheel jumps on the ground only; in the air it buffers a hop and never spends the double jump.
@@ -281,6 +292,9 @@ export function launchCharacter(velocity: Vector3, additive: boolean) {
 }
 
 export function initMovement() {
+	player.GetAttributeChangedSignal(PerkAttribute.SuperJump).Connect(() => {
+		if (player.GetAttribute(PerkAttribute.SuperJump) === true) superJumpSpent = false;
+	});
 	player.CharacterAdded.Connect(onCharacterAdded);
 	if (player.Character) task.spawn(onCharacterAdded, player.Character);
 

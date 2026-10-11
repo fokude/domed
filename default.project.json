@@ -50,6 +50,12 @@
 				},
 				"MatchXp": {
 					"$className": "RemoteEvent"
+				},
+				"PerkTaken": {
+					"$className": "RemoteEvent"
+				},
+				"UsePerk": {
+					"$className": "RemoteEvent"
 				}
 			},
 			"MatchState": {

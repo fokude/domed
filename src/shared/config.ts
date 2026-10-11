@@ -64,6 +64,18 @@ export const TeamBalanceConfig = {
 	tolerance: 4,
 };
 
+// Perk orbs (see docs/PERKS.md).
+export const PerkConfig = {
+	pickupRadius: 5,
+	// Seconds before a taken orb comes back. Stronger perks take longer.
+	respawn: { SuperJump: 25, Shield: 40, Radar: 45, Overcharge: 60 },
+	superJumpVelocity: 110,
+	overchargeDuration: 10,
+	// Fraction of the normal rail cooldown while overcharged.
+	overchargeCooldownScale: 0.5,
+	radarDuration: 4,
+};
+
 export const WeaponConfig = {
 	cooldown: 0.9,
 	range: 1000,

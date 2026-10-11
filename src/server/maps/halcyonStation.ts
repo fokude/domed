@@ -9,6 +9,7 @@ import {
 	flagBaseMarker,
 	jumpPad,
 	onCircle,
+	perkMarker,
 	plank,
 	pointLight,
 	ramp,
@@ -209,6 +210,14 @@ export const HalcyonStation: MapBuilder = {
 		controlPointMarker(map, new Vector3(40, 0, -75), "3", 14, "Hardpoint");
 		controlPointMarker(map, new Vector3(-40, 0, -75), "4", 14, "Hardpoint");
 		controlPointMarker(map, new Vector3(40, 0, 75), "5", 14, "Hardpoint");
+
+		// Perk orbs: strong perks at contested spots, team-side perks in mirrored pairs.
+		perkMarker(map, new Vector3(-20, 0, 0), "Overcharge");
+		perkMarker(map, new Vector3(20, 0, 0), "Radar");
+		perkMarker(map, new Vector3(0, 0, 80), "SuperJump");
+		perkMarker(map, new Vector3(0, 0, -80), "SuperJump");
+		perkMarker(map, new Vector3(-TUBE_X, 0, 75), "Shield");
+		perkMarker(map, new Vector3(TUBE_X, 0, -75), "Shield");
 
 		buildBay(map, "Red", 1);
 		buildBay(map, "Blue", -1);

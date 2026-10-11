@@ -45,6 +45,7 @@ Update these in the same commit as the change they describe:
   Engine quirks list.
 - docs/MAPPING.md: map markers and attributes.
 - docs/RATING.md: skill rating, team balance, and the reasoning and sources behind them.
+- docs/PERKS.md: perks, their design rules, and the reasoning behind them.
 - docs/MAP_DESIGN.md: researched layout principles and targets. Check new or changed maps
   against it; ask the owner to run `/openness` in Studio to measure them.
 - README.md: setup, scripts, Studio commands, modes.
@@ -53,7 +54,7 @@ Update these in the same commit as the change they describe:
 
 - Interface members called as methods must be declared and implemented as methods (classes
   work well); assigning arrow functions fails to compile.
-- Luau keywords (`end`, `local`, `then`, ...) and roblox-ts reserved names (`pairs`, ...)
+- Luau keywords (`end`, `local`, `then`, `until`, ...) and roblox-ts reserved names (`pairs`, ...)
   can't be identifiers.
 - Arrays of enum items need an explicit type, such as `Enum.KeyCode[]`, before `includes` or
   `indexOf` will accept a general `KeyCode`.

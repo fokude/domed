@@ -2,6 +2,7 @@
 
 import { isAlive } from "shared/characters";
 import { WeaponConfig as Config } from "shared/config";
+import { PERK_INFO, PerkAttribute, railCooldown, timeLeft } from "shared/perks";
 import { HitKind, Remotes } from "shared/remotes";
 import { HudColors, setCooldown, showBanner, showHitmarker } from "./hud";
 
@@ -71,7 +72,7 @@ function fire() {
 	if (!character || !camera || !isAlive(character)) return;
 
 	const now = os.clock();
-	if (now - lastShotAt < Config.cooldown) return;
+	if (now - lastShotAt < railCooldown(player)) return;
 	lastShotAt = now;
 
 	const cameraCFrame = camera.CFrame;
@@ -83,7 +84,7 @@ function fire() {
 	const hitPosition = result ? result.Position : origin.add(direction);
 	const hitPart = result?.Instance.IsA("BasePart") ? resolveHitPart(result.Instance) : undefined;
 
-	drawBeam(cameraCFrame.PointToWorldSpace(MUZZLE_OFFSET), hitPosition, LOCAL_BEAM_COLOR);
+	drawBeam(cameraCFrame.PointToWorldSpace(MUZZLE_OFFSET), hitPosition, beamColor(player, LOCAL_BEAM_COLOR));
 
 	const hitCharacter = hitPart?.Parent;
 	const hitPlayer = hitCharacter?.IsA("Model") ? Players.GetPlayerFromCharacter(hitCharacter) : undefined;
@@ -98,11 +99,17 @@ function fire() {
 function onShotFired(shooter: Player, origin: Vector3, hitPosition: Vector3) {
 	if (shooter === player) return;
 	const color = shooter.Team ? shooter.TeamColor.Color : ENEMY_BEAM_COLOR;
-	drawBeam(origin.sub(new Vector3(0, 0.5, 0)), hitPosition, color);
+	drawBeam(origin.sub(new Vector3(0, 0.5, 0)), hitPosition, beamColor(shooter, color));
+}
+
+// Overcharged shots are gold for everyone, so the boost is visible and can be played around.
+function beamColor(shooter: Player, normal: Color3): Color3 {
+	return timeLeft(shooter, PerkAttribute.OverchargeUntil) > 0 ? PERK_INFO.Overcharge.color : normal;
 }
 
 function onHitConfirm(kind: HitKind) {
 	if (kind === "kill") showBanner("DOMED", HudColors.Red, 0.8);
+	else if (kind === "shield") showBanner("SHIELD BROKEN", PERK_INFO.Shield.color, 0.8);
 }
 
 export function initWeapon() {
@@ -115,7 +122,7 @@ export function initWeapon() {
 
 	RunService.RenderStepped.Connect(() => {
 		if (triggerHeld) fire();
-		setCooldown(math.clamp((os.clock() - lastShotAt) / Config.cooldown, 0, 1));
+		setCooldown(math.clamp((os.clock() - lastShotAt) / railCooldown(player), 0, 1));
 	});
 
 	Remotes.ShotFired.OnClientEvent.Connect(onShotFired);

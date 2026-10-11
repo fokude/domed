@@ -9,7 +9,8 @@ with [Rojo](https://rojo.space).
 
 Built for 5v5: Team Deathmatch, Capture the Flag, Domination and Hardpoint, plus
 free-for-all Deathmatch. Team modes appear once enough players are in a server (4, or 6 for
-CTF); smaller lobbies play a shorter free-for-all. When
+CTF); smaller lobbies play a shorter free-for-all. Perk orbs (Super Jump, Shield, Overcharge, Radar) spawn at fixed spots on
+every map. When
 publishing, set **Max Players** to 10 in Studio's Game Settings (Places tab); player count
 isn't set in code.
 

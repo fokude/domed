@@ -197,7 +197,8 @@ export function setCooldown(fraction: number) {
 	cooldownFill.Size = UDim2.fromScale(fraction, 1);
 }
 
-export function addKill(killerName: string, victimName: string) {
+// Adds a line to the kill feed; `richText` may use <font> tags.
+function addFeedLine(richText: string) {
 	if (feedEntries.size() >= MAX_FEED_ENTRIES) {
 		feedEntries.shift()?.Destroy();
 	}
@@ -215,7 +216,7 @@ export function addKill(killerName: string, victimName: string) {
 			TextColor3: HudColors.White,
 			TextXAlignment: Enum.TextXAlignment.Right,
 			RichText: true,
-			Text: `${escapeRichText(killerName)}  <font color="#ff3c28">DOMED</font>  ${escapeRichText(victimName)} `,
+			Text: richText,
 		},
 		feed,
 	);
@@ -226,4 +227,12 @@ export function addKill(killerName: string, victimName: string) {
 		if (index !== -1) feedEntries.remove(index);
 		entry.Destroy();
 	});
+}
+
+export function addKill(killerName: string, victimName: string) {
+	addFeedLine(`${escapeRichText(killerName)}  <font color="#ff3c28">DOMED</font>  ${escapeRichText(victimName)} `);
+}
+
+export function addPerkTaken(playerName: string, perkName: string, color: Color3) {
+	addFeedLine(`${escapeRichText(playerName)}  took  <font color="#${color.ToHex()}">${perkName}</font> `);
 }

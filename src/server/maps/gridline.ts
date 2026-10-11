@@ -11,6 +11,7 @@ import {
 	flagBaseMarker,
 	jumpPad,
 	outline,
+	perkMarker,
 	ramp,
 	ring,
 	scenery,
@@ -324,6 +325,14 @@ export const Gridline: MapBuilder = {
 		controlPointMarker(map, new Vector3(54, 0, -30), "3", 16, "Hardpoint");
 		controlPointMarker(map, new Vector3(-54, 0, -30), "4", 16, "Hardpoint");
 		controlPointMarker(map, new Vector3(54, 0, 30), "5", 16, "Hardpoint");
+
+		// Perk orbs: strong perks at contested spots, team-side perks in mirrored pairs.
+		perkMarker(map, new Vector3(0, ROOF_HEIGHT, 0), "Overcharge");
+		perkMarker(map, new Vector3(0, -TRENCH_DEPTH, 0), "Radar");
+		perkMarker(map, new Vector3(0, -TRENCH_DEPTH, 90), "SuperJump");
+		perkMarker(map, new Vector3(0, -TRENCH_DEPTH, -90), "SuperJump");
+		perkMarker(map, new Vector3(-66, 0, 60), "Shield");
+		perkMarker(map, new Vector3(66, 0, -60), "Shield");
 
 		buildGround(map);
 		buildLandscape(map);

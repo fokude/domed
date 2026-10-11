@@ -9,6 +9,7 @@ import {
 	hazard,
 	jumpPad,
 	onCircle,
+	perkMarker,
 	plank,
 	pointLight,
 	ring,
@@ -169,6 +170,14 @@ export const InfernalSpire: MapBuilder = {
 		controlPointMarker(arena, new Vector3(-22, TIER_TOPS[0], 0), "A", 8, "Domination");
 		controlPointMarker(arena, new Vector3(0, TIER_TOPS[2], 0), "B", 8, "Domination");
 		controlPointMarker(arena, new Vector3(22, TIER_TOPS[0], 0), "C", 8, "Domination");
+
+		// Perk orbs: strong perks at contested spots, team-side perks in mirrored pairs.
+		perkMarker(arena, new Vector3(0, TIER_TOPS[2] + 1, 0), "Overcharge");
+		perkMarker(arena, new Vector3(0, TIER_TOPS[1], 12), "Radar");
+		perkMarker(arena, at(RING_RADIUS, QUARTER, RING_HEIGHT), "SuperJump");
+		perkMarker(arena, at(RING_RADIUS, QUARTER * 3, RING_HEIGHT), "SuperJump");
+		perkMarker(arena, at(ISLAND_RADIUS + 3, EIGHTH, ISLAND_HEIGHT), "Shield");
+		perkMarker(arena, at(ISLAND_RADIUS + 3, EIGHTH * 5, ISLAND_HEIGHT), "Shield");
 		hazard(slab(arena, Vector3.zero, new Vector3(320, 4, 320), Lava, "Lava"));
 		buildRampart(arena);
 		buildSpire(arena);

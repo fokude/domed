@@ -15,6 +15,7 @@ import {
 	flagBaseMarker,
 	jumpPad,
 	onCircle,
+	perkMarker,
 	plank,
 	plateWithHoles,
 	ramp,
@@ -379,6 +380,13 @@ export const Bastion: MapBuilder = {
 		controlPointMarker(map, new Vector3(CANAL_X, CANAL, -110), "3", 16, "Hardpoint");
 		controlPointMarker(map, new Vector3(AQUEDUCT_X, UPPER, -110), "4", 15, "Hardpoint");
 		controlPointMarker(map, new Vector3(CANAL_X, CANAL, 110), "5", 16, "Hardpoint");
+
+		// Perk orbs: strong perks at contested spots, team-side perks in mirrored pairs.
+		perkMarker(map, new Vector3(0, TOWER, 0), "Overcharge");
+		perkMarker(map, new Vector3(AQUEDUCT_X, UPPER, 0), "Radar");
+		perkMarker(map, new Vector3(CANAL_X, CANAL, 0), "SuperJump");
+		perkMarker(map, new Vector3(0, GROUND, 125), "Shield");
+		perkMarker(map, new Vector3(0, GROUND, -125), "Shield");
 
 		buildGround(map);
 		buildBoundary(map);

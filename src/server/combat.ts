@@ -6,7 +6,9 @@
 // miss constantly because of latency.
 
 import { WeaponConfig } from "shared/config";
+import { railCooldown } from "shared/perks";
 import { Remotes } from "shared/remotes";
+import { consumeShield } from "./perks";
 import { recordKill } from "./progression";
 import { incrementStat } from "./stats";
 
@@ -86,7 +88,7 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	if (!character || !humanoid || humanoid.Health <= 0 || !head?.IsA("BasePart")) return;
 
 	const now = os.clock();
-	if (now - (lastShotAt.get(shooter) ?? -math.huge) < WeaponConfig.cooldown - COOLDOWN_LENIENCY) return;
+	if (now - (lastShotAt.get(shooter) ?? -math.huge) < railCooldown(shooter) - COOLDOWN_LENIENCY) return;
 	lastShotAt.set(shooter, now);
 
 	if (origin.sub(head.Position).Magnitude > lagTolerance(character)) return reject(shooter, "origin");
@@ -113,7 +115,12 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	const obstruction = Workspace.Raycast(origin, shotVector, lineOfSightParams);
 	if (obstruction && obstruction.Position.sub(hitPosition).Magnitude > 1.5) return reject(shooter, "line of sight");
 
-	if (hitPart.Name === "Head") {
+	if (hitPart.Name === "Head" && consumeShield(victim)) {
+		// A shield absorbs the headshot and breaks, pushing the target back like a body shot.
+		const knockback = WeaponConfig.bodyShotKnockback;
+		Remotes.Knockback.FireClient(victim, shotVector.Unit.mul(knockback).add(new Vector3(0, knockback * 0.35, 0)));
+		Remotes.HitConfirm.FireClient(shooter, "shield");
+	} else if (hitPart.Name === "Head") {
 		victimHumanoid.Health = 0;
 		incrementStat(shooter, "Kills");
 		recordKill(shooter, shotVector.Magnitude);

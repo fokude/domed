@@ -9,6 +9,7 @@ import { getStandings } from "shared/standings";
 import { setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
 import { logMatchFinished, logOnboardingStep } from "../analytics";
+import { startPerks, stopPerks } from "../perks";
 import { recordMatchEnd, startMatchXp } from "../progression";
 import { getMapModel, listMaps } from "../maps/library";
 import { LoadedMap, loadMap } from "../maps/loader";
@@ -94,6 +95,7 @@ function randomOption(): MatchOption {
 function startMatch(option: MatchOption): GameMode {
 	const map = loadMap(getMapModel(option.mapId)!);
 	currentMap = map;
+	startPerks(map);
 	const mode = MODE_FACTORIES[option.mode]!(map);
 	currentMode = mode;
 
@@ -155,6 +157,7 @@ function runMatch(option: MatchOption) {
 	const result = waitForResult(mode);
 	setCombatRules(undefined);
 	closeSpawning();
+	stopPerks();
 	if (!forcedOption) {
 		const participants = Players.GetPlayers().filter((player) => player.GetAttribute(DEPLOYED_ATTRIBUTE) === true);
 		recordMatchEnd(participants, result.winners);
@@ -193,6 +196,7 @@ function runMatchSafely(option: MatchOption): boolean {
 	warn(`Match ${optionKey(option)} failed and was taken out of rotation: ${err}`);
 	brokenOptions.add(optionKey(option));
 	setCombatRules(undefined);
+	pcall(stopPerks);
 	closeSpawning();
 	const mode = currentMode;
 	if (mode) pcall(() => mode.stop());

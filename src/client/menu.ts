@@ -22,7 +22,7 @@ const ACCENT = Color3.fromRGB(255, 60, 40);
 const PANEL = Color3.fromRGB(20, 22, 28);
 
 // In-game HUD that would clutter the menu.
-const GAMEPLAY_GUIS = ["DomedHud", "Speedometer"];
+const GAMEPLAY_GUIS = ["DomedHud", "Speedometer", "Perks"];
 
 const player = Players.LocalPlayer;
 

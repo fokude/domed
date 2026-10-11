@@ -1,6 +1,7 @@
 // Loads a map Model into the workspace and turns its markers into gameplay data.
 
 import { MODE_IDS, ModeId, TEAM_IDS, TeamId } from "shared/modes";
+import { PERK_IDS, PerkId } from "shared/perks";
 import {
 	DEFAULT_ARC_HEIGHT,
 	LIGHTING_FOLDER,
@@ -40,6 +41,12 @@ export interface ControlPoint {
 	mode?: ModeId;
 }
 
+export interface PerkSpawn {
+	perk: PerkId;
+	// Floor-level position of the orb.
+	position: Vector3;
+}
+
 export interface LoadedMap {
 	info: MapInfo;
 	arena: Model;
@@ -47,6 +54,7 @@ export interface LoadedMap {
 	flagBases: Map<TeamId, Vector3>;
 	// Sorted by label.
 	controlPoints: ControlPoint[];
+	perks: PerkSpawn[];
 	killHeight: number;
 }
 
@@ -162,6 +170,16 @@ function collectControlPoints(arena: Model): ControlPoint[] {
 	return points;
 }
 
+function collectPerks(arena: Model): PerkSpawn[] {
+	const perks: PerkSpawn[] = [];
+	for (const marker of tagged(arena, MapTag.Perk)) {
+		const perk = PERK_IDS.find((id) => id === marker.GetAttribute(MapAttribute.PerkType));
+		if (marker.IsA("BasePart") && perk) perks.push({ perk, position: feetPosition(marker) });
+		else warn(`Perk marker ${marker.GetFullName()} has no valid PerkType`);
+	}
+	return perks;
+}
+
 function collectFlagBases(arena: Model): Map<TeamId, Vector3> {
 	const bases = new Map<TeamId, Vector3>();
 	for (const marker of tagged(arena, MapTag.FlagBase)) {
@@ -190,7 +208,8 @@ export function loadMap(source: Model): LoadedMap {
 	const spawns = collectSpawns(arena);
 	const flagBases = collectFlagBases(arena);
 	const controlPoints = collectControlPoints(arena);
-	for (const tag of [MapTag.Spawn, MapTag.FlagBase, MapTag.PadTarget, MapTag.ControlPoint]) {
+	const perks = collectPerks(arena);
+	for (const tag of [MapTag.Spawn, MapTag.FlagBase, MapTag.PadTarget, MapTag.ControlPoint, MapTag.Perk]) {
 		tagged(arena, tag).forEach((marker) => marker.Destroy());
 	}
 
@@ -201,6 +220,7 @@ export function loadMap(source: Model): LoadedMap {
 		spawns,
 		flagBases,
 		controlPoints,
+		perks,
 		killHeight: attribute(arena, MapAttribute.KillHeight, "number", DEFAULT_KILL_HEIGHT),
 	};
 }

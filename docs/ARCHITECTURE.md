@@ -10,16 +10,17 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 
 **Shared** (`src/shared`, used by server and client)
 
-| File             | Owns                                                          |
-| ---------------- | ------------------------------------------------------------- |
-| `config.ts`      | Every tuning value: movement, weapon, match and mode settings |
-| `modes.ts`       | Mode and team ids, team colors, mode display names            |
-| `remotes.ts`     | Typed handles to the RemoteEvents                             |
-| `matchState.ts`  | Replicated match state attributes, and player attribute names |
-| `mapMarkers.ts`  | Map marker tags and attribute names                           |
-| `standings.ts`   | Player ranking (kills, then deaths)                           |
-| `characters.ts`  | Safe reads of player characters                               |
-| `progression.ts` | Saved profile types, and the XP-to-level curve                |
+| File             | Owns                                                            |
+| ---------------- | --------------------------------------------------------------- |
+| `config.ts`      | Every tuning value: movement, weapon, match and mode settings   |
+| `modes.ts`       | Mode and team ids, team colors, mode display names              |
+| `remotes.ts`     | Typed handles to the RemoteEvents                               |
+| `matchState.ts`  | Replicated match state attributes, and player attribute names   |
+| `mapMarkers.ts`  | Map marker tags and attribute names                             |
+| `standings.ts`   | Player ranking (kills, then deaths)                             |
+| `characters.ts`  | Safe reads of player characters                                 |
+| `perks.ts`       | Perk definitions, effect attributes and the Overcharge cooldown |
+| `progression.ts` | Saved profile types, and the XP-to-level curve                  |
 
 **Server** (`src/server`)
 
@@ -30,6 +31,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection |
 | `hazards.ts`          | Lava and falling out of the map                                |
 | `movementCheck.ts`    | Flagging and kicking speed hacks and teleports                 |
+| `perks.ts`            | Perk orbs, granting effects, shields                           |
 | `analytics.ts`        | Onboarding funnel and custom events for the Creator Dashboard  |
 | `stats.ts`            | Kills and deaths on the leaderboard                            |
 | `data/profiles.ts`    | Loading and saving player profiles with ProfileStore           |
@@ -59,6 +61,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `matchBar.ts`      | Timer and team scores at the top of the screen                        |
 | `objectives.ts`    | Control point strip in Domination and Hardpoint                       |
 | `onboarding.ts`    | The how-to-play card in the menu and one-time in-game tips            |
+| `perks.ts`         | Perk panel, Radar outlines, pickup announcements                      |
 | `profileData.ts`   | Reading the local player's saved profile                              |
 | `profileScreen.ts` | The Profile panel in the menu: level, XP and lifetime stats           |
 | `podium.ts`        | Live top three in Deathmatch, and the end-of-match podium             |
@@ -119,6 +122,11 @@ class, `controlPoints.ts`) live alongside it; the team modes share
 Teams are balanced within each server by a hidden skill rating, which each mode updates through
 `GameMode.rateMatch`. [RATING.md](RATING.md) covers the model, what each mode counts, team
 balance, and the reasoning and sources behind them.
+
+## Perks
+
+Perk orbs sit at `Perk` markers and respawn on timers; effects are player attributes the
+client reads. [PERKS.md](PERKS.md) has the perks, the design rules and their sources.
 
 ## Movement
 

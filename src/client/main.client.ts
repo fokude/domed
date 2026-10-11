@@ -10,6 +10,7 @@ import { initMenu } from "./menu";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
 import { initObjectives } from "./objectives";
 import { initOnboarding } from "./onboarding";
+import { initPerks } from "./perks";
 import { initPodium, setMatchXp, showMatchEnd } from "./podium";
 import { initProfileScreen } from "./profileScreen";
 import { initSpeedometer, setSpeed } from "./speedometer";
@@ -36,6 +37,7 @@ initWeapon();
 initMenu();
 initMapVote();
 initOnboarding();
+initPerks();
 initProfileScreen();
 initTeammates();
 

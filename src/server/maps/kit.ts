@@ -3,6 +3,7 @@
 // be baked into Studio models and finished by hand (see docs/MAPPING.md).
 
 import { ModeId, TEAM_COLORS, TeamId } from "shared/modes";
+import { PerkId } from "shared/perks";
 import { DEFAULT_ARC_HEIGHT, LIGHTING_FOLDER, MapAttribute, MapTag, PAD_TARGET_LINK } from "shared/mapMarkers";
 
 const CollectionService = game.GetService("CollectionService");
@@ -307,6 +308,13 @@ export function controlPointMarker(
 	if (radius !== 12) marker.SetAttribute(MapAttribute.Radius, radius);
 	if (mode) marker.SetAttribute(MapAttribute.PointMode, mode);
 	return tag(marker, MapTag.ControlPoint);
+}
+
+// Perk orb standing on `position` (floor level).
+export function perkMarker(parent: Instance, position: Vector3, perk: PerkId): Part {
+	const marker = slab(parent, position.add(new Vector3(0, 1, 0)), new Vector3(3, 1, 3), MarkerStyle, "Perk");
+	marker.SetAttribute(MapAttribute.PerkType, perk);
+	return tag(marker, MapTag.Perk);
 }
 
 export interface MapInfo {

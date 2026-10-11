@@ -1,6 +1,7 @@
 // Typed handles to the RemoteEvents declared in default.project.json.
 // The server receives arguments as `unknown` regardless, so it must validate them.
 
+import { PerkId } from "./perks";
 import { OnboardingKey } from "./progression";
 import { Standing } from "./standings";
 
@@ -10,7 +11,7 @@ function remote<T extends Callback>(name: string) {
 	return folder.WaitForChild(name) as RemoteEvent<T>;
 }
 
-export type HitKind = "kill" | "body";
+export type HitKind = "kill" | "body" | "shield";
 
 export const Remotes = {
 	Fire: remote<(origin: Vector3, hitPosition: Vector3, hitPart: BasePart | undefined) => void>("Fire"),
@@ -23,6 +24,10 @@ export const Remotes = {
 	MarkOnboarding: remote<(key: OnboardingKey) => void>("MarkOnboarding"),
 	// Sent to each player as a match ends: XP earned this match, and the level they're now on.
 	MatchXp: remote<(earned: number, level: number, leveledUp: boolean) => void>("MatchXp"),
+	// Everyone is told when a player takes a perk, so there's counterplay.
+	PerkTaken: remote<(taker: Player, perk: PerkId) => void>("PerkTaken"),
+	// Client reports it used a held perk (the Super Jump is triggered by client movement).
+	UsePerk: remote<(perk: PerkId) => void>("UsePerk"),
 	CastVote: remote<(optionIndex: number) => void>("CastVote"),
 	// Client asks to leave the menu and join the match in progress.
 	Deploy: remote<() => void>("Deploy"),
