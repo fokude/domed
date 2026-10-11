@@ -1,8 +1,10 @@
 // Chat commands for testing in Studio. They do nothing in live servers.
-//   /map <MapId> [Deathmatch|CTF]   switch to that map right away
+//   /map <MapId> [mode]   switch to that map right away
 //   /end                            end the match, then show results and the vote
+//   /openness                       measure the current map's openness and spawn exposure
 
-import { allMatchOptions, endMatch, forceMatch } from "./match/controller";
+import { allMatchOptions, endMatch, forceMatch, getCurrentMap } from "./match/controller";
+import { measureOpenness } from "./maps/openness";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
@@ -22,15 +24,28 @@ function switchMap(mapId: string | undefined, mode: string | undefined) {
 	warn(`[dev] No map matches "${mapId ?? ""} ${mode ?? ""}". Available: ${available}`);
 }
 
+function reportOpenness() {
+	const map = getCurrentMap();
+	if (!map) return;
+	print(`[dev] Measuring ${map.info.name}...`);
+	const report = measureOpenness(map);
+	const percent = (value: number) => `${math.round(value * 100)}%`;
+	print(
+		`[dev] ${map.info.name}: openness ${percent(report.openness)} (target ~25%), spawn exposure ` +
+			`${percent(report.spawnExposure)} (target <20%), from ${report.spots} spots`,
+	);
+}
+
 function onChatted(message: string) {
 	const [command, mapId, mode] = message.split(" ");
 	if (command === "/map") switchMap(mapId, mode);
 	else if (command === "/end") endMatch();
+	else if (command === "/openness") task.spawn(reportOpenness);
 }
 
 export function startDevCommands() {
 	if (!RunService.IsStudio()) return;
-	print("[dev] Chat commands: /map <MapId> [Deathmatch|CTF], /end");
+	print("[dev] Chat commands: /map <MapId> [mode], /end, /openness");
 	const watch = (player: Player) => player.Chatted.Connect(onChatted);
 	Players.PlayerAdded.Connect(watch);
 	Players.GetPlayers().forEach(watch);

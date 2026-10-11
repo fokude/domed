@@ -38,10 +38,11 @@ Then in Studio:
 
 Type these in chat during a Studio playtest. They're ignored on live servers.
 
-| Command                   | Does                                              |
-| ------------------------- | ------------------------------------------------- |
-| `/map <MapId> [Deathmatch | CTF]`                                             | Switch to that map right away, e.g. `/map InfernalSpire` |
-| `/end`                    | End the match, then show results and the map vote |
+| Command                   | Does                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `/map <MapId> [Deathmatch | CTF]`                                                                          | Switch to that map right away, e.g. `/map InfernalSpire` |
+| `/end`                    | End the match, then show results and the map vote                              |
+| `/openness`               | Measure the current map's openness and spawn exposure (see docs/MAP_DESIGN.md) |
 
 `/map MovementLab` loads a test map with stations for trying movement features.
 

@@ -27,7 +27,8 @@ DOMED different: one headshot kills, everyone has the same railgun, players bunn
 | Entrances to a strong position                                   | at least 3                                             | Deathmatch Map Design: The Architecture of Flow    |
 | Exits from a team's spawn area                                   | at least 2                                             | Unreal Tournament: Blitz level design              |
 
-Use `/openness` in Studio to measure a map's openness and spawn exposure.
+Use `/openness` in a Studio playtest to measure the current map (it samples 250 standing spots
+across every floor).
 
 ### DOMED scale
 

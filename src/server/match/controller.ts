@@ -44,6 +44,7 @@ export interface MatchOption {
 }
 
 let currentMode: GameMode | undefined;
+let currentMap: LoadedMap | undefined;
 // Set by dev commands to cut the current match short.
 let endRequested = false;
 let forcedOption: MatchOption | undefined;
@@ -67,6 +68,7 @@ function randomOption(): MatchOption {
 
 function startMatch(option: MatchOption): GameMode {
 	const map = loadMap(getMapModel(option.mapId)!);
+	currentMap = map;
 	const mode = MODE_FACTORIES[option.mode]!(map);
 	currentMode = mode;
 
@@ -136,6 +138,10 @@ export function endMatch() {
 export function forceMatch(option: MatchOption) {
 	forcedOption = option;
 	endRequested = true;
+}
+
+export function getCurrentMap(): LoadedMap | undefined {
+	return currentMap;
 }
 
 export function startMatchLoop() {
