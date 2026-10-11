@@ -1,8 +1,9 @@
 // Client entry point: sets up the first-person camera and wires modules to server events.
 
 import { MatchConfig } from "shared/config";
+import { getMatchState } from "shared/matchState";
 import { Remotes } from "shared/remotes";
-import { addKill, HudColors, initHud, showBanner } from "./hud";
+import { addKill, hideRespawnCountdown, HudColors, initHud, showBanner, showRespawnCountdown } from "./hud";
 import { initMapVote } from "./mapVote";
 import { initMatchBar } from "./matchBar";
 import { initMenu } from "./menu";
@@ -36,11 +37,24 @@ initTeammates();
 
 Remotes.Knockback.OnClientEvent.Connect((impulse) => launchCharacter(impulse, true));
 
+function currentRespawnTime(): number {
+	return getMatchState("RespawnTime") ?? MatchConfig.respawnTime;
+}
+
+// Every death shows the countdown, including falls and hazards that have no killer.
+player.CharacterAdded.Connect((character) => {
+	hideRespawnCountdown();
+	const humanoid = character.WaitForChild("Humanoid") as Humanoid;
+	humanoid.Died.Connect(() => {
+		if (getMatchState("Phase") === "Playing") showRespawnCountdown(currentRespawnTime());
+	});
+});
+
 Remotes.KillFeed.OnClientEvent.Connect((killer, victim) => {
 	const killerName = killer?.DisplayName ?? "?";
 	const victimName = victim?.DisplayName ?? "?";
 	addKill(killerName, victimName);
-	if (victim === player) showBanner(`DOMED BY ${killerName}`, HudColors.Red, MatchConfig.respawnTime);
+	if (victim === player) showBanner(`DOMED BY ${killerName}`, HudColors.Red, currentRespawnTime());
 });
 
 Remotes.MatchEnded.OnClientEvent.Connect(showMatchEnd);

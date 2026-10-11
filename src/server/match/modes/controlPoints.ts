@@ -5,7 +5,7 @@
 // Hardpoint: one point is live at a time, moving to the next every so often. A team scores
 // every second it has the live point to itself.
 
-import { DominationConfig, HardpointConfig } from "shared/config";
+import { DominationConfig, HardpointConfig, MatchConfig } from "shared/config";
 import { ControlPointState, getMatchState, setMatchState } from "shared/matchState";
 import { TEAM_IDS, TeamId } from "shared/modes";
 import { Remotes } from "shared/remotes";
@@ -52,6 +52,7 @@ export class ControlPointMode implements GameMode {
 	readonly id: Kind;
 	readonly timeLimit: number;
 	readonly scoreTarget: number;
+	readonly respawnTime = MatchConfig.objectiveRespawnTime;
 
 	private readonly roster: TeamRoster;
 	private readonly zones: Zone[] = [];

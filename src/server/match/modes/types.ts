@@ -12,6 +12,8 @@ export interface GameMode extends CombatRules {
 	readonly id: ModeId;
 	readonly timeLimit: number;
 	readonly scoreTarget: number;
+	// Seconds before respawning; MatchConfig.respawnTime when not set.
+	readonly respawnTime?: number;
 	// A player entering the match: joining mid-game or deployed at the start.
 	addPlayer(player: Player): void;
 	removePlayer(player: Player): void;

@@ -15,6 +15,8 @@ export interface MatchStateValues {
 	EndsAt: number;
 	// Kills to win in deathmatch, captures to win in CTF.
 	ScoreTarget: number;
+	// Seconds before a dead player respawns in the current mode.
+	RespawnTime: number;
 	RedScore: number;
 	BlueScore: number;
 	RedFlag: FlagStatus;

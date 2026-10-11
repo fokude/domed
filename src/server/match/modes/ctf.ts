@@ -2,7 +2,7 @@
 // flag is home to score. Carriers drop the flag when they die; a teammate touching a dropped
 // flag returns it, and it returns on its own after a while.
 
-import { CtfConfig } from "shared/config";
+import { CtfConfig, MatchConfig } from "shared/config";
 import { CARRYING_FLAG_ATTRIBUTE, FlagStatus, getMatchState, setMatchState } from "shared/matchState";
 import { TEAM_IDS, TeamId } from "shared/modes";
 import { Remotes } from "shared/remotes";
@@ -54,6 +54,7 @@ export class CaptureTheFlag implements GameMode {
 	readonly id = "CTF";
 	readonly timeLimit = CtfConfig.timeLimit;
 	readonly scoreTarget = CtfConfig.captureTarget;
+	readonly respawnTime = MatchConfig.objectiveRespawnTime;
 
 	private readonly roster: TeamRoster;
 	private readonly flags = new Map<TeamId, Flag>();

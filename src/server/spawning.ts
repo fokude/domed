@@ -16,6 +16,7 @@ let pickSpawn: SpawnPicker = () => undefined;
 let onDeath: DeathHandler = () => {};
 let onDeploy: (player: Player) => void = () => {};
 let spawningOpen = false;
+let respawnTime = MatchConfig.respawnTime;
 const deployed = new Set<Player>();
 
 export function setSpawnPicker(picker: SpawnPicker) {
@@ -24,6 +25,10 @@ export function setSpawnPicker(picker: SpawnPicker) {
 
 export function setDeathHandler(handler: DeathHandler) {
 	onDeath = handler;
+}
+
+export function setRespawnTime(seconds: number) {
+	respawnTime = seconds;
 }
 
 export function setDeployHandler(handler: (player: Player) => void) {
@@ -83,7 +88,7 @@ function onCharacterAdded(player: Player, character: Model) {
 	humanoid.Died.Connect(() => {
 		incrementStat(player, "Deaths");
 		onDeath(player, character);
-		task.delay(MatchConfig.respawnTime, () => {
+		task.delay(respawnTime, () => {
 			if (spawningOpen && deployed.has(player) && player.Parent && player.Character === character) {
 				player.LoadCharacter();
 			}

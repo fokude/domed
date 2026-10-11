@@ -18,6 +18,7 @@ import {
 	returnAllToMenu,
 	setDeathHandler,
 	setDeployHandler,
+	setRespawnTime,
 	setSpawnPicker,
 } from "../spawning";
 import { resetStats } from "../stats";
@@ -85,6 +86,9 @@ function startMatch(option: MatchOption): GameMode {
 	setMatchState("Mode", mode.id);
 	setMatchState("MapName", map.info.name);
 	setMatchState("ScoreTarget", mode.scoreTarget);
+	const respawnTime = mode.respawnTime ?? MatchConfig.respawnTime;
+	setRespawnTime(respawnTime);
+	setMatchState("RespawnTime", respawnTime);
 	setMatchState("EndsAt", Workspace.GetServerTimeNow() + mode.timeLimit);
 
 	for (const player of Players.GetPlayers()) {

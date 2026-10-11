@@ -19,9 +19,11 @@ let hitmarker: Frame;
 let cooldownFill: Frame;
 let feed: Frame;
 let banner: TextLabel;
+let respawnLabel: TextLabel;
 
 let hitmarkerToken = 0;
 let bannerToken = 0;
+let respawnToken = 0;
 let feedCount = 0;
 const feedEntries: TextLabel[] = [];
 
@@ -124,6 +126,22 @@ function buildPanels(gui: ScreenGui) {
 		},
 		gui,
 	);
+
+	respawnLabel = create(
+		"TextLabel",
+		{
+			AnchorPoint: new Vector2(0.5, 0.5),
+			Position: new UDim2(0.5, 0, 0.3, 56),
+			Size: UDim2.fromOffset(400, 32),
+			BackgroundTransparency: 1,
+			Font: Enum.Font.GothamBold,
+			TextSize: 24,
+			TextColor3: HudColors.White,
+			TextStrokeTransparency: 0.3,
+			Visible: false,
+		},
+		gui,
+	);
 }
 
 export function initHud() {
@@ -145,6 +163,24 @@ export function showHitmarker(isHeadshot: boolean) {
 	task.delay(HITMARKER_TIME, () => {
 		if (hitmarkerToken === token) hitmarker.Visible = false;
 	});
+}
+
+// Counts down whole seconds until respawn, or until hideRespawnCountdown is called.
+export function showRespawnCountdown(seconds: number) {
+	const token = ++respawnToken;
+	task.spawn(() => {
+		for (let remaining = math.ceil(seconds); remaining > 0 && respawnToken === token; remaining--) {
+			respawnLabel.Text = `RESPAWNING IN ${remaining}`;
+			respawnLabel.Visible = true;
+			task.wait(1);
+		}
+		if (respawnToken === token) respawnLabel.Visible = false;
+	});
+}
+
+export function hideRespawnCountdown() {
+	respawnToken += 1;
+	respawnLabel.Visible = false;
 }
 
 export function showBanner(text: string, color: Color3, duration: number) {

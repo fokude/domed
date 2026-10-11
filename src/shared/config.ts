@@ -33,6 +33,9 @@ export const WeaponConfig = {
 
 export const MatchConfig = {
 	respawnTime: 1.5,
+	// Objective modes (CTF, Domination, Hardpoint) respawn slower, so killing defenders opens
+	// a window to make progress.
+	objectiveRespawnTime: 5,
 	spawnProtection: 1.5,
 	// Seconds the end-of-match podium stays up.
 	resultsTime: 8,
