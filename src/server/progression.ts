@@ -4,6 +4,7 @@ import { getLiveRoot } from "shared/characters";
 import { MovementConfig, XpConfig } from "shared/config";
 import { levelForXp, ONBOARDING_KEYS } from "shared/progression";
 import { Remotes } from "shared/remotes";
+import { logOnboardingStep } from "./analytics";
 import { getProfile, updateProfile } from "./data/profiles";
 
 const Players = game.GetService("Players");
@@ -32,6 +33,7 @@ function awardXp(player: Player, amount: number) {
 	updateProfile(player, (data) => {
 		data.xp += granted;
 	});
+	if (levelForXp(getProfile(player)?.xp ?? 0).level >= 2) logOnboardingStep(player, "level2");
 }
 
 export function startMatchXp() {
@@ -44,6 +46,7 @@ export function recordKill(shooter: Player, distance: number) {
 		data.stats.longestHeadshot = math.max(data.stats.longestHeadshot, math.floor(distance));
 	});
 	awardXp(shooter, XpConfig.kill);
+	logOnboardingStep(shooter, "firstKill");
 }
 
 export function recordDeath(player: Player) {

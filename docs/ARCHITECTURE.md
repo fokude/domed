@@ -30,6 +30,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection |
 | `hazards.ts`          | Lava and falling out of the map                                |
 | `movementCheck.ts`    | Flagging and kicking speed hacks and teleports                 |
+| `analytics.ts`        | Onboarding funnel and custom events for the Creator Dashboard  |
 | `stats.ts`            | Kills and deaths on the leaderboard                            |
 | `data/profiles.ts`    | Loading and saving player profiles with ProfileStore           |
 | `progression.ts`      | Recording lifetime stats into profiles                         |
@@ -146,6 +147,13 @@ session-locks each profile so two servers can't overwrite each other's saves. Ea
 profile is copied to their `Profile` attribute as JSON for their client to read. In Studio,
 saving to real DataStores needs **Enable Studio Access to API Services** in Game Settings;
 without it profiles are temporary.
+
+## Analytics
+
+`server/analytics.ts` logs an onboarding funnel (joined, pressed Play, first kill, finished a
+match, reached level 2) and two custom events: `MatchFinished` (match length, with mode and map
+in custom fields 1 and 2) and `SessionLength` (minutes). They appear under Analytics in the
+Creator Dashboard once the game has live traffic.
 
 ## Known gaps
 

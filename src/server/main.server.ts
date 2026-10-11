@@ -1,3 +1,4 @@
+import { startAnalytics } from "./analytics";
 import { startCombat } from "./combat";
 import { startProfiles } from "./data/profiles";
 import { startDevCommands } from "./dev";
@@ -23,6 +24,7 @@ for (const player of Players.GetPlayers()) {
 	onPlayerAdded(player);
 }
 
+startAnalytics();
 startProfiles();
 startProgression();
 startCombat();

@@ -8,6 +8,7 @@ import { Remotes } from "shared/remotes";
 import { getStandings } from "shared/standings";
 import { setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
+import { logMatchFinished, logOnboardingStep } from "../analytics";
 import { recordMatchEnd, startMatchXp } from "../progression";
 import { getMapModel, listMaps } from "../maps/library";
 import { LoadedMap, loadMap } from "../maps/loader";
@@ -149,6 +150,7 @@ function voteForNext(previous: MatchOption): MatchOption {
 
 function runMatch(option: MatchOption) {
 	endRequested = false;
+	const startedAt = os.clock();
 	const mode = startMatch(option);
 	const result = waitForResult(mode);
 	setCombatRules(undefined);
@@ -156,6 +158,10 @@ function runMatch(option: MatchOption) {
 	if (!forcedOption) {
 		const participants = Players.GetPlayers().filter((player) => player.GetAttribute(DEPLOYED_ATTRIBUTE) === true);
 		recordMatchEnd(participants, result.winners);
+		for (const player of participants) {
+			logOnboardingStep(player, "matchFinished");
+			logMatchFinished(player, option.mode, option.mapId, os.clock() - startedAt);
+		}
 		showResults(result);
 	}
 	mode.stop();
