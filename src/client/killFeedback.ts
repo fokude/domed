@@ -278,8 +278,14 @@ export function initKillFeedback() {
 	Remotes.HitConfirm.OnClientEvent.Connect(onHitConfirm);
 	Remotes.HeadBurst.OnClientEvent.Connect(headBurst);
 	Remotes.NearMiss.OnClientEvent.Connect(nearMiss);
-	Remotes.KillFeed.OnClientEvent.Connect((_, victim) => {
+	Remotes.KillFeed.OnClientEvent.Connect((killer, victim, cause) => {
 		if (victim === player) playSound("death");
+		// Ring-outs are the crowd's favorite: everyone hears the roar, and the killer's headline
+		// calls it (see docs/LORE.md).
+		if (cause === "knockback") {
+			playSound("crowdRoar");
+			if (killer === player) showHeadline("RING OUT!", MULTI_GOLD);
+		}
 	});
 	Remotes.PersonalBest.OnClientEvent.Connect((record, value) => {
 		playSound("personalBest");

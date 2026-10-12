@@ -302,12 +302,12 @@ function awardKill(
 	Remotes.HitConfirm.FireClient(shooter, "kill", false);
 	if (victim.IsA("Player")) {
 		recordKill(shooter, cause === "headshot" ? distance : undefined);
-		Remotes.KillFeed.FireAllClients(shooter, victim);
+		Remotes.KillFeed.FireAllClients(shooter, victim, cause);
 		sendDeathRecap(victim, shooter, cause, distance);
 		currentRules.onKill(shooter, victim);
 	} else {
 		recordKill(shooter, undefined);
-		Remotes.KillFeed.FireAllClients(shooter, getBotName(victim));
+		Remotes.KillFeed.FireAllClients(shooter, getBotName(victim), cause);
 	}
 }
 

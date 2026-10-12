@@ -258,8 +258,10 @@ function addFeedLine(richText: string) {
 	});
 }
 
-export function addKill(killerName: string, victimName: string) {
-	addFeedLine(`${escapeRichText(killerName)}  <font color="#ff3c28">DOMED</font>  ${escapeRichText(victimName)} `);
+// A ring-out (knocked into a hazard or off the map) reads RING OUT instead of DOMED.
+export function addKill(killerName: string, victimName: string, ringOut = false) {
+	const verb = ringOut ? '<font color="#ffc828">RING OUT</font>' : '<font color="#ff3c28">DOMED</font>';
+	addFeedLine(`${escapeRichText(killerName)}  ${verb}  ${escapeRichText(victimName)} `);
 }
 
 export function addPerkTaken(playerName: string, perkName: string, color: Color3) {

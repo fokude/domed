@@ -269,7 +269,7 @@ function shoot(bot: Bot, target: Model) {
 	if (isHead) {
 		victimHumanoid.Health = 0;
 		Remotes.HeadBurst.FireAllClients(result.Position);
-		Remotes.KillFeed.FireAllClients(bot.humanoid.DisplayName, victim);
+		Remotes.KillFeed.FireAllClients(bot.humanoid.DisplayName, victim, "headshot");
 		Remotes.DeathRecap.FireClient(
 			victim,
 			bot.model,

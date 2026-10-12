@@ -27,7 +27,8 @@ export const Remotes = {
 	HitConfirm: remote<(kind: HitKind, practice: boolean) => void>("HitConfirm"),
 	Knockback: remote<(impulse: Vector3) => void>("Knockback"),
 	// Either player may have left by the time a client receives this.
-	KillFeed: remote<(killer?: Combatant, victim?: Combatant) => void>("KillFeed"),
+	// `cause` "knockback" is a ring-out: knocked into a hazard or off the map.
+	KillFeed: remote<(killer?: Combatant, victim?: Combatant, cause?: DeathCause) => void>("KillFeed"),
 	// Client reports that the player has seen an onboarding step.
 	MarkOnboarding: remote<(key: OnboardingKey) => void>("MarkOnboarding"),
 	// Sent to each player as a match ends: XP earned this match, and the level they're now on.

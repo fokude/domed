@@ -12,15 +12,16 @@ playing against their interest. Roblox's audience is young, which makes this mat
 
 ## What happens on a kill
 
-| Layer           | Detail                                            | Who sees it |
-| --------------- | ------------------------------------------------- | ----------- |
-| Headline        | "DOMED" pops in oversized and settles, then fades | Killer      |
-| Crosshair burst | A ring expands from the crosshair                 | Killer      |
-| Edge flash      | A brief red flash at the screen edges             | Killer      |
-| XP popup        | "+10 XP" drifts up beside the crosshair           | Killer      |
-| Sound           | A bright tick layered over a low thump            | Killer      |
-| Head burst      | Particles burst from the victim's head            | Everyone    |
-| Death sound     | Plays for the victim                              | Victim      |
+| Layer           | Detail                                                                    | Who sees it               |
+| --------------- | ------------------------------------------------------------------------- | ------------------------- |
+| Headline        | "DOMED" pops in oversized and settles, then fades                         | Killer                    |
+| Crosshair burst | A ring expands from the crosshair                                         | Killer                    |
+| Edge flash      | A brief red flash at the screen edges                                     | Killer                    |
+| XP popup        | "+10 XP" drifts up beside the crosshair                                   | Killer                    |
+| Sound           | A bright tick layered over a low thump                                    | Killer                    |
+| Head burst      | Particles burst from the victim's head                                    | Everyone                  |
+| Death sound     | Plays for the victim                                                      | Victim                    |
+| Ring-out        | "RING OUT!" headline in gold, RING OUT in the kill feed, and a crowd roar | Killer; roar for everyone |
 
 **Multi-kills** (each within 4 seconds of the last) escalate the headline (DOUBLE DOME, TRIPLE
 DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch each step.
@@ -28,6 +29,12 @@ DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch ea
 (on the Test Range and in the warm-up) escalate multi-kills but earn no XP popup and don't
 count toward streaks, so practice can't carry a streak into a match. Body shots, shield
 breaks and perk pickups each have their own cue.
+
+**Ring-outs** (a kill by knocking someone into a hazard or off the map) are the crowd's
+favorite in the tournament lore (LORE.md): everyone hears a crowd roar, the killer's headline
+reads "RING OUT!", and the kill feed says RING OUT instead of DOMED. They're DOMED's most
+distinctive kill, so they get the biggest reaction. The roar is a placeholder sound until a
+Creator Store crowd cheer is picked.
 
 **Death recap**: the killed player sees how far away the killer was and how fast they were
 moving, under the respawn countdown, and the killer is outlined through walls until respawn.
