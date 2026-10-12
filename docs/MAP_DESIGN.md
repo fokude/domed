@@ -106,6 +106,25 @@ statue or a color.
 
 **Personality.** Each map has its own theme and feel. Layout rules are shared; identity isn't.
 
+## Roster
+
+Six maps, each with a distinct role, so rotation varies in scale, pace and feel as well as
+looks. Classic arena maps inspire archetypes only: layouts, themes and names are DOMED's own,
+since recognizable copies of commercial maps carry IP risk and add nothing a fresh layout
+can't.
+
+| Map             | Role                                                   | Archetype                  | Modes                                       |
+| --------------- | ------------------------------------------------------ | -------------------------- | ------------------------------------------- |
+| Bastion         | The big 5v5 map: two fortresses, three lanes           | Classic CTF                | CTF, Team Deathmatch, Domination, Hardpoint |
+| Infernal Spire  | Circular arena: climb the central spire over lava      | King of the hill           | Deathmatch, Team Deathmatch, Domination     |
+| Gridline        | Mid-size synthwave map built around a speed trench     | Speed lanes                | All five                                    |
+| Halcyon Station | Low-gravity station interiors: hangars, tubes, reactor | Indoor low gravity         | All five                                    |
+| Skyreach        | Floating sky islands linked by jump pads, air control  | Quake 3's The Longest Yard | Deathmatch, Team Deathmatch, Domination     |
+| Foundry         | Dense industrial interior, many levels, close fights   | Unreal Tournament's Deck16 | Deathmatch, Team Deathmatch, Hardpoint      |
+
+Every map is measured with `npm run preview` against the targets above before it ships, and
+checked in Studio with `/openness`.
+
 ## Sources
 
 - [Mapping for CTF](https://beyondunrealwiki.github.io/pages/mapping-for-ctf.html), Unreal Wiki
