@@ -1,5 +1,8 @@
-// A ruined citadel over a lava lake. A rampart ring encloses a tiered obsidian spire,
-// with floating basalt islands between them. Falling means lava.
+// A ruined citadel over a lava lake. A rampart ring encloses a tiered obsidian spire, with
+// floating basalt islands between them. Falling means lava. Players spawn in rooms recessed
+// into the rampart, and basalt columns rise from the lava to break sightlines across it: the
+// first version, an open lake, measured 72% openness and 99.6% spawn exposure (see
+// docs/MAP_DESIGN.md).
 
 import {
 	block,
@@ -34,6 +37,10 @@ const Barrier: Style = { color: new Color3(), transparency: 1 };
 const FIRE = Color3.fromRGB(255, 120, 30);
 const EMBER = Color3.fromRGB(120, 20, 10);
 
+const CENTER = Vector3.zero;
+const QUARTER = math.pi / 2;
+const EIGHTH = math.pi / 4;
+
 const RING_HEIGHT = 12;
 const RING_RADIUS = 108;
 const RING_WIDTH = 20;
@@ -44,12 +51,32 @@ const TIER_DIAMETERS = [64, 40, 22];
 const ISLAND_RADIUS = 68;
 const ISLAND_HEIGHT = 30;
 
-const CENTER = Vector3.zero;
-const QUARTER = math.pi / 2;
-const EIGHTH = math.pi / 4;
+// The rampart is built in this many segments; doorways replace some of them.
+const RAMPART_SEGMENTS = 48;
+// Spawn rooms behind the rampart, one behind each doorway, between the bridges and the pads.
+const DOOR_ANGLES = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => EIGHTH / 2 + i * EIGHTH);
+const DOOR_HEIGHT = 12;
+const ROOM_DEPTH = 18;
+const ROOM_WIDTH = 28;
+const ROOM_HEIGHT = 16;
+// A screen wall just inside each doorway hides the spawns from the ring and splits the way
+// out into two exits, one each side.
+const SCREEN_WIDTH = 6;
+// Basalt columns in the lava, one in front of each doorway, screening the spawn rooms and
+// breaking sightlines across the lake.
+const COLUMN_RADIUS = 86;
+const COLUMN_WIDTH = 24;
+const COLUMN_TOP = 56;
+const BARRIER_RADIUS = RAMPART_RADIUS + ROOM_DEPTH + 6;
 
 function at(radius: number, angle: number, height: number): Vector3 {
 	return onCircle(CENTER, radius, angle).add(new Vector3(0, height, 0));
+}
+
+// A frame at `radius` and `angle` around the ring. Its +Z axis points toward the center and -Z
+// away from it.
+function ringFrame(radius: number, angle: number, height: number): CFrame {
+	return new CFrame(CENTER).mul(CFrame.Angles(0, angle, 0)).mul(new CFrame(0, height, -radius));
 }
 
 function brazier(parent: Instance, base: Vector3) {
@@ -59,28 +86,131 @@ function brazier(parent: Instance, base: Vector3) {
 	pointLight(bowl, FIRE, 40, 2);
 }
 
+function isDoorway(segmentAngle: number): boolean {
+	return DOOR_ANGLES.some((door) => math.abs(((segmentAngle - door + math.pi) % (2 * math.pi)) - math.pi) < 0.01);
+}
+
+// The outer wall, with a doorway into a spawn room at each door angle.
 function buildRampart(arena: Model) {
 	ring(arena, new Vector3(0, RING_HEIGHT, 0), RING_RADIUS, RING_WIDTH, 4, 24, Basalt, "Walkway");
-	ring(arena, new Vector3(0, RAMPART_TOP, 0), RAMPART_RADIUS, 4, RAMPART_TOP - RING_HEIGHT, 24, Basalt, "Rampart");
-	const barrier = ring(arena, new Vector3(0, 340, 0), RAMPART_RADIUS + 3, 4, 300, 24, Barrier, "Barrier");
+
+	const segmentLength = 2 * (RAMPART_RADIUS + 2) * math.tan(math.pi / RAMPART_SEGMENTS) + 0.2;
+	const wallHeight = RAMPART_TOP - RING_HEIGHT;
+	for (let i = 0; i < RAMPART_SEGMENTS; i++) {
+		const angle = EIGHTH / 2 + (i / RAMPART_SEGMENTS) * 2 * math.pi;
+		if (isDoorway(angle)) {
+			// Lintel over the doorway.
+			const lintelHeight = wallHeight - DOOR_HEIGHT;
+			block(
+				arena,
+				new Vector3(segmentLength, lintelHeight, 4),
+				ringFrame(RAMPART_RADIUS, angle, RAMPART_TOP - lintelHeight / 2),
+				Basalt,
+				"Lintel",
+			);
+		} else {
+			block(
+				arena,
+				new Vector3(segmentLength, wallHeight, 4),
+				ringFrame(RAMPART_RADIUS, angle, RING_HEIGHT + wallHeight / 2),
+				Basalt,
+				"Rampart",
+			);
+		}
+	}
+
+	const barrier = ring(arena, new Vector3(0, 340, 0), BARRIER_RADIUS, 4, 300, 24, Barrier, "Barrier");
 	barrier.forEach((part) => (part.CanQuery = false));
 
 	for (let i = 0; i < 48; i += 2) {
 		const angle = (i / 48) * 2 * math.pi;
-		block(
-			arena,
-			new Vector3(6, 5, 4),
-			new CFrame(CENTER).mul(CFrame.Angles(0, angle, 0)).mul(new CFrame(0, RAMPART_TOP + 2.5, -RAMPART_RADIUS)),
-			Basalt,
-			"Merlon",
-		);
+		block(arena, new Vector3(6, 5, 4), ringFrame(RAMPART_RADIUS, angle, RAMPART_TOP + 2.5), Basalt, "Merlon");
 	}
 	for (let i = 0; i < 12; i++) {
 		const angle = (i / 12) * 2 * math.pi;
 		slab(arena, at(RING_RADIUS, angle, RING_HEIGHT - 4), new Vector3(8, RING_HEIGHT, 8), Obsidian, "Support");
 	}
-	for (let i = 0; i < 8; i++) {
-		brazier(arena, at(RING_RADIUS - 8, EIGHTH / 2 + i * EIGHTH, RING_HEIGHT));
+	// Braziers mark the pads, between the doorways.
+	for (let i = 0; i < 4; i++) {
+		const angle = EIGHTH + i * QUARTER;
+		brazier(arena, at(RING_RADIUS + 6, angle + 0.06, RING_HEIGHT));
+		brazier(arena, at(RING_RADIUS + 6, angle - 0.06, RING_HEIGHT));
+	}
+}
+
+// A small room behind each doorway: floor, roof, side walls and a back wall on the outer side.
+// Two spawns stand at the back facing the center, so a spawning player sees the doorway and
+// the column beyond it.
+function buildSpawnRooms(arena: Model) {
+	const middle = RAMPART_RADIUS + 2 + ROOM_DEPTH / 2;
+	for (const angle of DOOR_ANGLES) {
+		const frame = ringFrame(middle, angle, 0);
+		const inRoom = (x: number, y: number, z: number) => frame.mul(new CFrame(x, y, z));
+		block(arena, new Vector3(ROOM_WIDTH, 4, ROOM_DEPTH), inRoom(0, RING_HEIGHT - 2, 0), Basalt, "RoomFloor");
+		block(
+			arena,
+			new Vector3(ROOM_WIDTH, 3, ROOM_DEPTH),
+			inRoom(0, RING_HEIGHT + ROOM_HEIGHT + 1.5, 0),
+			Obsidian,
+			"RoomRoof",
+		);
+		for (const side of [-1, 1]) {
+			block(
+				arena,
+				new Vector3(2, ROOM_HEIGHT, ROOM_DEPTH),
+				inRoom((side * (ROOM_WIDTH - 2)) / 2, RING_HEIGHT + ROOM_HEIGHT / 2, 0),
+				Basalt,
+				"RoomWall",
+			);
+		}
+		block(
+			arena,
+			new Vector3(ROOM_WIDTH, ROOM_HEIGHT, 2),
+			inRoom(0, RING_HEIGHT + ROOM_HEIGHT / 2, -(ROOM_DEPTH / 2 - 1)),
+			Basalt,
+			"RoomWall",
+		);
+		block(
+			arena,
+			new Vector3(SCREEN_WIDTH, ROOM_HEIGHT, 2),
+			inRoom(0, RING_HEIGHT + ROOM_HEIGHT / 2, ROOM_DEPTH / 2 - 6),
+			Basalt,
+			"Screen",
+		);
+		const torch = block(
+			arena,
+			new Vector3(1, 1, 1),
+			inRoom(0, RING_HEIGHT + ROOM_HEIGHT - 2, -(ROOM_DEPTH / 2 - 2.5)),
+			Rune,
+			"Torch",
+		);
+		pointLight(torch, FIRE, 24, 1.5);
+
+		for (const side of [-1, 1]) {
+			const spot = inRoom(side * 5, RING_HEIGHT, -(ROOM_DEPTH / 2 - 4)).Position;
+			spawnMarker(arena, spot, CENTER);
+		}
+	}
+}
+
+// Columns of basalt rising out of the lava in front of each doorway.
+function buildColumns(arena: Model) {
+	for (const angle of DOOR_ANGLES) {
+		block(
+			arena,
+			new Vector3(COLUMN_WIDTH, COLUMN_TOP, COLUMN_WIDTH),
+			ringFrame(COLUMN_RADIUS, angle, COLUMN_TOP / 2),
+			Obsidian,
+			"Column",
+		);
+		// A cap of bone, so the columns read as part of the citadel rather than bare rock.
+		block(
+			arena,
+			new Vector3(COLUMN_WIDTH + 2, 2, COLUMN_WIDTH + 2),
+			ringFrame(COLUMN_RADIUS, angle, COLUMN_TOP + 1),
+			Bone,
+			"ColumnCap",
+		);
 	}
 }
 
@@ -120,9 +250,7 @@ function buildSpire(arena: Model) {
 		);
 	}
 
-	// Vents climb the spire: tier 1 to 2, tier 2 to the crown. They sit far enough out, with a
-	// high enough arc, to clear the overhang of the tier above. Tier 1 vents sit where the iron
-	// bridges land, so running off a bridge carries straight on upward.
+	// Vents climb the spire: tier 1 to 2, tier 2 to the crown.
 	for (const angle of [0, math.pi]) {
 		jumpPad(arena, at(28, angle, TIER_TOPS[0]), at(12, angle, TIER_TOPS[1]), 10, Vent);
 	}
@@ -178,8 +306,10 @@ export const InfernalSpire: MapBuilder = {
 		perkMarker(arena, at(RING_RADIUS, QUARTER * 3, RING_HEIGHT), "SuperJump");
 		perkMarker(arena, at(ISLAND_RADIUS + 3, EIGHTH, ISLAND_HEIGHT), "Shield");
 		perkMarker(arena, at(ISLAND_RADIUS + 3, EIGHTH * 5, ISLAND_HEIGHT), "Shield");
-		hazard(slab(arena, Vector3.zero, new Vector3(320, 4, 320), Lava, "Lava"));
+		hazard(slab(arena, Vector3.zero, new Vector3(340, 4, 340), Lava, "Lava"));
 		buildRampart(arena);
+		buildSpawnRooms(arena);
+		buildColumns(arena);
 		buildSpire(arena);
 		buildIslands(arena);
 
@@ -203,12 +333,5 @@ export const InfernalSpire: MapBuilder = {
 				brightness: 0,
 			},
 		});
-
-		for (let i = 0; i < 8; i++) {
-			spawnMarker(arena, at(RING_RADIUS, EIGHTH / 2 + i * EIGHTH, RING_HEIGHT), CENTER);
-		}
-		for (let i = 0; i < 4; i++) {
-			spawnMarker(arena, at(ISLAND_RADIUS - 4, EIGHTH + i * QUARTER, ISLAND_HEIGHT), CENTER);
-		}
 	},
 };

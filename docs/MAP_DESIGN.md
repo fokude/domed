@@ -35,19 +35,18 @@ across every floor). `npm run preview -- <MapId>` measures the same thing offlin
 
 Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`):
 
-| Map                     | Openness | Spawn exposure | Notes                                                    |
-| ----------------------- | -------- | -------------- | -------------------------------------------------------- |
-| Bastion                 | 17%      | 9%             | Meets both targets                                       |
-| Gridline                | 31%      | 90%            | Spawns spread across an open map                         |
-| Halcyon Station         | 40%      | 86%            | Spawns spread across an open map                         |
-| Infernal Spire          | 72%      | 99.6%          | Open lava lake; spawns on the open ring                  |
-| Infernal Spire redesign | 24%      | 14%            | Spawn rooms with screens; basalt columns across the lake |
+| Map             | Openness | Spawn exposure | Notes                                                                        |
+| --------------- | -------- | -------------- | ---------------------------------------------------------------------------- |
+| Bastion         | 17%      | 9%             | Meets both targets                                                           |
+| Gridline        | 31%      | 90%            | Spawns spread across an open map                                             |
+| Halcyon Station | 40%      | 86%            | Spawns spread across an open map                                             |
+| Infernal Spire  | 24%      | 14%            | Spawn rooms with screens; basalt columns across the lake (was 72% and 99.6%) |
 
 Free-for-all maps that scatter spawns everywhere score high on spawn exposure almost by
 design; openness is the clearer signal for them.
 
-**The Infernal Spire redesign** (`InfernalSpireV2`, dev-only until playtested against the
-original) was the first map built with the preview loop. Three iterations: spawn rooms behind
+**The Infernal Spire redesign** was the first map built with the preview loop. The original
+was an open lava lake with spawns on the open ring. Three iterations: spawn rooms behind
 the rampart and columns in the lava (openness 35%, but the renders showed the rooms had been
 built facing outward, sealing the spawns); turned around (spawn exposure 74%, since a wide
 doorway shows a wide arc of the ring); then screen walls inside each doorway, which also give
