@@ -45,6 +45,7 @@ function floorsInColumn(x: number, z: number, top: number, bottom: number, map: 
 		const standable =
 			hit.Normal.Y > 0.7 &&
 			hit.Position.Y > map.killHeight &&
+			hit.Position.Y <= map.playableTop &&
 			!CollectionService.HasTag(hit.Instance, MapTag.Hazard) &&
 			!Workspace.Raycast(hit.Position.add(new Vector3(0, 0.1, 0)), new Vector3(0, HEADROOM, 0), params);
 		if (standable) floors.push(hit.Position);

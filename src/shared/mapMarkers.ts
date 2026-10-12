@@ -23,6 +23,9 @@ export const MapAttribute = {
 	Modes: "Modes",
 	Gravity: "Gravity",
 	KillHeight: "KillHeight",
+	// Optional: the highest height players can stand at, such as under an indoor map's roof.
+	// Measurements ignore standing spots above it (a roof nobody can reach).
+	PlayableTop: "PlayableTop",
 	// Accent color for the map's vote card.
 	ThemeColor: "ThemeColor",
 	// Test maps: reachable with /map in Studio, never in rotation or votes.

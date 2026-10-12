@@ -27,15 +27,16 @@ already set up.
 
 Set these on the map Model itself.
 
-| Attribute     | Type    | Meaning                                                              |
-| ------------- | ------- | -------------------------------------------------------------------- |
-| `DisplayName` | string  | Name shown to players                                                |
-| `Tagline`     | string  | One line shown in the map vote                                       |
-| `Modes`       | string  | Comma-separated: `Deathmatch`, `CTF`                                 |
-| `Gravity`     | number  | Workspace gravity while this map is loaded (default 196.2)           |
-| `KillHeight`  | number  | Players below this Y die, for lava and drops into the void           |
-| `ThemeColor`  | Color3  | Accent color of the map's card in the vote                           |
-| `DevOnly`     | boolean | Test map: loadable with `/map` in Studio, never in rotation or votes |
+| Attribute     | Type    | Meaning                                                                                                                  |
+| ------------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `DisplayName` | string  | Name shown to players                                                                                                    |
+| `Tagline`     | string  | One line shown in the map vote                                                                                           |
+| `Modes`       | string  | Comma-separated: `Deathmatch`, `CTF`                                                                                     |
+| `Gravity`     | number  | Workspace gravity while this map is loaded (default 196.2)                                                               |
+| `KillHeight`  | number  | Players below this Y die, for lava and drops into the void                                                               |
+| `PlayableTop` | number  | Optional: highest height players can stand at, e.g. under an indoor roof. `/openness` and previews ignore spots above it |
+| `ThemeColor`  | Color3  | Accent color of the map's card in the vote                                                                               |
+| `DevOnly`     | boolean | Test map: loadable with `/map` in Studio, never in rotation or votes                                                     |
 
 ## Markers
 

@@ -69,6 +69,8 @@ export interface LoadedMap {
 	perks: PerkSpawn[];
 	dummies: DummySpawn[];
 	killHeight: number;
+	// Standing spots above this can't be reached (see MapAttribute.PlayableTop).
+	playableTop: number;
 }
 
 const LIGHTING_EFFECT_CLASSES = new Set([
@@ -282,5 +284,6 @@ export function loadMap(source: Model): LoadedMap {
 		perks,
 		dummies,
 		killHeight: attribute(arena, MapAttribute.KillHeight, "number", DEFAULT_KILL_HEIGHT),
+		playableTop: attribute(arena, MapAttribute.PlayableTop, "number", math.huge),
 	};
 }

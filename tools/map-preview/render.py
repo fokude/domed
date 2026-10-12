@@ -226,6 +226,7 @@ for part in solid:
 p_lo = Vector((min(p.x for p in solid_points), min(p.y for p in solid_points), min(p.z for p in solid_points)))
 p_hi = Vector((max(p.x for p in solid_points), max(p.y for p in solid_points), max(p.z for p in solid_points)))
 kill_height = data["attributes"].get("KillHeight", -50)
+playable_top = data["attributes"].get("PlayableTop", math.inf)
 
 
 def floors_in_column(x, y):
@@ -238,6 +239,7 @@ def floors_in_column(x, y):
         standable = (
             normal.z > 0.7
             and hit.z > kill_height
+            and hit.z <= playable_top
             and "Hazard" not in part["tags"]
             and bvh.ray_cast(hit + Vector((0, 0, 0.1)), Vector((0, 0, 1)), HEADROOM)[0] is None
         )
@@ -363,8 +365,7 @@ levels = []
 for top in floor_tops:
     if not levels or top - levels[-1] >= 10:
         levels.append(top)
-for level in levels[:5]:
-    cut = level + 8
+def render_cut(cut, name):
     hidden, flattened = [], {}
     for obj in geometry + scenery + markers:
         heights = [v.co.z for v in obj.data.vertices]
@@ -379,7 +380,7 @@ for level in levels[:5]:
                 v.co.z = min(v.co.z, cut)
             obj.color = (0.05, 0.05, 0.06, 1)
     cut_cam = make_camera(f"Cut{cut}", Vector((center.x, center.y, cut + 100)), ortho_scale=extent * 1.08, rotation=(0, 0, 0))
-    render(f"cut_{cut}.png", cut_cam, resolution, resolution)
+    render(name, cut_cam, resolution, resolution)
     for obj in hidden:
         obj.hide_render = False
     for obj, (coords, color) in flattened.items():
@@ -387,11 +388,17 @@ for level in levels[:5]:
             v.co = co
         obj.color = color
 
-# Exposure plan: the cut through the lowest floor, with the sampled spots on top.
+
+for level in levels[:5]:
+    render_cut(level + 8, f"cut_{level + 8}.png")
+
+# Exposure plan: a cut through the main floor (the height most standing spots are at), with
+# the sampled spots drawn on top, including those on upper floors.
+spot_floors = [round(spot.z - EYE_HEIGHT) for spot in spots] or [0]
+main_floor = max(set(spot_floors), key=spot_floors.count)
 for dot in exposure_dots:
     dot.hide_render = False
-cut_cam = make_camera("Exposure", Vector((center.x, center.y, p_hi.z + 50)), ortho_scale=extent * 1.08, rotation=(0, 0, 0))
-render("exposure.png", cut_cam, resolution, resolution)
+render_cut(round(main_floor) + 8, "exposure.png")
 for dot in exposure_dots:
     dot.hide_render = True
 

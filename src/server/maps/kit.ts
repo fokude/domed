@@ -342,6 +342,8 @@ export interface MapInfo {
 	modes: ModeId[];
 	gravity: number;
 	killHeight: number;
+	// The highest height players can stand at, for indoor maps with an unreachable roof.
+	playableTop?: number;
 	themeColor: Color3;
 	devOnly?: boolean;
 	// Background music, as "rbxassetid://<id>". See docs/FEEDBACK.md for choosing tracks.
@@ -354,6 +356,7 @@ export function setMapInfo(map: Model, info: MapInfo) {
 	map.SetAttribute(MapAttribute.Modes, info.modes.join(","));
 	map.SetAttribute(MapAttribute.Gravity, info.gravity);
 	map.SetAttribute(MapAttribute.KillHeight, info.killHeight);
+	if (info.playableTop !== undefined) map.SetAttribute(MapAttribute.PlayableTop, info.playableTop);
 	map.SetAttribute(MapAttribute.ThemeColor, info.themeColor);
 	if (info.devOnly) map.SetAttribute(MapAttribute.DevOnly, true);
 	if (info.music !== undefined && info.music !== "") map.SetAttribute(MapAttribute.Music, info.music);
