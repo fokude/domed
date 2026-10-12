@@ -1,7 +1,9 @@
 // A synthwave arena at sunset: purple floor under a magenta and cyan grid that runs out to the
-// horizon, chrome structures, and a striped sun. Laid out for one-shot rails and fast movement:
-// a sunken trench to build speed out of sight, lane walls and billboards that break long
-// sightlines, and an exposed raised platform in the middle. Red's base is at +Z, Blue's at -Z.
+// horizon, chrome structures, and a striped sun. Laid out for one-shot rails and fast movement
+// in three lanes: covered neon arcades down each side, and an open field between them with a
+// sunken trench to build speed out of sight, lane walls and billboards that break long
+// sightlines, and an exposed raised platform in the middle. Every spawn sits in a pocket out
+// of sight. Red's base is at +Z, Blue's at -Z.
 
 import { TeamId } from "shared/modes";
 import {
@@ -22,9 +24,10 @@ import {
 	Style,
 	teamGlow,
 } from "./kit";
+import { spectatorRing } from "./spectators";
 import { MapBuilder } from "./types";
 
-const HALF_WIDTH = 80;
+const HALF_WIDTH = 122;
 const HALF_LENGTH = 200;
 // Side walls stay low so the sunset is visible; an invisible barrier keeps players in.
 const SIDE_WALL_HEIGHT = 12;
@@ -39,6 +42,18 @@ const TRENCH_RAMP_END = 125;
 const LANE_WALL_X = 28;
 const LANE_WALL_HEIGHT = 12;
 const ROOF_HEIGHT = 16;
+// The neon arcades: covered halls along each side, between an inner wall and the side wall.
+const ARCADE_INNER_X = 80;
+const ARCADE_HALF_LENGTH = 150;
+const ARCADE_HEIGHT = 18;
+// Doorways through the arcades' inner walls, between them and the open field.
+const ARCADE_DOORS: [number, number][] = [
+	[-127, -113],
+	[-67, -53],
+	[-7, 7],
+	[53, 67],
+	[113, 127],
+];
 
 const Floor: Style = { color: Color3.fromRGB(42, 20, 64), material: Enum.Material.SmoothPlastic, reflectance: 0.3 };
 const Chrome: Style = { color: Color3.fromRGB(175, 180, 200), material: Enum.Material.Metal };
@@ -87,7 +102,7 @@ function buildGround(map: Model) {
 	}
 
 	// Grid: magenta lines run lengthwise, cyan lines across.
-	for (const x of [20, 40, 60]) {
+	for (const x of [20, 40, 60, 90, 110]) {
 		for (const side of [-1, 1]) {
 			slab(map, new Vector3(side * x, 0.05, 0), new Vector3(0.3, 0.1, HALF_LENGTH * 2), Magenta, "Grid");
 		}
@@ -211,6 +226,88 @@ function buildLanes(map: Model) {
 	}
 }
 
+// A covered arcade down each side: a roof, an inner wall with doorways onto the field, pillars
+// staggered against alternate walls so it can't be watched end to end, and neon underfoot and
+// overhead. Free-for-all spawns sit in pockets in the outer wall.
+function buildArcades(map: Model) {
+	for (const side of [-1, 1]) {
+		const innerX = side * ARCADE_INNER_X;
+		const midX = side * ((ARCADE_INNER_X + HALF_WIDTH) / 2);
+		const width = HALF_WIDTH - ARCADE_INNER_X;
+		const arcadeDoors = ARCADE_DOORS.map(([a, b]) => [a, b] as [number, number]);
+		for (const [from, to] of segmentsBetween(-ARCADE_HALF_LENGTH, ARCADE_HALF_LENGTH, arcadeDoors)) {
+			coverBlock(
+				map,
+				new Vector3(innerX, ARCADE_HEIGHT, (from + to) / 2),
+				new Vector3(2, ARCADE_HEIGHT, to - from),
+				Wall,
+				Magenta,
+				"ArcadeWall",
+			);
+		}
+		slab(
+			map,
+			new Vector3(midX, ARCADE_HEIGHT + 2, 0),
+			new Vector3(width + 2, 2, ARCADE_HALF_LENGTH * 2),
+			Wall,
+			"ArcadeRoof",
+		);
+		slab(
+			map,
+			new Vector3(midX, ARCADE_HEIGHT - 0.2, 0),
+			new Vector3(1, 0.3, ARCADE_HALF_LENGTH * 2),
+			Cyan,
+			"ArcadeStrip",
+		);
+
+		for (let z = -ARCADE_HALF_LENGTH + 25; z < ARCADE_HALF_LENGTH; z += 25) {
+			const nearInner = math.floor((z + ARCADE_HALF_LENGTH) / 25) % 2 === 0;
+			const x = nearInner ? side * (ARCADE_INNER_X + 7) : side * (HALF_WIDTH - 7);
+			coverBlock(
+				map,
+				new Vector3(x, ARCADE_HEIGHT, z),
+				new Vector3(5, ARCADE_HEIGHT, 5),
+				Chrome,
+				Magenta,
+				"ArcadePillar",
+			);
+		}
+
+		// Spawn pockets in the outer wall, each opening onto the arcade.
+		for (const z of [-90, 90]) {
+			for (const edge of [-1, 1]) {
+				slab(
+					map,
+					new Vector3(side * (HALF_WIDTH - 8), ARCADE_HEIGHT, z + edge * 8),
+					new Vector3(16, ARCADE_HEIGHT, 2),
+					Wall,
+					"PocketWall",
+				);
+			}
+			slab(
+				map,
+				new Vector3(side * (HALF_WIDTH - 14), ARCADE_HEIGHT, z),
+				new Vector3(2, ARCADE_HEIGHT, 6),
+				Wall,
+				"PocketScreen",
+			);
+			spawnMarker(map, new Vector3(side * (HALF_WIDTH - 5), 0, z), new Vector3(side * ARCADE_INNER_X, 0, z + 20));
+		}
+	}
+}
+
+// Wall segments from `from` to `to`, leaving out the given gaps.
+function segmentsBetween(from: number, to: number, gaps: [number, number][]): [number, number][] {
+	const cuts = [from];
+	for (const [a, b] of gaps) cuts.push(a, b);
+	cuts.push(to);
+	const segments: [number, number][] = [];
+	for (let i = 0; i < cuts.size(); i += 2) {
+		if (cuts[i + 1] - cuts[i] > 0.5) segments.push([cuts[i], cuts[i + 1]]);
+	}
+	return segments;
+}
+
 // Raised platform over the trench: sees everything, but everyone sees you.
 function buildCenter(map: Model) {
 	coverBlock(map, new Vector3(0, ROOF_HEIGHT, 0), new Vector3(32, 1.5, 32), Chrome, Magenta, "Roof");
@@ -268,8 +365,9 @@ function buildBase(map: Model, team: TeamId, sign: number) {
 	ring(map, flagSpot.add(new Vector3(0, 0.1, 0)), 4.6, 0.6, 0.2, 20, glow, "DaisRing");
 	flagBaseMarker(map, flagSpot, team);
 
-	// Spawns sit behind a wall so nobody is shot before they can move.
-	coverBlock(map, new Vector3(0, BASE_HEIGHT + 8, z(186)), new Vector3(44, 8, 2), Wall, glow, "SpawnWall");
+	// Spawns sit in a pocket behind a wall wider and taller than their line, with the way out
+	// at each end, so nobody is shot before they can move.
+	coverBlock(map, new Vector3(0, BASE_HEIGHT + 12, z(186)), new Vector3(52, 12, 2), Wall, glow, "SpawnWall");
 	for (const x of [-18, 18]) {
 		coverBlock(map, new Vector3(x, BASE_HEIGHT + 6, z(165)), new Vector3(8, 6, 3), Chrome, glow, "Cover");
 	}
@@ -282,8 +380,8 @@ function buildBase(map: Model, team: TeamId, sign: number) {
 		jumpPad(map, new Vector3(x, BASE_HEIGHT, z(180)), new Vector3(x, ARCH_HEIGHT, z(150)), 6, Pad);
 	}
 
-	for (const x of [-30, -18, -6, 6, 18, 30]) {
-		spawnMarker(map, new Vector3(x, BASE_HEIGHT, z(193)), new Vector3(x, BASE_HEIGHT, 0), team);
+	for (const x of [-20, -12, -4, 4, 12, 20]) {
+		spawnMarker(map, new Vector3(x, BASE_HEIGHT, z(193)), new Vector3(x > 0 ? 40 : -40, BASE_HEIGHT, z(193)), team);
 	}
 }
 
@@ -313,6 +411,9 @@ export const Gridline: MapBuilder = {
 			gravity: 196.2,
 			killHeight: -30,
 			themeColor: Color3.fromRGB(255, 60, 200),
+			// Music: synthwave with driving drums and arpeggios. Pick a licensed Creator Store track
+			// (see docs/FEEDBACK.md).
+			music: "",
 		});
 
 		// Domination points, on the center line so neither side is closer.
@@ -340,15 +441,12 @@ export const Gridline: MapBuilder = {
 		buildTrench(map);
 		buildLanes(map);
 		buildCenter(map);
+		buildArcades(map);
 		buildBase(map, "Red", 1);
 		buildBase(map, "Blue", -1);
 		buildSun(map);
 
-		for (const side of [-1, 1]) {
-			for (const z of [-100, 100]) {
-				spawnMarker(map, new Vector3(side * 72, 0, z), Vector3.zero);
-			}
-		}
+		spectatorRing(map, Vector3.zero, 270, 46, 10, Color3.fromRGB(255, 60, 200));
 
 		setMapLighting(map, {
 			clockTime: 17.8,

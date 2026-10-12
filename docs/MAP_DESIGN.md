@@ -38,7 +38,7 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 | Map             | Openness | Spawn exposure | Notes                                                                        |
 | --------------- | -------- | -------------- | ---------------------------------------------------------------------------- |
 | Bastion         | 17%      | 9%             | Meets both targets                                                           |
-| Gridline        | 31%      | 90%            | Spawns spread across an open map                                             |
+| Gridline        | 26%      | 21%            | Covered arcades down both sides; spawns in pockets (was 31% and 90%)         |
 | Halcyon Station | 40%      | 86%            | Spawns spread across an open map                                             |
 | Infernal Spire  | 19%      | 10%            | Gallery tunnel round the lake, spawn rooms, lava columns (was 72% and 99.6%) |
 | Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map            |
@@ -75,6 +75,11 @@ fronts and side doors (14%). Ruined walls on the low islands' inner edges brough
 then showed spawns in the open in the corners and Furnace Row (68%), so every spawn moved into
 a pocket: a wall across the back of the room with the way out at one end (18%). At 10% open
 it's far tighter than the 25% target, which is its role: the roster's close-quarters map.
+
+**Gridline** was a narrow open field (160 wide) with spawns on top of the base platforms and
+in the open field (90% exposure). It now has a covered neon arcade down each side, making three
+real lanes and widening it to 244. Base spawns sit behind a wall wider and taller than their
+line, and free-for-all spawns moved into pockets in the arcades' outer walls.
 
 ### DOMED scale
 
