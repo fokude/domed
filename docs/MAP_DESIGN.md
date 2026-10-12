@@ -28,7 +28,8 @@ DOMED different: one headshot kills, everyone has the same railgun, players bunn
 | Exits from a team's spawn area                                   | at least 2                                             | Unreal Tournament: Blitz level design              |
 
 Use `/openness` in a Studio playtest to measure the current map (it samples 250 standing spots
-across every floor).
+across every floor). `npm run preview -- <MapId>` measures the same thing offline
+(see MAPPING.md).
 
 ### DOMED scale
 

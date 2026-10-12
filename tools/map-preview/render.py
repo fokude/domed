@@ -2,6 +2,8 @@
 #   plan.png       top-down plan in the map's colors, with markers highlighted
 #   heights.png    top-down plan colored by height (blue low, red high)
 #   cut_<h>.png    floor plans with everything above height h (studs) cut away, one per level
+#   exposure.png   plan with sampled standing spots: red can see a spawn, green can't
+#   metrics.json   openness and spawn exposure, measured like the game's /openness
 #   overview.png   angled view of the whole map
 #   spawn_N.png    eye-level views from spawns, at the game's field of view
 # Run through Blender:
@@ -12,10 +14,12 @@
 import json
 import math
 import os
+import random
 import sys
 
 import bpy
 from mathutils import Matrix, Vector
+from mathutils.bvhtree import BVHTree
 
 argv = sys.argv[sys.argv.index("--") + 1 :]
 json_path, out_dir = argv[0], os.path.abspath(argv[1])
@@ -187,6 +191,96 @@ hi = Vector((max(p.x for p in points), max(p.y for p in points), max(p.z for p i
 center = (lo + hi) / 2
 extent = max(hi.x - lo.x, hi.y - lo.y)
 
+# --- Openness and spawn exposure, measured the same way as the game's /openness command ---
+# (server/maps/openness.ts): sample standing spots on every floor, then check which pairs can
+# see each other, and which spots can see a spawn. Rays hit what the game's raycasts hit: every
+# queryable part except markers, which are removed when a map loads, and Art.
+REMOVED_AT_LOAD = {"Spawn", "FlagBase", "PadTarget", "ControlPoint", "Perk", "Dummy"}
+SAMPLE_COUNT, EYE_HEIGHT, HEADROOM = 250, 5, 6
+
+ray_verts, ray_faces, face_part = [], [], []
+for part in data["parts"]:
+    if not part["canQuery"] or "Art" in part["ancestors"] or REMOVED_AT_LOAD & set(part["tags"]):
+        continue
+    verts, faces = local_geometry(part)
+    matrix = part_matrix(part["cframe"])
+    offset = len(ray_verts)
+    ray_verts.extend(matrix @ (P @ Vector(v)) for v in verts)
+    for face in faces:
+        ray_faces.append(tuple(offset + i for i in face))
+        face_part.append(part)
+bvh = BVHTree.FromPolygons(ray_verts, ray_faces)
+
+solid = [p for p in data["parts"] if p["canQuery"] and p["canCollide"] and not REMOVED_AT_LOAD & set(p["tags"])]
+solid_points = []
+for part in solid:
+    verts, _ = local_geometry(part)
+    matrix = part_matrix(part["cframe"])
+    solid_points.extend(matrix @ (P @ Vector(v)) for v in verts)
+p_lo = Vector((min(p.x for p in solid_points), min(p.y for p in solid_points), min(p.z for p in solid_points)))
+p_hi = Vector((max(p.x for p in solid_points), max(p.y for p in solid_points), max(p.z for p in solid_points)))
+kill_height = data["attributes"].get("KillHeight", -50)
+
+
+def floors_in_column(x, y):
+    floors, start = [], Vector((x, y, p_hi.z + 5))
+    for _ in range(12):
+        hit, normal, index, distance = bvh.ray_cast(start, Vector((0, 0, -1)), start.z - (p_lo.z - 5))
+        if hit is None:
+            break
+        part = face_part[index]
+        standable = (
+            normal.z > 0.7
+            and hit.z > kill_height
+            and "Hazard" not in part["tags"]
+            and bvh.ray_cast(hit + Vector((0, 0, 0.1)), Vector((0, 0, 1)), HEADROOM)[0] is None
+        )
+        if standable:
+            floors.append(hit)
+        start = hit - Vector((0, 0, 0.5))
+    return floors
+
+
+def can_see(a, b):
+    direction = b - a
+    return bvh.ray_cast(a, direction.normalized(), direction.length - 0.05)[0] is None
+
+
+rng = random.Random(7)
+spots = []
+for _ in range(SAMPLE_COUNT * 20):
+    if len(spots) >= SAMPLE_COUNT:
+        break
+    floors = floors_in_column(rng.uniform(p_lo.x, p_hi.x), rng.uniform(p_lo.y, p_hi.y))
+    if floors:
+        spots.append(rng.choice(floors) + Vector((0, 0, EYE_HEIGHT)))
+
+visible = sum(1 for i in range(len(spots)) for j in range(i + 1, len(spots)) if can_see(spots[i], spots[j]))
+pairs = len(spots) * (len(spots) - 1) // 2
+spawn_eyes = [position + Vector((0, 0, 1.5)) for position, _, _ in spawns]
+exposed = [any(can_see(spot, eye) for eye in spawn_eyes) for spot in spots]
+metrics = {
+    "spots": len(spots),
+    "openness": round(visible / pairs, 3) if pairs else 0,
+    "spawnExposure": round(sum(exposed) / len(spots), 3) if spots else 0,
+    "targets": {"openness": 0.25, "spawnExposure": 0.2},
+}
+with open(os.path.join(out_dir, "metrics.json"), "w") as f:
+    json.dump(metrics, f, indent=2)
+print(f"Openness {metrics['openness']:.0%} (target ~25%), spawn exposure {metrics['spawnExposure']:.0%} (target <20%)")
+
+# Exposure dots for the exposure plan: red spots can see a spawn, green can't.
+exposure_dots = []
+for spot, seen in zip(spots, exposed):
+    s = 2.2
+    base = spot - Vector((0, 0, EYE_HEIGHT - 0.8))
+    verts = [tuple(base + Vector(o)) for o in ((-s, -s, 0), (s, -s, 0), (s, s, 0), (-s, s, 0))]
+    dot = add_object("ExposureDot", verts, [(0, 1, 2, 3)], Matrix.Identity(4), (1, 0.15, 0.1) if seen else (0.2, 1, 0.3))
+    dot.matrix_world = Matrix.Identity(4)
+    dot.data.vertices.foreach_set("co", [c for v in verts for c in v])
+    dot.hide_render = True
+    exposure_dots.append(dot)
+
 # Workbench: fast, flat-shaded and readable, which is what a layout review needs.
 scene.render.engine = "BLENDER_WORKBENCH"
 shading = scene.display.shading
@@ -267,6 +361,14 @@ for level in levels[:5]:
     cut_cam = make_camera(f"Cut{cut}", Vector((center.x, center.y, cut)), ortho_scale=extent * 1.08, rotation=(0, 0, 0))
     cut_cam.data.clip_start = 0.01
     render(f"cut_{cut}.png", cut_cam, resolution, resolution)
+
+# Exposure plan: the cut through the lowest floor, with the sampled spots on top.
+for dot in exposure_dots:
+    dot.hide_render = False
+cut_cam = make_camera("Exposure", Vector((center.x, center.y, p_hi.z + 50)), ortho_scale=extent * 1.08, rotation=(0, 0, 0))
+render("exposure.png", cut_cam, resolution, resolution)
+for dot in exposure_dots:
+    dot.hide_render = True
 
 # Overview: from a corner, above.
 eye = center + Vector((extent * 0.55, -extent * 0.75, extent * 0.55))

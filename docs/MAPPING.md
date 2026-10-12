@@ -121,12 +121,16 @@ Sources: [Roblox mesh specifications](https://create.roblox.com/docs/art/modelin
 - `heights.png`: top-down, colored by height from blue (low) to red (high).
 - `overview.png`: the whole map from a raised corner.
 - `spawn_<n>_<team>.png`: eye-level views from spawns at the game's field of view.
+- `metrics.json` and `exposure.png`: openness and spawn exposure, measured offline the same
+  way as `/openness` (250 standing spots, sight rays between them), and a plan marking which
+  spots can see a spawn (red) or not (green).
 
 It runs the map's builder in Node on a small stand-in for Roblox's API
 (`tools/map-preview/roblox-shim.js`), exports the parts as JSON, and renders them with
 Blender's fast Workbench engine in a few seconds. Use it to check a layout change before
 playtesting: whether spawns look into open fire, whether a lane reads as intended, whether
-heights are varied. It doesn't replace `/openness` or a playtest; it's the "look at it" step.
+heights are varied. The offline numbers approximate `/openness` (cylinders and balls are faceted); confirm
+important ones in Studio. A playtest is still the final judge.
 
 Why: maps were built entirely by coordinates in code, with nobody (agent or human) seeing them
 until a Studio session. A render after each change gives the build, look, adjust loop that
