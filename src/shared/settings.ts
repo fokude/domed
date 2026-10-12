@@ -18,6 +18,13 @@ export const CROSSHAIR_COLORS: Record<CrosshairColor, Color3> = {
 };
 export const CROSSHAIR_COLOR_IDS: CrosshairColor[] = ["White", "Green", "Cyan", "Yellow", "Pink"];
 
+// Background music volume. Off is a real choice: plenty of players listen to their own music.
+export type MusicVolume = "Off" | "Low" | "Medium" | "High";
+export const MUSIC_VOLUMES: MusicVolume[] = ["Off", "Low", "Medium", "High"];
+// Sound volume for each setting. Kept low: music sits under gunfire and footsteps, which carry
+// information.
+export const MUSIC_LEVELS: Record<MusicVolume, number> = { Off: 0, Low: 0.12, Medium: 0.25, High: 0.4 };
+
 export interface CrosshairSettings {
 	style: CrosshairStyle;
 	color: CrosshairColor;
@@ -27,11 +34,13 @@ export interface CrosshairSettings {
 
 export interface PlayerSettings {
 	crosshair: CrosshairSettings;
+	music: MusicVolume;
 }
 
 // Matches the original crosshair: a small white dot with a dark outline.
 export const DEFAULT_SETTINGS: PlayerSettings = {
 	crosshair: { style: "Dot", color: "White", size: "Small", outline: true },
+	music: "Medium",
 };
 
 function pick<T extends defined>(options: T[], value: unknown, fallback: T): T {
@@ -40,7 +49,8 @@ function pick<T extends defined>(options: T[], value: unknown, fallback: T): T {
 
 // Turns untrusted input into valid settings, falling back to defaults field by field.
 export function sanitizeSettings(input: unknown): PlayerSettings {
-	const crosshair = typeIs(input, "table") ? (input as { crosshair?: unknown }).crosshair : undefined;
+	const fields = (typeIs(input, "table") ? input : {}) as { crosshair?: unknown; music?: unknown };
+	const crosshair = fields.crosshair;
 	const raw = (typeIs(crosshair, "table") ? crosshair : {}) as Partial<Record<keyof CrosshairSettings, unknown>>;
 	const fallback = DEFAULT_SETTINGS.crosshair;
 	return {
@@ -50,5 +60,6 @@ export function sanitizeSettings(input: unknown): PlayerSettings {
 			size: pick(CROSSHAIR_SIZES, raw.size, fallback.size),
 			outline: typeIs(raw.outline, "boolean") ? raw.outline : fallback.outline,
 		},
+		music: pick(MUSIC_VOLUMES, fields.music, DEFAULT_SETTINGS.music),
 	};
 }

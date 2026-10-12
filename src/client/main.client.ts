@@ -9,6 +9,8 @@ import { initKillFeedback } from "./killFeedback";
 import { initMapVote } from "./mapVote";
 import { initMatchBar } from "./matchBar";
 import { initMenu } from "./menu";
+import { initMusic } from "./music";
+import { initPlayerSettings } from "./playerSettings";
 import { getSpeed, initMovement, launchCharacter } from "./movement";
 import { initObjectives } from "./objectives";
 import { initOnboarding } from "./onboarding";
@@ -32,6 +34,7 @@ player.CameraMode = Enum.CameraMode.LockFirstPerson;
 StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false);
 StarterGui.SetCoreGuiEnabled(Enum.CoreGuiType.Health, false);
 
+initPlayerSettings();
 initHud();
 initMatchBar();
 initObjectives();
@@ -49,6 +52,7 @@ initProfileScreen();
 initSettingsScreen();
 initTeammates();
 initDeathRecap();
+initMusic();
 
 Remotes.Knockback.OnClientEvent.Connect((impulse) => launchCharacter(impulse, true));
 

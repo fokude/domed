@@ -1,8 +1,9 @@
 # Settings
 
-Player settings, chosen in the menu's Settings panel and saved in the player's profile, so
+Player settings (crosshair and music volume), chosen in the menu's Settings panel and saved in the player's profile, so
 they follow the player to every server. Code: `shared/settings.ts` (options, defaults,
-validation), `client/crosshair.ts` (drawing), `client/settingsScreen.ts` (the panel).
+validation), `client/crosshair.ts` (drawing), `client/settingsScreen.ts` (the panel), `client/playerSettings.ts` (loading, changing and
+saving them).
 
 ## Crosshair
 
@@ -35,6 +36,11 @@ The default matches the original crosshair: a small white dot with a dark outlin
 - **Mouse sensitivity.** Roblox's own settings menu (Esc) already has a camera sensitivity
   slider that works with the default first-person camera DOMED uses. A setting of our own
   would need a custom camera, so it waits.
+
+## Music volume
+
+Off, Low, Medium (default) or High; see FEEDBACK.md. Kept low overall so music never drowns
+out the sounds that tell players where enemies are.
 
 ## Saving
 

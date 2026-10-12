@@ -17,6 +17,8 @@ export const MapTag = {
 export const MapAttribute = {
 	DisplayName: "DisplayName",
 	Tagline: "Tagline",
+	// Background music for the map: a Creator Store audio id, as "rbxassetid://<id>".
+	Music: "Music",
 	// Comma-separated mode ids, e.g. "Deathmatch,CTF".
 	Modes: "Modes",
 	Gravity: "Gravity",

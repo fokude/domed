@@ -72,7 +72,9 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `profileData.ts`    | Reading the local player's saved profile                                      |
 | `profileScreen.ts`  | The Profile panel in the menu: level, XP and lifetime stats                   |
 | `settingsScreen.ts` | The Settings panel in the menu (see SETTINGS.md)                              |
-| `crosshair.ts`      | Drawing the crosshair from the player's settings, and saving changes          |
+| `crosshair.ts`      | Drawing the crosshair from the player's settings                              |
+| `playerSettings.ts` | The player's settings: loading, changing, saving, change events               |
+| `music.ts`          | Per-map background music with crossfades                                      |
 | `podium.ts`         | Live top three in Deathmatch, and the end-of-match podium                     |
 | `speedometer.ts`    | Speed readout and its effects                                                 |
 | `sounds.ts`         | Every sound cue, in one table                                                 |

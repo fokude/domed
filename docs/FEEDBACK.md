@@ -70,6 +70,19 @@ and put its id in `SOUND_CUES` in `src/client/sounds.ts` as `"rbxassetid://<id>"
 volume and pitch to taste. The kill cue is pitched up per multi-kill step, so pick something
 short and bright.
 
+## Music
+
+Each map can have its own background track, set by the map's `Music` attribute (`music` in
+`setMapInfo`, or the attribute on a Studio map). The client loops it and crossfades between
+tracks when the arena changes (warm-up to match and back). Players pick the volume in Settings:
+Off, Low, Medium (default) or High. Volumes are kept low because gunfire and footsteps carry
+information, and Off is a real option for players who listen to their own music.
+
+Use tracks from the Creator Store's audio library (Toolbox, Audio), which Roblox licenses for
+use in experiences, so there are no copyright problems. Never upload commercial music. Paste
+the id as `"rbxassetid://<id>"`. Each map's file notes the genre it calls for, matching its
+identity: heavy metal for Infernal Spire, synthwave for Gridline, and so on.
+
 ## Sources
 
 - Martin Jonasson and Petri Purho, _Juice It or Lose It_ (2012), summarized in

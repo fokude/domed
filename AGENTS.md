@@ -64,8 +64,8 @@ Update these in the same commit as the change they describe:
 
 - Interface members called as methods must be declared and implemented as methods (classes
   work well); assigning arrow functions fails to compile.
-- Luau keywords (`end`, `local`, `then`, `until`, ...) and roblox-ts reserved names (`pairs`, `next`, ...)
-  can't be identifiers.
+- Luau keywords (`end`, `local`, `then`, `until`, ...) and roblox-ts reserved names (`pairs`,
+  `next`, `table`, ...) can't be identifiers.
 - Arrays of enum items need an explicit type, such as `Enum.KeyCode[]`, before `includes` or
   `indexOf` will accept a general `KeyCode`.
 - Vector3 and CFrame math uses methods: `a.add(b)`, `a.mul(n)`, `cf.mul(other)`.

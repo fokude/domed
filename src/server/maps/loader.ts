@@ -26,6 +26,8 @@ export interface MapInfo {
 	modes: ModeId[];
 	themeColor: Color3;
 	devOnly: boolean;
+	// Background music asset id, or empty for none.
+	music: string;
 }
 
 export interface SpawnPoint {
@@ -99,6 +101,7 @@ export function readMapInfo(map: Model): MapInfo {
 		modes,
 		themeColor: attribute(map, MapAttribute.ThemeColor, "Color3", Color3.fromRGB(200, 205, 215)),
 		devOnly: attribute(map, MapAttribute.DevOnly, "boolean", false),
+		music: attribute(map, MapAttribute.Music, "string", ""),
 	};
 }
 

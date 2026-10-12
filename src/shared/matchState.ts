@@ -12,6 +12,8 @@ export interface MatchStateValues {
 	Phase: Phase;
 	Mode: ModeId;
 	MapName: string;
+	// Background music for the current arena (warm-up or match): an asset id, or empty.
+	Music: string;
 	// Server time (Workspace.GetServerTimeNow) when the current phase ends.
 	EndsAt: number;
 	// Kills to win in deathmatch, captures to win in CTF.

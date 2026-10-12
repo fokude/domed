@@ -344,6 +344,8 @@ export interface MapInfo {
 	killHeight: number;
 	themeColor: Color3;
 	devOnly?: boolean;
+	// Background music, as "rbxassetid://<id>". See docs/FEEDBACK.md for choosing tracks.
+	music?: string;
 }
 
 export function setMapInfo(map: Model, info: MapInfo) {
@@ -354,6 +356,7 @@ export function setMapInfo(map: Model, info: MapInfo) {
 	map.SetAttribute(MapAttribute.KillHeight, info.killHeight);
 	map.SetAttribute(MapAttribute.ThemeColor, info.themeColor);
 	if (info.devOnly) map.SetAttribute(MapAttribute.DevOnly, true);
+	if (info.music !== undefined && info.music !== "") map.SetAttribute(MapAttribute.Music, info.music);
 }
 
 export interface LightingSettings {

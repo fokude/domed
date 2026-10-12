@@ -131,6 +131,7 @@ function openArena(map: LoadedMap, arenaRules: ArenaRules) {
 	setRespawnTime(arenaRules.respawnTime);
 	setMatchState("RespawnTime", arenaRules.respawnTime);
 	setMatchState("MapName", map.info.name);
+	setMatchState("Music", map.info.music);
 }
 
 // Stops combat and respawns and clears what openArena (and bots) started. Safe to call after a

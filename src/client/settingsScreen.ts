@@ -1,4 +1,5 @@
-// Settings panel in the menu: crosshair style, color, size and outline, with a live preview.
+// Settings panel in the menu: crosshair style, color, size and outline, with a live preview,
+// and music volume.
 // See docs/SETTINGS.md.
 
 import {
@@ -7,6 +8,7 @@ import {
 	CROSSHAIR_SIZES,
 	CROSSHAIR_STYLES,
 	CrosshairSettings,
+	MUSIC_VOLUMES,
 } from "shared/settings";
 import {
 	createCrosshairFrame,
@@ -15,6 +17,7 @@ import {
 	onCrosshairChanged,
 	setCrosshairSettings,
 } from "./crosshair";
+import { changeSettings, getSettings } from "./playerSettings";
 import { addMenuButton, getMenuContent, registerMenuPanel, toggleMenuPanel } from "./menu";
 import { create, Palette } from "./ui";
 
@@ -109,7 +112,7 @@ function build() {
 			TextSize: 30,
 			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Left,
-			Text: "CROSSHAIR",
+			Text: "SETTINGS",
 		},
 		panel,
 	);
@@ -122,7 +125,7 @@ function build() {
 	create("UIListLayout", { Padding: new UDim(0, 8), SortOrder: Enum.SortOrder.LayoutOrder }, rows);
 
 	const current = getCrosshairSettings;
-	const styles = optionRow(rows, 1, "STYLE");
+	const styles = optionRow(rows, 1, "CROSSHAIR STYLE");
 	for (const style of CROSSHAIR_STYLES) {
 		option(
 			styles,
@@ -131,7 +134,7 @@ function build() {
 			() => change({ style }),
 		);
 	}
-	const colors = optionRow(rows, 2, "COLOR");
+	const colors = optionRow(rows, 2, "CROSSHAIR COLOR");
 	for (const color of CROSSHAIR_COLOR_IDS) {
 		option(
 			colors,
@@ -141,7 +144,7 @@ function build() {
 			CROSSHAIR_COLORS[color],
 		);
 	}
-	const sizes = optionRow(rows, 3, "SIZE");
+	const sizes = optionRow(rows, 3, "CROSSHAIR SIZE");
 	for (const size of CROSSHAIR_SIZES) {
 		option(
 			sizes,
@@ -150,7 +153,7 @@ function build() {
 			() => change({ size }),
 		);
 	}
-	const outline = optionRow(rows, 4, "OUTLINE");
+	const outline = optionRow(rows, 4, "CROSSHAIR OUTLINE");
 	option(
 		outline,
 		"ON",
@@ -163,6 +166,15 @@ function build() {
 		() => !current().outline,
 		() => change({ outline: false }),
 	);
+	const music = optionRow(rows, 5, "MUSIC");
+	for (const volume of MUSIC_VOLUMES) {
+		option(
+			music,
+			volume.upper(),
+			() => getSettings().music === volume,
+			() => changeSettings({ music: volume }),
+		);
+	}
 
 	// Preview on a dark and a light half, since maps range from night to bright daylight.
 	const preview = create(
