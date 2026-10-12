@@ -62,6 +62,8 @@ let sinceMembership = 0;
 let generation = 0;
 // Studio override for testing; undefined uses BotConfig.fillTo.
 let fillOverride: number | undefined;
+// Bots being built: building a character waits on Roblox, so they're counted until they exist.
+let spawning = 0;
 
 const rayParams = new RaycastParams();
 rayParams.FilterType = Enum.RaycastFilterType.Exclude;
@@ -121,8 +123,26 @@ function randomDescription(): HumanoidDescription {
 function spawnBot(name: string) {
 	if (!folder) return;
 	const cframe = spawnPoint();
-	if (!cframe) return;
-	const model = Players.CreateHumanoidModelFromDescription(randomDescription(), Enum.HumanoidRigType.R15);
+	if (!cframe) {
+		warn("[bots] No spawn points on this map");
+		return;
+	}
+	const spawnedIn = generation;
+	spawning += 1;
+	const [ok, result] = pcall(() =>
+		Players.CreateHumanoidModelFromDescription(randomDescription(), Enum.HumanoidRigType.R15),
+	);
+	spawning -= 1;
+	if (!ok) {
+		warn(`[bots] Couldn't build a bot character: ${result}`);
+		return;
+	}
+	const model = result;
+	// The match may have ended while the character was being built.
+	if (generation !== spawnedIn || !folder) {
+		model.Destroy();
+		return;
+	}
 	model.Name = name;
 	model.AddTag(BOT_TAG);
 	const humanoid = model.FindFirstChildOfClass("Humanoid")!;
@@ -177,7 +197,7 @@ function desiredCount(): number {
 // Adds or removes one bot at a time toward the number the server needs.
 function updateMembership() {
 	const desired = desiredCount();
-	if (bots.size() < desired) {
+	if (bots.size() + spawning < desired) {
 		spawnBot(unusedName());
 		return;
 	}
@@ -388,6 +408,9 @@ export function pushBot(model: Model, direction: Vector3, scale = 1) {
 // Studio only: sets how many players and bots to fill to, or undefined for the default.
 export function setBotFill(count: number | undefined) {
 	fillOverride = count;
+	const target = count ?? BotConfig.fillTo;
+	if (heartbeat) print(`[bots] Filling to ${target} players and bots (${bots.size()} bots now)`);
+	else print(`[bots] Will fill to ${target}. Bots only join Deathmatch matches; this isn't one.`);
 }
 
 export function startBots(loaded: LoadedMap) {
@@ -422,6 +445,7 @@ export function stopBots() {
 	folder = undefined;
 	map = undefined;
 	bots.clear();
+	spawning = 0;
 }
 
 export function startBotSystem() {
