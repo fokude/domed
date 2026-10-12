@@ -24,6 +24,7 @@ import {
 	Style,
 	wedge,
 } from "./kit";
+import { spectatorRing } from "./spectators";
 import { MapBuilder } from "./types";
 
 const Basalt: Style = { color: Color3.fromRGB(38, 32, 32), material: Enum.Material.Basalt };
@@ -391,6 +392,8 @@ export const InfernalSpire: MapBuilder = {
 		buildColumns(arena);
 		buildSpire(arena);
 		buildIslands(arena);
+		// The tournament's crowd floats beyond the rampart, between the spawn rooms.
+		spectatorRing(arena, CENTER, 175, 48, 8, Color3.fromRGB(255, 100, 30), EIGHTH / 2 + EIGHTH / 2);
 
 		setMapLighting(arena, {
 			clockTime: 0,

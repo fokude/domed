@@ -148,7 +148,7 @@ for index, part in enumerate(data["parts"]):
     obj["top"] = max((matrix @ (P @ Vector(v))).z for v in verts)
     if kind:
         markers.append(obj)
-    elif part["canQuery"]:
+    elif part["canQuery"] and "Art" not in part["ancestors"]:
         geometry.append(obj)
     else:
         scenery.append(obj)
@@ -212,7 +212,12 @@ for part in data["parts"]:
         face_part.append(part)
 bvh = BVHTree.FromPolygons(ray_verts, ray_faces)
 
-solid = [p for p in data["parts"] if p["canQuery"] and p["canCollide"] and not REMOVED_AT_LOAD & set(p["tags"])]
+# Art is made visual only when a map loads, so it isn't playable space.
+solid = [
+    p
+    for p in data["parts"]
+    if p["canQuery"] and p["canCollide"] and "Art" not in p["ancestors"] and not REMOVED_AT_LOAD & set(p["tags"])
+]
 solid_points = []
 for part in solid:
     verts, _ = local_geometry(part)

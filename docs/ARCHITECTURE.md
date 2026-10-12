@@ -49,6 +49,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `maps/loader.ts`      | Loading a map Model, reading its markers, and making its Art folder visual only          |
 | `maps/library.ts`     | Finding maps: Studio-authored, and those still built in code                             |
 | `maps/kit.ts`         | Building blocks for maps built in code                                                   |
+| `maps/spectators.ts`  | Floating spectator stands for any arena (see LORE.md)                                    |
 | `maps/openness.ts`    | The `/openness` measurement                                                              |
 | `maps/<name>.ts`      | Maps built in code, one per file                                                         |
 

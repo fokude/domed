@@ -24,7 +24,9 @@ and fun, never gore or grimness, which suits an arcade shooter and Roblox's youn
   every map can look completely different while belonging to one game.
 - **Spectators around every arena.** Floating stands, hovering camera drones and holographic
   scoreboards ring each map. It's DOMED's shared visual signature, and it makes every arena
-  read as a stage. Spectator art is visual only (the map's `Art` folder; see MAPPING.md).
+  read as a stage. `spectatorRing` in `maps/spectators.ts` places stands of crowd silhouettes
+  under a banner in the arena's color, with camera drones; it all goes in the map's `Art`
+  folder, so it's visual only.
 - **The crowd reacts.** The biggest crowd-pleaser is the **ring-out**: knocking someone into
   lava or off the map with a body shot or shove. It's announced as "RING OUT!" with a crowd
   roar for everyone, the knockback fantasy that sets DOMED apart.
