@@ -32,6 +32,17 @@ export const SOUND_CUES: Record<SoundCue, CueSettings> = {
 };
 
 // Plays a cue once. `pitchScale` multiplies the cue's pitch, for escalation.
+const lastPlayed = new Map<SoundCue, number>();
+
+// Plays a cue unless it already played within `cooldown` seconds, so big shared cues (a crowd
+// roar) don't stack into noise when events come in bursts.
+export function playSoundThrottled(cue: SoundCue, cooldown: number) {
+	const now = os.clock();
+	if (now - (lastPlayed.get(cue) ?? -math.huge) < cooldown) return;
+	lastPlayed.set(cue, now);
+	playSound(cue);
+}
+
 export function playSound(cue: SoundCue, pitchScale = 1) {
 	const settings = SOUND_CUES[cue];
 	const sound = new Instance("Sound");

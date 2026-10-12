@@ -34,7 +34,9 @@ breaks and perk pickups each have their own cue.
 favorite in the tournament lore (LORE.md): everyone hears a crowd roar, the killer's headline
 reads "RING OUT!", and the kill feed says RING OUT instead of DOMED. They're DOMED's most
 distinctive kill, so they get the biggest reaction. The roar is a placeholder sound until a
-Creator Store crowd cheer is picked.
+Creator Store crowd cheer is picked. Ring-outs join the multi-kill chain ("DOUBLE RING OUT!"), and only
+one roar plays at a time: another can't start within 2 seconds, so a burst of ring-outs
+stays one big moment instead of stacked noise (`playSoundThrottled` in `sounds.ts`).
 
 **Death recap**: the killed player sees how far away the killer was and how fast they were
 moving, under the respawn countdown, and the killer is outlined through walls until respawn.
