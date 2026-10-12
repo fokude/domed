@@ -69,6 +69,46 @@ A Folder named `Lighting` in the map holds its atmosphere:
 To tune lighting, move the effects into Lighting, adjust them while looking at the map, then
 move them back into the folder and save the map.
 
+## Art pass with Blender
+
+Maps are built in two layers: **gameplay geometry** (simple Parts that players stand on and
+shoot against) and **art** (detailed meshes, often from Blender, that players see). Keep them
+separate:
+
+1. **Graybox first.** Build and playtest the layout from simple Parts, in code or in Studio.
+   Check it against MAP_DESIGN.md and run `/openness`. Only add art once it plays well.
+2. **Model the art around the graybox** in Blender, using the graybox as a reference (export it
+   from Studio, or match its measurements: 1 Blender unit is imported as 1 stud).
+3. **Import** with the official
+   [Roblox Blender plugin](https://github.com/Roblox/roblox-blender-plugin), which uploads
+   straight from Blender, or Studio's 3D Importer (FBX, OBJ or glTF).
+4. **Put every art mesh in a Folder named `Art`** in the map. When the map loads, everything
+   in it becomes visual only: not solid, invisible to shots and line-of-sight checks, and
+   anchored. Movement and hit detection keep running on the gameplay geometry.
+5. **Hide the gray parts the art covers** (Transparency 1), but leave them solid and
+   queryable.
+
+**Why not collide with the art directly:** collision for detailed meshes is approximate, so
+players snag on bumps, lose bunny-hop speed on uneven floors, and shots hit (or pass) where
+nothing is visible. In a one-shot movement shooter, clean and predictable surfaces matter more
+than anywhere. Simple collision under detailed art is the usual practice in shooters.
+
+**The one rule art must follow:** anything that looks solid enough to block movement or a shot
+must have gameplay geometry behind it. Art that blocks a sightline with nothing solid behind it
+lets shots pass through a visible wall.
+
+**Budgets:**
+
+- Under 20,000 triangles per mesh (Roblox's limit); far fewer for props that repeat.
+- Textures at 1024×1024 at most, smaller for small props: mobile devices have little memory.
+- Build from a kit of reusable modular pieces (wall panels, trims, pillars, railings) rather
+  than unique large meshes; repeated meshes load once.
+- Watertight meshes with no n-gons, as Roblox's specifications require.
+
+Sources: [Roblox mesh specifications](https://create.roblox.com/docs/art/modeling/specifications),
+[Roblox Blender plugin](https://github.com/Roblox/roblox-blender-plugin) and
+[its documentation](https://github.com/Roblox/creator-docs/blob/main/content/en-us/art/modeling/roblox-blender-plugin.md).
+
 ## Maps still defined in code
 
 Some maps are still built by code in `src/server/maps/`, and are rebuilt every time the server

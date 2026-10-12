@@ -4,6 +4,7 @@ import { MODE_IDS, ModeId, TEAM_IDS, TeamId } from "shared/modes";
 import { PERK_IDS, PerkId } from "shared/perks";
 import {
 	DEFAULT_ARC_HEIGHT,
+	ART_FOLDER,
 	LIGHTING_FOLDER,
 	MapAttribute,
 	MapTag,
@@ -220,6 +221,21 @@ function collectFlagBases(arena: Model): Map<TeamId, Vector3> {
 	return bases;
 }
 
+// Makes everything in the map's Art folder visual only: players can't stand on it, shots and
+// line-of-sight checks pass through it, and it never moves. Movement and hit detection then run
+// on the map's simple gameplay geometry, however detailed the art is.
+function prepareArt(arena: Model) {
+	const art = arena.FindFirstChild(ART_FOLDER);
+	if (!art) return;
+	for (const part of art.GetDescendants()) {
+		if (!part.IsA("BasePart")) continue;
+		part.Anchored = true;
+		part.CanCollide = false;
+		part.CanQuery = false;
+		part.CanTouch = false;
+	}
+}
+
 // Replaces the current map. Gravity is set before jump pads are configured because their
 // launch velocities depend on it.
 export function loadMap(source: Model): LoadedMap {
@@ -235,6 +251,7 @@ export function loadMap(source: Model): LoadedMap {
 	applyLighting(lighting);
 	lighting?.Destroy();
 
+	prepareArt(arena);
 	setUpJumpPads(arena);
 	const spawns = collectSpawns(arena);
 	const flagBases = collectFlagBases(arena);

@@ -46,7 +46,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `match/voting.ts`     | Map vote options and tallying                                                            |
 | `match/teams.ts`      | Red and Blue teams, balancing, team scores and spawns                                    |
 | `match/modes/*.ts`    | One file per game mode                                                                   |
-| `maps/loader.ts`      | Loading a map Model and reading its markers                                              |
+| `maps/loader.ts`      | Loading a map Model, reading its markers, and making its Art folder visual only          |
 | `maps/library.ts`     | Finding maps: Studio-authored, and those still built in code                             |
 | `maps/kit.ts`         | Building blocks for maps built in code                                                   |
 | `maps/openness.ts`    | The `/openness` measurement                                                              |

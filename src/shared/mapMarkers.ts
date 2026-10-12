@@ -50,6 +50,10 @@ export const MapAttribute = {
 export const PAD_TARGET_LINK = "Target";
 // Folder in a map holding lighting attributes and post-processing effects.
 export const LIGHTING_FOLDER = "Lighting";
+// Folder in a map holding visual-only art (such as Blender meshes). Everything in it is made
+// non-solid and invisible to shots when the map loads; gameplay runs on the simple geometry
+// outside it. See docs/MAPPING.md.
+export const ART_FOLDER = "Art";
 
 // HumanoidRootPart height above the feet.
 export const ROOT_HEIGHT = 3;
