@@ -29,6 +29,7 @@ import {
 	teamGlow,
 	wallWithGaps,
 } from "./kit";
+import { spectatorRing } from "./spectators";
 import { MapBuilder } from "./types";
 
 const HALF_WIDTH = 160;
@@ -364,10 +365,14 @@ export const Bastion: MapBuilder = {
 		setMapInfo(map, {
 			name: "Bastion",
 			tagline: "Two fortresses, one tower. Take the aqueduct, the plaza or the canal.",
-			modes: ["CTF", "TeamDeathmatch", "Deathmatch", "Domination", "Hardpoint"],
+			// No free-for-all: the map is built for two teams, and far too big for one.
+			modes: ["CTF", "TeamDeathmatch", "Domination", "Hardpoint"],
 			gravity: 196.2,
 			killHeight: -30,
 			themeColor: Color3.fromRGB(255, 140, 40),
+			// Music: big, cinematic desert rock with a western edge. Pick a licensed Creator Store
+			// track (see docs/FEEDBACK.md).
+			music: "",
 		});
 
 		// Domination points, on the center line so neither side is closer.
@@ -397,6 +402,8 @@ export const Bastion: MapBuilder = {
 		buildBase(map, "Red", 1);
 		buildBase(map, "Blue", -1);
 		buildBackdrop(map);
+		// The crowd floats above the desert, ringing both fortresses.
+		spectatorRing(map, Vector3.zero, 400, 70, 12, Color3.fromRGB(255, 140, 40));
 
 		setMapLighting(map, {
 			clockTime: 17.2,
