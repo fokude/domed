@@ -10,6 +10,7 @@ import { Bastion } from "./bastion";
 import { Gridline } from "./gridline";
 import { HalcyonStation } from "./halcyonStation";
 import { InfernalSpire } from "./infernalSpire";
+import { InfernalSpireV2 } from "./infernalSpireV2";
 import { readMapInfo, MapInfo } from "./loader";
 import { TestRange } from "./testRange";
 import { MapBuilder } from "./types";
@@ -17,7 +18,7 @@ import { Warmup } from "./warmup";
 
 const ServerStorage = game.GetService("ServerStorage");
 
-const CODE_MAPS: MapBuilder[] = [InfernalSpire, Gridline, HalcyonStation, Bastion, TestRange, Warmup];
+const CODE_MAPS: MapBuilder[] = [InfernalSpire, Gridline, HalcyonStation, Bastion, InfernalSpireV2, TestRange, Warmup];
 
 export function bakeMaps(): Folder {
 	ServerStorage.FindFirstChild("BakedMaps")?.Destroy();

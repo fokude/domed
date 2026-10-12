@@ -31,6 +31,29 @@ Use `/openness` in a Studio playtest to measure the current map (it samples 250 
 across every floor). `npm run preview -- <MapId>` measures the same thing offline
 (see MAPPING.md).
 
+### Current measurements
+
+Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`):
+
+| Map                     | Openness | Spawn exposure | Notes                                                    |
+| ----------------------- | -------- | -------------- | -------------------------------------------------------- |
+| Bastion                 | 17%      | 9%             | Meets both targets                                       |
+| Gridline                | 31%      | 90%            | Spawns spread across an open map                         |
+| Halcyon Station         | 40%      | 86%            | Spawns spread across an open map                         |
+| Infernal Spire          | 72%      | 99.6%          | Open lava lake; spawns on the open ring                  |
+| Infernal Spire redesign | 24%      | 14%            | Spawn rooms with screens; basalt columns across the lake |
+
+Free-for-all maps that scatter spawns everywhere score high on spawn exposure almost by
+design; openness is the clearer signal for them.
+
+**The Infernal Spire redesign** (`InfernalSpireV2`, dev-only until playtested against the
+original) was the first map built with the preview loop. Three iterations: spawn rooms behind
+the rampart and columns in the lava (openness 35%, but the renders showed the rooms had been
+built facing outward, sealing the spawns); turned around (spawn exposure 74%, since a wide
+doorway shows a wide arc of the ring); then screen walls inside each doorway, which also give
+every room two ways out, and wider columns (24% and 14%). The screens' side gaps were widened
+after the floor plan showed them too tight to leave at speed.
+
 ### DOMED scale
 
 A character is about 5.5 studs tall, so a stud is roughly 0.3 m.
