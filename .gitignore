@@ -6,3 +6,4 @@ include/
 *.rbxl.lock
 *.rbxlx.lock
 project_artefacts/
+previews/

@@ -109,6 +109,29 @@ Sources: [Roblox mesh specifications](https://create.roblox.com/docs/art/modelin
 [Roblox Blender plugin](https://github.com/Roblox/roblox-blender-plugin) and
 [its documentation](https://github.com/Roblox/creator-docs/blob/main/content/en-us/art/modeling/roblox-blender-plugin.md).
 
+## Previewing a map without Studio
+
+`npm run preview -- <MapId>` renders a code-built map in Blender (5.x, installed locally) to
+`previews/<MapId>/`:
+
+- `plan.png`: top-down view in the map's colors. Spawns are arrows in team colors pointing the
+  way they face; jump pads cyan, perks gold, control point zones white.
+- `cut_<h>.png`: floor plans with everything above height h cut away, one per level, so
+  interiors under roofs and upper floors can be read.
+- `heights.png`: top-down, colored by height from blue (low) to red (high).
+- `overview.png`: the whole map from a raised corner.
+- `spawn_<n>_<team>.png`: eye-level views from spawns at the game's field of view.
+
+It runs the map's builder in Node on a small stand-in for Roblox's API
+(`tools/map-preview/roblox-shim.js`), exports the parts as JSON, and renders them with
+Blender's fast Workbench engine in a few seconds. Use it to check a layout change before
+playtesting: whether spawns look into open fire, whether a lane reads as intended, whether
+heights are varied. It doesn't replace `/openness` or a playtest; it's the "look at it" step.
+
+Why: maps were built entirely by coordinates in code, with nobody (agent or human) seeing them
+until a Studio session. A render after each change gives the build, look, adjust loop that
+level designers rely on.
+
 ## Maps still defined in code
 
 Some maps are still built by code in `src/server/maps/`, and are rebuilt every time the server

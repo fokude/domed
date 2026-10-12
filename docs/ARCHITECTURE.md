@@ -99,6 +99,9 @@ Adding a remote means updating both; a remote missing from the project file make
 `WaitForChild` hang forever. `npm run check` fails if the two lists disagree
 (`scripts/check-remotes.js`).
 
+Tooling outside the game lives in `scripts/` (checks) and `tools/` (the map preview renderer,
+see MAPPING.md). Neither is compiled into the place.
+
 The server receives remote arguments as `unknown` and validates them before use.
 
 ## Match flow

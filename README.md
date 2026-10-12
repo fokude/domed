@@ -18,6 +18,7 @@ isn't set in code.
 
 - [Roblox Studio](https://create.roblox.com)
 - [Node.js](https://nodejs.org) 20.19 or newer
+- [Blender](https://www.blender.org) 5.x, optional: only for map previews
 - [Rojo](https://rojo.space/docs/v7/getting-started/installation/) 7.7, both the CLI and the
   Studio plugin. The plugin version must match the CLI; `rojo plugin install` installs the
   matching one.
@@ -59,13 +60,14 @@ multi-kills), all four perks on 5-second respawns, two control points (add `Domi
 
 ## Scripts
 
-| Command          | Does                                                 |
-| ---------------- | ---------------------------------------------------- |
-| `npm run build`  | Compile once                                         |
-| `npm run watch`  | Compile on save                                      |
-| `npm run lint`   | ESLint and Prettier checks                           |
-| `npm run check`  | Lint and compile: what CI runs, minus the Rojo build |
-| `npm run format` | Fix lint formatting and format the Markdown docs     |
+| Command                      | Does                                                                    |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `npm run build`              | Compile once                                                            |
+| `npm run watch`              | Compile on save                                                         |
+| `npm run lint`               | ESLint and Prettier checks                                              |
+| `npm run check`              | Check remotes, lint and compile: what CI runs, minus the Rojo build     |
+| `npm run format`             | Fix lint formatting and format the Markdown docs                        |
+| `npm run preview -- <MapId>` | Render a map's plans and spawn views with Blender (see docs/MAPPING.md) |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the code fits together.
 To contribute, read [CONTRIBUTING.md](CONTRIBUTING.md); [AGENTS.md](AGENTS.md) has the rules

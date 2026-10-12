@@ -24,6 +24,10 @@ what is untested rather than implying it works, and list what the person testing
 Studio chat commands: `/map <MapId> [mode]`, `/end`, `/openness`, and `/map TestRange [mode]`
 for the test map, where every feature can be tried solo against training dummies.
 
+Maps can be looked at without Studio: `npm run preview -- <MapId>` renders plans, floor cuts
+and spawn views to `previews/<MapId>/` (needs Blender; see docs/MAPPING.md). After changing a
+map's layout, render it and look at the images before calling the change done.
+
 ## Commits
 
 - One commit per feature, fix or tuning change, with a short, specific message. When several
