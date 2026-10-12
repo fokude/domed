@@ -17,6 +17,8 @@ export type HitKind = "kill" | "body" | "shield";
 export type Combatant = Player | string;
 export type PersonalBestRecord = "topSpeed" | "longestHeadshot";
 // How a player was killed, for their death recap.
+// Server-wide moments the whole lobby hears about (see server/streaks.ts).
+export type BroadcastKind = "KillingSpree" | "Rampage" | "Godlike" | "Shutdown";
 export type DeathCause = "headshot" | "knockback";
 
 export const Remotes = {
@@ -39,6 +41,9 @@ export const Remotes = {
 		remote<(killerCharacter: Model | undefined, cause: DeathCause, distance: number, killerSpeed: number) => void>(
 			"DeathRecap",
 		),
+	// To everyone: a streak worth announcing (`subject` is on it), or a Shutdown (`other` ended
+	// `subject`'s streak).
+	Broadcast: remote<(kind: BroadcastKind, subject: Combatant, other?: Combatant) => void>("Broadcast"),
 	// Sent to a shooter whose miss passed close to a head they could have hit.
 	NearMiss: remote<() => void>("NearMiss"),
 	// Sent to a player who just beat one of their saved records.

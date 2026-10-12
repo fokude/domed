@@ -54,6 +54,30 @@ the peak, and speed doesn't count for 3 seconds after being knocked back, since 
 someone else isn't the player's own speed (the owner's call after playtesting), and low records (under 50 speed or 50 studs) stay quiet so new players aren't
 flooded. They show improvement that doesn't depend on winning fights (see SKILL_FLOOR.md).
 
+## Server-wide moments
+
+Personal feedback (your kills, hitmarkers, near misses, personal bests) stays on your screen:
+it comes often, and broadcasting it would be noise. Rare, spectacular moments go to the whole
+lobby, so a server feels like one shared event, and everyone learns who to hunt, as Unreal
+Tournament's announcer did:
+
+| Moment                       | Everyone sees                                    | Sound             |
+| ---------------------------- | ------------------------------------------------ | ----------------- |
+| Ring-out                     | RING OUT in the kill feed                        | Crowd roar        |
+| Streak of 5 / 10 / 15        | "VOLT IS ON A KILLING SPREE" / RAMPAGE / GODLIKE | Sting; roar at 15 |
+| Ending a streak of 5 or more | "NOVA SHUT DOWN VOLT!"                           | Crowd roar        |
+
+Streaks are tracked on the server (`server/streaks.ts`); bots' kills don't build streaks.
+
+**When moments collide.** Each kind of feedback has its own channel, so they don't fight:
+your headline (kills, ring-outs), the line under it (your streaks, personal bests), and the
+broadcast banner under the match bar (server-wide moments, `client/announcer.ts`). The banner
+shows one announcement at a time for about two seconds through a small priority queue: a
+shutdown or GODLIKE jumps ahead of a killing spree, at most three wait, the lowest priority is
+dropped first when it's full, and anything older than four seconds is dropped as stale.
+Broadcasts about you are skipped, since your own callout covers them. The crowd is one voice:
+roars share one throttle, so ring-outs and shutdowns in a burst never stack.
+
 ## Why this design
 
 - **Layered, multi-sensory feedback.** The "juice" approach: flash, motion, floating text,

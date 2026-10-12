@@ -7,7 +7,16 @@
 const SoundService = game.GetService("SoundService");
 
 export type SoundCue =
-	"kill" | "killThump" | "bodyHit" | "shieldBreak" | "perkPickup" | "death" | "personalBest" | "shove" | "crowdRoar";
+	| "kill"
+	| "killThump"
+	| "bodyHit"
+	| "shieldBreak"
+	| "perkPickup"
+	| "death"
+	| "personalBest"
+	| "shove"
+	| "crowdRoar"
+	| "announce";
 
 interface CueSettings {
 	id: string;
@@ -27,11 +36,13 @@ export const SOUND_CUES: Record<SoundCue, CueSettings> = {
 	death: { id: "rbxasset://sounds/ouch.ogg", volume: 0.6, pitch: 1 },
 	personalBest: { id: TICK, volume: 0.9, pitch: 2 },
 	shove: { id: "rbxasset://sounds/swoosh.wav", volume: 0.7, pitch: 1.1 },
-	// Everyone hears it on a ring-out. Placeholder until a Creator Store crowd cheer is picked.
+	// A short sting under server-wide announcements.
+	announce: { id: TICK, volume: 0.7, pitch: 0.8 },
+	// The crowd, on ring-outs and the biggest announcements. One roar at a time (see
+	// playSoundThrottled). Placeholder until a Creator Store crowd cheer is picked.
 	crowdRoar: { id: "rbxasset://sounds/impact_water.mp3", volume: 0.8, pitch: 0.6 },
 };
 
-// Plays a cue once. `pitchScale` multiplies the cue's pitch, for escalation.
 const lastPlayed = new Map<SoundCue, number>();
 
 // Plays a cue unless it already played within `cooldown` seconds, so big shared cues (a crowd
@@ -43,6 +54,7 @@ export function playSoundThrottled(cue: SoundCue, cooldown: number) {
 	playSound(cue);
 }
 
+// Plays a cue once. `pitchScale` multiplies the cue's pitch, for escalation.
 export function playSound(cue: SoundCue, pitchScale = 1) {
 	const settings = SOUND_CUES[cue];
 	const sound = new Instance("Sound");

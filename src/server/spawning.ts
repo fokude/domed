@@ -6,6 +6,7 @@ import { getLiveRoot } from "shared/characters";
 import { MatchConfig, MovementConfig } from "shared/config";
 import { DEPLOYED_ATTRIBUTE, getMatchState } from "shared/matchState";
 import { recordDeath } from "./progression";
+import { endStreak } from "./streaks";
 import { incrementStat } from "./stats";
 
 const Debris = game.GetService("Debris");
@@ -102,6 +103,7 @@ function onCharacterAdded(player: Player, character: Model) {
 	Debris.AddItem(forceField, MatchConfig.spawnProtection);
 
 	humanoid.Died.Connect(() => {
+		endStreak(player);
 		// Deaths in the warm-up (falling off, say) don't count.
 		if (getMatchState("Phase") === "Playing") {
 			incrementStat(player, "Deaths");

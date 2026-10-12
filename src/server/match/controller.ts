@@ -38,6 +38,7 @@ import { CaptureTheFlag } from "./modes/ctf";
 import { Deathmatch } from "./modes/deathmatch";
 import { TeamDeathmatch } from "./modes/teamDeathmatch";
 import { GameMode, MatchResult } from "./modes/types";
+import { resetStreaks, startStreaks } from "../streaks";
 import { startFriendTracking } from "./teams";
 import { pickVoteOptions, runVote, startVoting } from "./voting";
 
@@ -165,6 +166,7 @@ function startMatch(option: MatchOption): GameMode {
 	for (const player of Players.GetPlayers()) {
 		resetStats(player);
 	}
+	resetStreaks();
 	deployAll();
 	startMatchXp();
 	setCombatRules(mode);
@@ -294,6 +296,7 @@ export function startMatchLoop() {
 	startVoting();
 	startFriendTracking();
 	startBotSystem();
+	startStreaks();
 
 	task.spawn(() => {
 		// Nothing runs on an empty server, so the first player arrives to a fresh warm-up.

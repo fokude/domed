@@ -30,6 +30,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `main.server.ts`      | Entry point: wires the modules together                                                  |
 | `combat.ts`           | Validating railgun shots and shoves, kills, knockback and kill credit                    |
 | `knockback.ts`        | The body-shot push, shared by player and bot shots; pauses speed records                 |
+| `streaks.ts`          | Kill streaks, broadcast to everyone when they get big or end                             |
 | `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection                           |
 | `hazards.ts`          | Lava and falling out of the map                                                          |
 | `movementCheck.ts`    | Flagging and kicking speed hacks and teleports                                           |
@@ -66,6 +67,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `hud.ts`            | Crosshair, hitmarker, cooldown, kill feed, banners, respawn countdown         |
 | `killFeedback.ts`   | Kill, multi-kill and streak feedback (see FEEDBACK.md)                        |
 | `deathRecap.ts`     | How you died: distance and killer speed, killer outlined until respawn        |
+| `announcer.ts`      | Server-wide announcements (streaks, shutdowns) through a priority queue       |
 | `matchBar.ts`       | Timer and team scores at the top of the screen                                |
 | `objectives.ts`     | Control point strip in Domination and Hardpoint                               |
 | `onboarding.ts`     | First-minute lessons, the body-shot tip, and the how-to-play card in the menu |

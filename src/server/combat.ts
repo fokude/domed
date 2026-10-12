@@ -14,6 +14,7 @@ import { hitDummy, isDummy, livingDummyHeads } from "./dummies";
 import { knockBack } from "./knockback";
 import { hitShield } from "./perks";
 import { recordKill } from "./progression";
+import { registerKill, registerKilledBy } from "./streaks";
 import { incrementStat } from "./stats";
 
 const Players = game.GetService("Players");
@@ -299,6 +300,8 @@ function awardKill(
 ) {
 	lastPush.delete(victim);
 	incrementStat(shooter, "Kills");
+	if (victim.IsA("Player")) registerKilledBy(victim, shooter);
+	registerKill(shooter);
 	Remotes.HitConfirm.FireClient(shooter, "kill", false);
 	if (victim.IsA("Player")) {
 		recordKill(shooter, cause === "headshot" ? distance : undefined);
