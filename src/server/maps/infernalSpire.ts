@@ -1,8 +1,9 @@
-// A ruined citadel over a lava lake. A rampart ring encloses a tiered obsidian spire, with
-// floating basalt islands between them. Falling means lava. Players spawn in rooms recessed
-// into the rampart, and basalt columns rise from the lava to break sightlines across it: the
-// first version, an open lake, measured 72% openness and 99.6% spawn exposure (see
-// docs/MAP_DESIGN.md).
+// A hellish citadel over a lava lake, in the spirit of Doom: a circular gallery tunnel runs
+// all the way round, opening onto the lake only at its bridges and balconies, with pillars
+// inside so fights happen in the tunnel too. Its roof is a battlement ring, reached through
+// skylights above the jump pads. In the middle, a tiered obsidian spire; between, floating
+// basalt islands and columns rising from the lava. Players spawn in rooms behind the gallery.
+// Falling means lava. Earlier versions are recorded in docs/MAP_DESIGN.md.
 
 import {
 	block,
@@ -33,6 +34,9 @@ const Lava: Style = { color: Color3.fromRGB(255, 100, 30), material: Enum.Materi
 const Rune: Style = { color: Color3.fromRGB(255, 60, 20), material: Enum.Material.Neon, collide: false };
 const Vent: Style = { color: Color3.fromRGB(255, 120, 0), material: Enum.Material.Neon };
 const Barrier: Style = { color: new Color3(), transparency: 1 };
+// Doom-style hell palette for the gallery: rust-red brick and dark iron grating.
+const Hellbrick: Style = { color: Color3.fromRGB(110, 38, 28), material: Enum.Material.Brick };
+const Grating: Style = { color: Color3.fromRGB(58, 48, 44), material: Enum.Material.DiamondPlate };
 
 const FIRE = Color3.fromRGB(255, 120, 30);
 const EMBER = Color3.fromRGB(120, 20, 10);
@@ -43,7 +47,7 @@ const EIGHTH = math.pi / 4;
 
 const RING_HEIGHT = 12;
 const RING_RADIUS = 108;
-const RING_WIDTH = 20;
+const RING_WIDTH = 24;
 const RAMPART_RADIUS = 120;
 const RAMPART_TOP = 40;
 const TIER_TOPS = [26, 44, 60];
@@ -68,6 +72,16 @@ const COLUMN_RADIUS = 86;
 const COLUMN_WIDTH = 24;
 const COLUMN_TOP = 56;
 const BARRIER_RADIUS = RAMPART_RADIUS + ROOM_DEPTH + 6;
+// The gallery: a tunnel over the ring walkway, between an inner wall and the rampart.
+const GALLERY_SEGMENTS = 48;
+const GALLERY_CEILING = RING_HEIGHT + 18;
+const INNER_WALL_RADIUS = RING_RADIUS - RING_WIDTH / 2 + 1.5;
+const BRIDGE_ANGLES = [0, 1, 2, 3].map((i) => i * QUARTER);
+const PAD_ANGLES = [0, 1, 2, 3].map((i) => EIGHTH + i * QUARTER);
+// Pillars inside the gallery, alternating against the inner and outer walls, so it can't be
+// seen down its whole curve.
+const PILLAR_ANGLES: number[] = [];
+for (let i = 0; i < 16; i++) PILLAR_ANGLES.push(EIGHTH / 4 + (i * EIGHTH) / 2);
 
 function at(radius: number, angle: number, height: number): Vector3 {
 	return onCircle(CENTER, radius, angle).add(new Vector3(0, height, 0));
@@ -86,13 +100,75 @@ function brazier(parent: Instance, base: Vector3) {
 	pointLight(bowl, FIRE, 40, 2);
 }
 
+// Smallest angle between two directions, in radians.
+function angleBetween(a: number, b: number): number {
+	return math.abs(((a - b + 3 * math.pi) % (2 * math.pi)) - math.pi);
+}
+
 function isDoorway(segmentAngle: number): boolean {
-	return DOOR_ANGLES.some((door) => math.abs(((segmentAngle - door + math.pi) % (2 * math.pi)) - math.pi) < 0.01);
+	return DOOR_ANGLES.some((door) => angleBetween(segmentAngle, door) < 0.01);
+}
+
+// The gallery's inner wall, roof and pillars. The inner wall opens at each bridge, and wider
+// at each jump pad as a balcony over the lake; the roof opens above the pads, so the roof's
+// battlement ring can be reached by jumping up through the skylight.
+function buildGallery(arena: Model) {
+	const step = (2 * math.pi) / GALLERY_SEGMENTS;
+	const wallHeight = GALLERY_CEILING - RING_HEIGHT;
+	const innerLength = 2 * (INNER_WALL_RADIUS + 1.5) * math.tan(math.pi / GALLERY_SEGMENTS) + 0.2;
+	const roofRadius = (INNER_WALL_RADIUS - 1.5 + RAMPART_RADIUS) / 2;
+	const roofWidth = RAMPART_RADIUS - (INNER_WALL_RADIUS - 1.5);
+	const roofLength = 2 * RAMPART_RADIUS * math.tan(math.pi / GALLERY_SEGMENTS) + 0.2;
+	for (let i = 0; i < GALLERY_SEGMENTS; i++) {
+		const angle = i * step;
+		const atBridge = BRIDGE_ANGLES.some((bridge) => angleBetween(angle, bridge) < 0.01);
+		const atPad = PAD_ANGLES.some((pad) => angleBetween(angle, pad) < step * 1.1);
+		if (!atBridge && !atPad) {
+			block(
+				arena,
+				new Vector3(innerLength, wallHeight, 3),
+				ringFrame(INNER_WALL_RADIUS, angle, RING_HEIGHT + wallHeight / 2),
+				Hellbrick,
+				"GalleryWall",
+			);
+		}
+		const underSkylight = PAD_ANGLES.some((pad) => angleBetween(angle, pad) < 0.01);
+		if (!underSkylight) {
+			block(
+				arena,
+				new Vector3(roofLength, 2, roofWidth),
+				ringFrame(roofRadius, angle, GALLERY_CEILING + 1),
+				Obsidian,
+				"GalleryRoof",
+			);
+		}
+	}
+
+	PILLAR_ANGLES.forEach((angle, i) => {
+		const radius = i % 2 === 0 ? INNER_WALL_RADIUS + 4 : RAMPART_RADIUS - 4.5;
+		const pillar = block(
+			arena,
+			new Vector3(8, wallHeight, 5),
+			ringFrame(radius, angle, RING_HEIGHT + wallHeight / 2),
+			Obsidian,
+			"GalleryPillar",
+		);
+		const rune = block(
+			arena,
+			new Vector3(1, wallHeight - 6, 5.4),
+			ringFrame(radius, angle, RING_HEIGHT + wallHeight / 2),
+			Rune,
+			"PillarRune",
+		);
+		pointLight(rune, FIRE, 22, 1.2);
+		pillar.Name = "GalleryPillar";
+	});
 }
 
 // The outer wall, with a doorway into a spawn room at each door angle.
 function buildRampart(arena: Model) {
-	ring(arena, new Vector3(0, RING_HEIGHT, 0), RING_RADIUS, RING_WIDTH, 4, 24, Basalt, "Walkway");
+	ring(arena, new Vector3(0, RING_HEIGHT, 0), RING_RADIUS, RING_WIDTH, 4, 24, Grating, "Walkway");
+	buildGallery(arena);
 
 	const segmentLength = 2 * (RAMPART_RADIUS + 2) * math.tan(math.pi / RAMPART_SEGMENTS) + 0.2;
 	const wallHeight = RAMPART_TOP - RING_HEIGHT;
@@ -105,7 +181,7 @@ function buildRampart(arena: Model) {
 				arena,
 				new Vector3(segmentLength, lintelHeight, 4),
 				ringFrame(RAMPART_RADIUS, angle, RAMPART_TOP - lintelHeight / 2),
-				Basalt,
+				Hellbrick,
 				"Lintel",
 			);
 		} else {
@@ -113,7 +189,7 @@ function buildRampart(arena: Model) {
 				arena,
 				new Vector3(segmentLength, wallHeight, 4),
 				ringFrame(RAMPART_RADIUS, angle, RING_HEIGHT + wallHeight / 2),
-				Basalt,
+				Hellbrick,
 				"Rampart",
 			);
 		}
@@ -292,6 +368,9 @@ export const InfernalSpire: MapBuilder = {
 			gravity: 196.2,
 			killHeight: -2,
 			themeColor: Color3.fromRGB(255, 100, 30),
+			// Music: heavy, driving metal in the spirit of Doom. Pick a licensed track from the
+			// Creator Store and set it here as "rbxassetid://<id>" (see docs/FEEDBACK.md).
+			music: "",
 		});
 
 		// Domination points, on the center line so neither side is closer.

@@ -2,6 +2,9 @@
 // Color3, Enum, Instance, math, CollectionService), so a map's code can run in Node and its
 // geometry can be exported for previews. Only what the maps need: extend it when a map uses
 // something new, and keep the math identical to Roblox's.
+//
+// Known difference: roblox-ts's `new Array(length, fill)` is JavaScript's `new Array(a, b)`, a
+// two-item array. Map code should build arrays with loops or literals instead.
 
 class Vector3 {
 	constructor(x = 0, y = 0, z = 0) {

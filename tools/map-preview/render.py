@@ -122,9 +122,10 @@ def color_for(part, kind):
 def add_object(name, verts, faces, matrix, color, alpha=1.0):
     mesh = bpy.data.meshes.new(name)
     mesh.from_pydata([P @ Vector(v) for v in verts], [], faces)
+    # Bake the placement into the vertices, so section cuts can work in world space.
+    mesh.transform(matrix)
     mesh.update()
     obj = bpy.data.objects.new(name, mesh)
-    obj.matrix_world = matrix
     obj.color = (*color, alpha)
     bpy.context.scene.collection.objects.link(obj)
     return obj
@@ -349,8 +350,9 @@ for obj in scenery:
     obj.hide_render = False
 shading.show_shadows = True
 
-# Section cuts: the camera sits at the cut height with a tiny near clip, so anything above it
-# is cut away, like an architect's floor plan. One cut 8 studs above each distinct floor level.
+# Section cuts, like an architect's floor plan: everything above the cut height is hidden and
+# anything crossing it is flattened to it, so walls show as solid outlines. One cut 8 studs
+# above each distinct floor level.
 floor_tops = sorted({round(obj["top"]) for obj in geometry if obj.dimensions.x * obj.dimensions.y > 400})
 levels = []
 for top in floor_tops:
@@ -358,9 +360,27 @@ for top in floor_tops:
         levels.append(top)
 for level in levels[:5]:
     cut = level + 8
-    cut_cam = make_camera(f"Cut{cut}", Vector((center.x, center.y, cut)), ortho_scale=extent * 1.08, rotation=(0, 0, 0))
-    cut_cam.data.clip_start = 0.01
+    hidden, flattened = [], {}
+    for obj in geometry + scenery + markers:
+        heights = [v.co.z for v in obj.data.vertices]
+        if min(heights) > cut:
+            obj.hide_render = True
+            hidden.append(obj)
+        elif max(heights) > cut:
+            # Cut walls are drawn near-black, as architects shade them, so they stand out from
+            # the floors.
+            flattened[obj] = ([v.co.copy() for v in obj.data.vertices], tuple(obj.color))
+            for v in obj.data.vertices:
+                v.co.z = min(v.co.z, cut)
+            obj.color = (0.05, 0.05, 0.06, 1)
+    cut_cam = make_camera(f"Cut{cut}", Vector((center.x, center.y, cut + 100)), ortho_scale=extent * 1.08, rotation=(0, 0, 0))
     render(f"cut_{cut}.png", cut_cam, resolution, resolution)
+    for obj in hidden:
+        obj.hide_render = False
+    for obj, (coords, color) in flattened.items():
+        for v, co in zip(obj.data.vertices, coords):
+            v.co = co
+        obj.color = color
 
 # Exposure plan: the cut through the lowest floor, with the sampled spots on top.
 for dot in exposure_dots:

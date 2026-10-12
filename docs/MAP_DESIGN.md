@@ -40,7 +40,7 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 | Bastion         | 17%      | 9%             | Meets both targets                                                           |
 | Gridline        | 31%      | 90%            | Spawns spread across an open map                                             |
 | Halcyon Station | 40%      | 86%            | Spawns spread across an open map                                             |
-| Infernal Spire  | 24%      | 14%            | Spawn rooms with screens; basalt columns across the lake (was 72% and 99.6%) |
+| Infernal Spire  | 19%      | 10%            | Gallery tunnel round the lake, spawn rooms, lava columns (was 72% and 99.6%) |
 
 Free-for-all maps that scatter spawns everywhere score high on spawn exposure almost by
 design; openness is the clearer signal for them.
@@ -52,6 +52,14 @@ built facing outward, sealing the spawns); turned around (spawn exposure 74%, si
 doorway shows a wide arc of the ring); then screen walls inside each doorway, which also give
 every room two ways out, and wider columns (24% and 14%). The screens' side gaps were widened
 after the floor plan showed them too tight to leave at speed.
+
+After a playtest the owner wanted the ring to be "a long room" rather than a walkway beside a
+wall, with fights inside it, and the map to feel more like Doom. The ring became a roofed
+gallery: an inner wall opening onto the lake only at the four bridges and four jump-pad
+balconies, sixteen pillars staggered against alternate walls so the curve can't be watched
+end to end, and a battlement roof reached through skylights above the pads (a new high tier).
+Rust-red brick and iron grating replaced plain basalt. It measures 19% open: a little under the
+target, which suits a map built around a tunnel.
 
 ### DOMED scale
 
