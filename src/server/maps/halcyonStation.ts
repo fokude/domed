@@ -1,6 +1,8 @@
 // A white, sterile space station under the stars, in low gravity. Two hangar bays at opposite
 // ends connect to a central reactor atrium by an open bridge and two glass-roofed tubes.
-// Falling off means drifting into space. Red's bay is at +Z, Blue's at -Z.
+// Falling off means drifting into space. Every spawn is in a pocket: behind a wall at the back
+// of each bay, or in escape pods off the tubes; cargo stacks where the bridge meets each bay
+// break the straight line between them. Red's bay is at +Z, Blue's at -Z.
 
 import { TeamId } from "shared/modes";
 import {
@@ -21,6 +23,7 @@ import {
 	Style,
 	teamGlow,
 } from "./kit";
+import { spectatorRing } from "./spectators";
 import { MapBuilder } from "./types";
 
 const ATRIUM_RADIUS = 48;
@@ -91,9 +94,35 @@ function buildBay(map: Model, team: TeamId, sign: number) {
 	slab(map, new Vector3(38, 4, z(152)), new Vector3(6, 4, 6), Panel, "Crate");
 	slab(map, new Vector3(34, 8, z(149)), new Vector3(5, 4, 5), Panel, "Crate");
 
-	for (const x of [-14, -7, 0, 7, 14]) {
-		spawnMarker(map, new Vector3(x, 0, z(165)), new Vector3(x, 0, 0), team);
+	// Spawn pocket: a wall across the back of the bay, wider than the spawn line, with the way
+	// out at each end. Spawns face their nearest exit.
+	slab(map, new Vector3(0, 14, z(158)), new Vector3(56, 14, 2), Hull, "SpawnWall");
+	slab(map, new Vector3(0, 14.2, z(158) - sign * 1.1), new Vector3(56, 0.4, 0.2), glow, "SpawnWallStripe");
+	for (const x of [-16, -8, 0, 8, 16]) {
+		spawnMarker(map, new Vector3(x, 0, z(166)), new Vector3(x >= 0 ? 40 : -40, 0, z(166)), team);
 	}
+
+	// A cargo stack where the bridge arrives, breaking the straight line down the bridge into
+	// the bay and giving cover in front of the flag.
+	slab(map, new Vector3(0, 8, z(124)), new Vector3(16, 8, 6), Panel, "CargoStack");
+	slab(map, new Vector3(-3, 13, z(124)), new Vector3(8, 5, 5), Panel, "CargoStack");
+}
+
+// An escape pod off the middle of a tube: a small room with its door onto the tube and a
+// spawn tucked beside the door, out of sight of the tube.
+function buildEscapePod(map: Model, side: number, sign: number) {
+	const z = sign * 75;
+	const podX = side * (TUBE_X + 15);
+	slab(map, new Vector3(podX, 0, z), new Vector3(14, 2, 18), Hull, "PodFloor");
+	slab(map, new Vector3(podX, TUBE_HEIGHT + 0.6, z), new Vector3(14, 0.6, 18), Panel, "PodRoof");
+	slab(map, new Vector3(podX + side * 7, TUBE_HEIGHT, z), new Vector3(1, TUBE_HEIGHT, 18), Hull, "PodWall");
+	for (const edge of [-1, 1]) {
+		slab(map, new Vector3(podX, TUBE_HEIGHT, z + edge * 9), new Vector3(14, TUBE_HEIGHT, 1), Hull, "PodWall");
+	}
+	const light = slab(map, new Vector3(podX, TUBE_HEIGHT - 0.1, z), new Vector3(2, 0.2, 10), Accent, "PodLight");
+	pointLight(light, ACCENT_LIGHT, 16, 1);
+	// Beside the door, not in line with it, so the tube can't see in.
+	spawnMarker(map, new Vector3(podX, 0, z + 6), new Vector3(side * TUBE_X, 0, z));
 }
 
 function buildConnectors(map: Model) {
@@ -108,6 +137,14 @@ function buildConnectors(map: Model) {
 			}
 		}
 
+		// Cover on the bridge, offset to alternate sides.
+		for (const [along, side] of [
+			[65, -1],
+			[95, 1],
+		] as [number, number][]) {
+			slab(map, new Vector3(side * 3, 7, z(along)), new Vector3(6, 7, 2), Panel, "BridgeCover");
+		}
+
 		// Enclosed side tubes: glass on the space side, a walkable glass roof.
 		for (const side of [-1, 1]) {
 			const x = side * TUBE_X;
@@ -120,13 +157,33 @@ function buildConnectors(map: Model) {
 				Hull,
 				"TubeWall",
 			);
-			slab(
-				map,
-				new Vector3(x + side * 7.5, TUBE_HEIGHT, z(75)),
-				new Vector3(1, TUBE_HEIGHT, 100),
-				Glass,
-				"TubeWindow",
-			);
+			// Glass on the space side, broken by the door to an escape pod at the middle.
+			for (const [from, to] of [
+				[25, 69],
+				[81, 125],
+			]) {
+				slab(
+					map,
+					new Vector3(x + side * 7.5, TUBE_HEIGHT, z((from + to) / 2)),
+					new Vector3(1, TUBE_HEIGHT, to - from),
+					Glass,
+					"TubeWindow",
+				);
+			}
+			buildEscapePod(map, side, sign);
+			// Bulkheads half-closing the tube on alternate sides, so it can't be watched end to end.
+			for (const [along, half] of [
+				[45, -1],
+				[105, 1],
+			] as [number, number][]) {
+				slab(
+					map,
+					new Vector3(x + half * 3.5, TUBE_HEIGHT, z(along)),
+					new Vector3(7, TUBE_HEIGHT, 1.5),
+					Hull,
+					"Bulkhead",
+				);
+			}
 			slab(map, new Vector3(x, TUBE_HEIGHT + 0.6, z(75)), new Vector3(16, 0.6, 100), Glass, "TubeRoof");
 			const strip = slab(
 				map,
@@ -168,6 +225,26 @@ function buildAtrium(map: Model) {
 		jumpPad(map, onCircle(Vector3.zero, 20, angle), onCircle(balconyTop, BALCONY_RADIUS, angle), 8, Pad);
 	}
 
+	// Coolant pylons around the reactor, breaking the straight lines across the atrium.
+	for (let i = 0; i < 4; i++) {
+		const pylon = slab(
+			map,
+			onCircle(new Vector3(0, 12, 0), 27, (i * math.pi) / 2),
+			new Vector3(5, 12, 5),
+			Trim,
+			"Pylon",
+		);
+		const glow = slab(
+			map,
+			onCircle(new Vector3(0, 12.2, 0), 27, (i * math.pi) / 2),
+			new Vector3(5.4, 0.4, 5.4),
+			Accent,
+			"PylonCap",
+		);
+		pointLight(glow, ACCENT_LIGHT, 18, 1);
+		pylon.Name = "Pylon";
+	}
+
 	// Short gangways from the balcony down onto the tube roofs.
 	for (const x of [-1, 1]) {
 		for (const z of [-1, 1]) {
@@ -182,10 +259,6 @@ function buildAtrium(map: Model) {
 			);
 		}
 	}
-
-	for (let i = 0; i < 4; i++) {
-		spawnMarker(map, onCircle(balconyTop, BALCONY_RADIUS, (i * math.pi) / 2), Vector3.zero);
-	}
 }
 
 export const HalcyonStation: MapBuilder = {
@@ -198,6 +271,9 @@ export const HalcyonStation: MapBuilder = {
 			gravity: 120,
 			killHeight: -60,
 			themeColor: Color3.fromRGB(90, 230, 220),
+			// Music: cold, spacious ambient electronic with a steady pulse. Pick a licensed Creator
+			// Store track (see docs/FEEDBACK.md).
+			music: "",
 		});
 
 		// Domination points, on the center line so neither side is closer.
@@ -223,6 +299,8 @@ export const HalcyonStation: MapBuilder = {
 		buildBay(map, "Blue", -1);
 		buildConnectors(map);
 		buildAtrium(map);
+		// The crowd floats outside the station's windows.
+		spectatorRing(map, Vector3.zero, 220, 20, 8, Color3.fromRGB(90, 230, 220));
 
 		setMapLighting(map, {
 			clockTime: 0,

@@ -35,14 +35,14 @@ across every floor). `npm run preview -- <MapId>` measures the same thing offlin
 
 Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`):
 
-| Map             | Openness | Spawn exposure | Notes                                                                        |
-| --------------- | -------- | -------------- | ---------------------------------------------------------------------------- |
-| Bastion         | 17%      | 9%             | Meets both targets                                                           |
-| Gridline        | 26%      | 21%            | Covered arcades down both sides; spawns in pockets (was 31% and 90%)         |
-| Halcyon Station | 40%      | 86%            | Spawns spread across an open map                                             |
-| Infernal Spire  | 19%      | 10%            | Gallery tunnel round the lake, spawn rooms, lava columns (was 72% and 99.6%) |
-| Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map            |
-| Foundry         | 10%      | 18%            | Close quarters by design: well under the open-map target                     |
+| Map             | Openness | Spawn exposure | Notes                                                                                                    |
+| --------------- | -------- | -------------- | -------------------------------------------------------------------------------------------------------- |
+| Bastion         | 17%      | 9%             | Meets both targets                                                                                       |
+| Gridline        | 26%      | 21%            | Covered arcades down both sides; spawns in pockets (was 31% and 90%)                                     |
+| Halcyon Station | 31%      | 10%            | Spawn pockets and escape pods; the walkable tube roofs and balcony stay open by design (was 40% and 86%) |
+| Infernal Spire  | 19%      | 10%            | Gallery tunnel round the lake, spawn rooms, lava columns (was 72% and 99.6%)                             |
+| Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map                                        |
+| Foundry         | 10%      | 18%            | Close quarters by design: well under the open-map target                                                 |
 
 Free-for-all maps that scatter spawns everywhere score high on spawn exposure almost by
 design; openness is the clearer signal for them.
@@ -80,6 +80,14 @@ it's far tighter than the 25% target, which is its role: the roster's close-quar
 in the open field (90% exposure). It now has a covered neon arcade down each side, making three
 real lanes and widening it to 244. Base spawns sit behind a wall wider and taller than their
 line, and free-for-all spawns moved into pockets in the arcades' outer walls.
+
+**Halcyon Station**'s spawns lined each hangar bay facing straight down the open center bridge
+into the other bay (86% exposure). Bay spawns now sit in a pocket behind a wall wider than
+their line; cargo stacks where the bridge meets each bay break the 348-stud straight line; and
+free-for-all spawns moved from the open balcony into escape pods off the glass tubes (10%).
+Staggered bulkheads in the tubes, cover on the bridge and pylons around the reactor brought
+openness from 40% to 31%. The rest is the walkable tube roofs and the balcony overlooking the
+atrium, which are the low-gravity map's character.
 
 ### DOMED scale
 
