@@ -7,6 +7,7 @@
 // Save to File). See docs/MAPPING.md.
 
 import { Bastion } from "./bastion";
+import { Foundry } from "./foundry";
 import { Gridline } from "./gridline";
 import { HalcyonStation } from "./halcyonStation";
 import { InfernalSpire } from "./infernalSpire";
@@ -18,7 +19,16 @@ import { Warmup } from "./warmup";
 
 const ServerStorage = game.GetService("ServerStorage");
 
-const CODE_MAPS: MapBuilder[] = [InfernalSpire, Gridline, HalcyonStation, Bastion, Skyreach, TestRange, Warmup];
+const CODE_MAPS: MapBuilder[] = [
+	InfernalSpire,
+	Gridline,
+	HalcyonStation,
+	Bastion,
+	Skyreach,
+	Foundry,
+	TestRange,
+	Warmup,
+];
 
 export function bakeMaps(): Folder {
 	ServerStorage.FindFirstChild("BakedMaps")?.Destroy();

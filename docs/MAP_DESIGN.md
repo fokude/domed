@@ -42,6 +42,7 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 | Halcyon Station | 40%      | 86%            | Spawns spread across an open map                                             |
 | Infernal Spire  | 19%      | 10%            | Gallery tunnel round the lake, spawn rooms, lava columns (was 72% and 99.6%) |
 | Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map            |
+| Foundry         | 10%      | 18%            | Close quarters by design: well under the open-map target                     |
 
 Free-for-all maps that scatter spawns everywhere score high on spawn exposure almost by
 design; openness is the clearer signal for them.
@@ -68,6 +69,12 @@ obelisk on the Crown and bigger monoliths brought it to 33% and 31%; the exposur
 the raised mid islands looking into the temples past the screens, so the temples got solid
 fronts and side doors (14%). Ruined walls on the low islands' inner edges brought openness to
 28%, which suits an open-air map.
+
+**Foundry** first measured 32% open, because the sampler counted its unreachable roof; the
+`PlayableTop` map attribute now excludes spots above the playable space. The exposure plan
+then showed spawns in the open in the corners and Furnace Row (68%), so every spawn moved into
+a pocket: a wall across the back of the room with the way out at one end (18%). At 10% open
+it's far tighter than the 25% target, which is its role: the roster's close-quarters map.
 
 ### DOMED scale
 

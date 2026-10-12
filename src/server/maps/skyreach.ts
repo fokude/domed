@@ -189,8 +189,20 @@ function buildCrown(arena: Model) {
 	}
 	// A tall obelisk in the middle: fights on the Crown circle it, and it blocks sightlines
 	// across the center of the map.
-	block(arena, new Vector3(8, 26, 8), new CFrame(0, CROWN + 13, 0).mul(CFrame.Angles(0, EIGHTH, 0)), Stone, "Obelisk");
-	const crest = block(arena, new Vector3(8.4, 2, 8.4), new CFrame(0, CROWN + 22, 0).mul(CFrame.Angles(0, EIGHTH, 0)), Glow, "ObeliskCrest");
+	block(
+		arena,
+		new Vector3(8, 26, 8),
+		new CFrame(0, CROWN + 13, 0).mul(CFrame.Angles(0, EIGHTH, 0)),
+		Stone,
+		"Obelisk",
+	);
+	const crest = block(
+		arena,
+		new Vector3(8.4, 2, 8.4),
+		new CFrame(0, CROWN + 22, 0).mul(CFrame.Angles(0, EIGHTH, 0)),
+		Glow,
+		"ObeliskCrest",
+	);
 	pointLight(crest, Color3.fromRGB(120, 230, 230), 50, 2);
 	const beacon = cylinder(arena, new Vector3(0, CROWN + 0.2, 0), 0.2, 8, Glow, "CrownBeacon");
 	pointLight(beacon, Color3.fromRGB(120, 230, 230), 40, 2);
