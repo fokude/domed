@@ -41,6 +41,7 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 | Gridline        | 31%      | 90%            | Spawns spread across an open map                                             |
 | Halcyon Station | 40%      | 86%            | Spawns spread across an open map                                             |
 | Infernal Spire  | 19%      | 10%            | Gallery tunnel round the lake, spawn rooms, lava columns (was 72% and 99.6%) |
+| Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map            |
 
 Free-for-all maps that scatter spawns everywhere score high on spawn exposure almost by
 design; openness is the clearer signal for them.
@@ -60,6 +61,13 @@ balconies, sixteen pillars staggered against alternate walls so the curve can't 
 end to end, and a battlement roof reached through skylights above the pads (a new high tier).
 Rust-red brick and iron grating replaced plain basalt. It measures 19% open: a little under the
 target, which suits a map built around a tunnel.
+
+**Skyreach** took four passes. First pass: 38% open and 61% spawn exposure, since the spawn
+temples' screens were narrower than the spawns behind them. Wider temples and screens, an
+obelisk on the Crown and bigger monoliths brought it to 33% and 31%; the exposure plan showed
+the raised mid islands looking into the temples past the screens, so the temples got solid
+fronts and side doors (14%). Ruined walls on the low islands' inner edges brought openness to
+28%, which suits an open-air map.
 
 ### DOMED scale
 
