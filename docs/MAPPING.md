@@ -129,8 +129,8 @@ It runs the map's builder in Node on a small stand-in for Roblox's API
 (`tools/map-preview/roblox-shim.js`), exports the parts as JSON, and renders them with
 Blender's fast Workbench engine in a few seconds. Use it to check a layout change before
 playtesting: whether spawns look into open fire, whether a lane reads as intended, whether
-heights are varied. The offline numbers approximate `/openness` (cylinders and balls are faceted); confirm
-important ones in Studio. A playtest is still the final judge.
+heights are varied. The offline numbers approximate `/openness` (cylinders and balls are
+faceted); confirm important ones in Studio. A playtest is still the final judge.
 
 Why: maps were built entirely by coordinates in code, with nobody (agent or human) seeing them
 until a Studio session. A render after each change gives the build, look, adjust loop that
