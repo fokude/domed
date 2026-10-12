@@ -1,9 +1,9 @@
 # Settings
 
-Player settings (crosshair and music volume), chosen in the menu's Settings panel and saved in the player's profile, so
-they follow the player to every server. Code: `shared/settings.ts` (options, defaults,
-validation), `client/crosshair.ts` (drawing), `client/settingsScreen.ts` (the panel), `client/playerSettings.ts` (loading, changing and
-saving them).
+Player settings (crosshair and music volume), chosen in the menu's Settings panel and saved
+in the player's profile, so they follow the player to every server. Code: `shared/settings.ts`
+(options, defaults, validation), `client/playerSettings.ts` (loading, changing and saving),
+`client/crosshair.ts` (drawing) and `client/settingsScreen.ts` (the panel).
 
 ## Crosshair
 
