@@ -159,21 +159,19 @@ export function setShieldBubbleStrength(character: Model | undefined, hitsLeft: 
 	else if (bubble?.IsA("BasePart")) bubble.Transparency = shieldTransparency(hitsLeft);
 }
 
-// Hits a shield has left after taking a hit: a headshot breaks it outright, other hits wear it
-// down by one. The one rule for players and training dummies.
-export function shieldHitsAfter(hitsLeft: number, isHead: boolean): number {
-	return isHead ? 0 : math.max(0, hitsLeft - 1);
+// Hits a shield has left after taking a hit. The one rule for players and training dummies.
+export function shieldHitsAfter(hitsLeft: number): number {
+	return math.max(0, hitsLeft - 1);
 }
 
 // "absorbed": the shield took the hit and holds. "broken": it took the hit and broke.
 export type ShieldHit = "absorbed" | "broken";
 
-// Applies a hit to a player's shield, if they have one. A headshot breaks it outright; body
-// shots wear it down until it breaks.
-export function hitShield(player: Player, isHead: boolean): ShieldHit | undefined {
+// Applies a hit to a player's shield, if they have one.
+export function hitShield(player: Player): ShieldHit | undefined {
 	const hits = player.GetAttribute(PerkAttribute.Shield);
 	if (!typeIs(hits, "number") || hits <= 0) return undefined;
-	const left = shieldHitsAfter(hits, isHead);
+	const left = shieldHitsAfter(hits);
 	player.SetAttribute(PerkAttribute.Shield, left > 0 ? left : undefined);
 	setShieldBubbleStrength(player.Character, left);
 	return left > 0 ? "absorbed" : "broken";

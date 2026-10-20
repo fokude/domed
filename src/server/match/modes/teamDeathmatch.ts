@@ -1,4 +1,4 @@
-// Red against Blue: every headshot on an enemy scores for your team.
+// Red against Blue: every kill on an enemy scores for your team.
 
 import { RatingConfig, TeamDeathmatchConfig } from "shared/config";
 import { LoadedMap } from "../../maps/loader";

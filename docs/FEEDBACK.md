@@ -5,7 +5,7 @@ What landing a kill feels like. Code: `client/killFeedback.ts` (visuals and esca
 
 ## Goal
 
-A headshot should feel like the best thing that can happen in the game, every time, without
+A kill should feel like the best thing that can happen in the game, every time, without
 giving the killer any advantage in the next fight. Satisfaction comes from game feel, not from
 manipulative hooks: no random rewards, no loss aversion, nothing designed to keep players
 playing against their interest. Roblox's audience is young, which makes this matter more.
@@ -19,14 +19,14 @@ playing against their interest. Roblox's audience is young, which makes this mat
 | Edge flash      | A brief red flash at the screen edges             | Killer      |
 | XP popup        | "+10 XP" drifts up beside the crosshair           | Killer      |
 | Sound           | A bright tick layered over a low thump            | Killer      |
-| Head burst      | Particles burst from the victim's head            | Everyone    |
+| Hit burst       | Particles burst where the victim was hit          | Everyone    |
 | Death sound     | Plays for the victim                              | Victim      |
 
 **Multi-kills** (each within 4 seconds of the last) escalate the headline (DOUBLE DOME, TRIPLE
 DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch each step.
 **Streaks** (kills without dying) call out milestones at 3, 5, 10 and 15. Training dummy kills
 (on the Test Range and in the warm-up) escalate multi-kills but earn no XP popup and don't
-count toward streaks, so practice can't carry a streak into a match. Body shots, shield
+count toward streaks, so practice can't carry a streak into a match. Shield hits, shield
 breaks and perk pickups each have their own cue.
 
 **Ring-outs** (knocking someone into a hazard or off the map) used to get a gold "RING OUT!"
@@ -38,12 +38,13 @@ moving, under the respawn countdown, and the killer is outlined through walls un
 A death you can explain feels fair and shows what to aim for (see SKILL_FLOOR.md). The victim
 is out of the fight while it shows, so the outline gives nothing away that matters.
 
-**Near misses**: when a clean miss passes within 2.5 studs of a head the shooter could have
-hit (a player or a training dummy), "CLOSE" flashes under the crosshair. It tells new players
-they're nearly there and teaches that only heads count; the server decides, so it can't be
-faked, and it's only shown to the shooter.
+**Near misses**: when a clean miss passes within 4 studs of the center of someone the shooter
+could have hit (a player, bot or training dummy), "CLOSE" flashes under the crosshair. That's
+just outside a character's arms and feet. It tells new players they're nearly there; the
+server decides, so it can't be faked, and it's only shown to the shooter. It measured 2.5
+studs from the head under headshot-only.
 
-**Personal bests** ("NEW TOP SPEED: 92", "LONGEST HEADSHOT: 140 STUDS") call out in gold the
+**Personal bests** ("NEW TOP SPEED: 92", "LONGEST KILL: 140 STUDS") call out in gold the
 moment a saved record falls. Speed records announce once the player stops accelerating, with
 the peak, and low records (under 50 speed or 50 studs) stay quiet so new players aren't
 flooded. They show improvement that doesn't depend on winning fights (see SKILL_FLOOR.md).
@@ -86,7 +87,7 @@ sound until a Creator Store crowd cheer is picked.
 - **No competitive cost.** Effects avoid the middle of the screen except the crosshair burst,
   which is brief and thin. There is deliberately **no screen shake, camera kick or hit-stop**
   (freezing frames on impact), common juice techniques that would move or interrupt a player's
-  aim in a one-shot game. The head burst shows everyone where a kill happened, which the falling
+  aim in a one-shot game. The hit burst shows everyone where a kill happened, which the falling
   body already shows.
 - **Silent kills feel unrewarding.** Before this pass, kills had no sound at all.
 

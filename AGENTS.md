@@ -1,6 +1,6 @@
 # DOMED
 
-Roblox headshot-only movement shooter for 5v5, written in roblox-ts and synced into Studio
+Roblox instagib movement shooter for 5v5, written in roblox-ts and synced into Studio
 with Rojo. Humans and coding agents both work on this repository; these rules apply to both.
 
 Start with README.md, then docs/ARCHITECTURE.md (which includes a map of where everything

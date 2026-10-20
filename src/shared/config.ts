@@ -70,9 +70,8 @@ export const PerkConfig = {
 	// Seconds before a taken orb comes back. Stronger perks take longer.
 	respawn: { SuperJump: 25, Shield: 40, Radar: 45, Overcharge: 60 },
 	superJumpVelocity: 110,
-	// Hits a shield takes before breaking. A headshot always breaks it at once; body shots wear
-	// it down, so a shielded player can't shrug off fire indefinitely.
-	shieldHits: 3,
+	// Hits a shield takes before breaking. One, so a Shield is one extra life (see docs/PERKS.md).
+	shieldHits: 1,
 	overchargeDuration: 10,
 	// Fraction of the normal rail cooldown while overcharged.
 	overchargeCooldownScale: 0.5,
@@ -94,11 +93,12 @@ export const BotConfig = {
 	reactionTime: 0.6,
 	// Bots fire this much slower than players.
 	cooldownScale: 1.3,
-	// Aim error radius in studs: a base, plus more per stud of distance and per unit of the
-	// target's speed. Headshot odds are roughly (head radius / error radius) squared.
-	baseSpread: 0.5,
-	spreadPerStud: 0.012,
-	spreadPerSpeed: 0.015,
+	// Aim error radius in studs around the target's torso: a base, plus more per stud of distance
+	// and per unit of the target's speed. Bots aim at the torso, a bigger target than the head
+	// they used to aim at, so these are 2.5 times the old headshot spreads (see docs/BOTS.md).
+	baseSpread: 1.25,
+	spreadPerStud: 0.03,
+	spreadPerSpeed: 0.0375,
 	// How far bots look for targets.
 	sightRange: 250,
 };

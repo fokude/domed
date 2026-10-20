@@ -9,7 +9,7 @@ const SoundService = game.GetService("SoundService");
 export type SoundCue =
 	| "kill"
 	| "killThump"
-	| "bodyHit"
+	| "shieldHit"
 	| "shieldBreak"
 	| "perkPickup"
 	| "death"
@@ -26,10 +26,11 @@ interface CueSettings {
 const TICK = "rbxasset://sounds/volume_slider.ogg";
 
 export const SOUND_CUES: Record<SoundCue, CueSettings> = {
-	// Layered on a headshot kill: a bright tick (pitched up per multi-kill) over a low thump.
+	// Layered on a kill: a bright tick (pitched up per multi-kill) over a low thump.
 	kill: { id: TICK, volume: 1, pitch: 1.6 },
 	killThump: { id: "rbxasset://sounds/action_jump_land.mp3", volume: 0.8, pitch: 0.7 },
-	bodyHit: { id: TICK, volume: 0.6, pitch: 0.9 },
+	// A shield took a hit and holds.
+	shieldHit: { id: TICK, volume: 0.6, pitch: 0.9 },
 	shieldBreak: { id: "rbxasset://sounds/impact_water.mp3", volume: 0.7, pitch: 1.8 },
 	perkPickup: { id: TICK, volume: 0.8, pitch: 1.2 },
 	death: { id: "rbxasset://sounds/ouch.ogg", volume: 0.6, pitch: 1 },

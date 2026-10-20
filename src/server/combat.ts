@@ -2,15 +2,15 @@
 //
 // Hit detection is client-authoritative: the shooter's client says what it hit and the
 // server checks the claim is plausible (fire rate, shooter position, target position,
-// line of sight). With fast movement and tiny head hitboxes, server-side raycasts would
-// miss constantly because of latency.
+// line of sight). With fast movement, server-side raycasts would miss constantly because of
+// latency.
 
 import { flatSpeed, getLiveRoot } from "shared/characters";
 import { WeaponConfig } from "shared/config";
 import { railCooldown } from "shared/perks";
 import { DeathCause, Remotes } from "shared/remotes";
-import { getBotName, isBot, killBot, livingBotHeads } from "./bots";
-import { hitDummy, isDummy, livingDummyHeads } from "./dummies";
+import { getBotName, isBot, killBot, livingBotRoots } from "./bots";
+import { hitDummy, isDummy, livingDummyRoots } from "./dummies";
 import { hitShield } from "./perks";
 import { recordKill } from "./progression";
 import { registerKill, registerKilledBy } from "./streaks";
@@ -30,8 +30,9 @@ const LAG_SECONDS = 0.35;
 const MAX_AIM_ANGLE = math.rad(100);
 // Rejections are logged on the first one and then every this many, per player.
 const REJECTION_LOG_EVERY = 10;
-// A miss passing this close to the center of a head it could have hit counts as a near miss.
-const NEAR_MISS_STUDS = 2.5;
+// A miss passing this close to the root of a character it could have hit counts as a near miss:
+// just outside an R15 character's arms and feet.
+const NEAR_MISS_STUDS = 4;
 
 export interface CombatRules {
 	canDamage(shooter: Player, victim: Player): boolean;
@@ -112,19 +113,16 @@ function distanceToSegment(point: Vector3, from: Vector3, to: Vector3): number {
 	return from.add(segment.mul(along)).sub(point).Magnitude;
 }
 
-// Tells the shooter when a miss just passed a head: encouragement for new players, and a
-// reminder that only heads count. Purely cosmetic, so it uses server positions without lag
-// allowance. See docs/SKILL_FLOOR.md.
+// Tells the shooter when a miss only just missed someone: encouragement for new players.
+// Purely cosmetic, so it uses server positions without lag allowance. See docs/SKILL_FLOOR.md.
 function checkNearMiss(shooter: Player, origin: Vector3, hitPosition: Vector3, currentRules: CombatRules) {
-	const heads = [...livingDummyHeads(), ...livingBotHeads()];
+	const roots = [...livingDummyRoots(), ...livingBotRoots()];
 	for (const other of Players.GetPlayers()) {
-		const otherCharacter = other.Character;
-		const otherHumanoid = otherCharacter?.FindFirstChildOfClass("Humanoid");
-		const otherHead = otherCharacter?.FindFirstChild("Head");
-		if (other === shooter || !otherHumanoid || otherHumanoid.Health <= 0 || !otherHead?.IsA("BasePart")) continue;
-		if (currentRules.canDamage(shooter, other)) heads.push(otherHead);
+		const otherRoot = getLiveRoot(other);
+		if (other === shooter || !otherRoot) continue;
+		if (currentRules.canDamage(shooter, other)) roots.push(otherRoot);
 	}
-	if (heads.some((head) => distanceToSegment(head.Position, origin, hitPosition) <= NEAR_MISS_STUDS)) {
+	if (roots.some((root) => distanceToSegment(root.Position, origin, hitPosition) <= NEAR_MISS_STUDS)) {
 		Remotes.NearMiss.FireClient(shooter);
 	}
 }
@@ -150,7 +148,7 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 
 	Remotes.ShotFired.FireAllClients(shooter, origin, hitPosition);
 
-	// Only clean misses count: hitting anyone (a body shot, say) already has its own feedback.
+	// Only clean misses count: hitting anyone (a shield, say) already has its own feedback.
 	const hitSomeone = hitPart?.Parent?.FindFirstChildOfClass("Humanoid") !== undefined;
 	if (rules && !hitSomeone) checkNearMiss(shooter, origin, hitPosition, rules);
 	if (!hitPart || !rules) return;
@@ -163,7 +161,7 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	if (isDummy(victimCharacter)) {
 		const reason = implausibleHit(character, victimCharacter, hitPart, origin, hitPosition);
 		if (reason !== undefined) return reject(shooter, reason);
-		const kind = hitDummy(victimCharacter, hitPart.Name === "Head");
+		const kind = hitDummy(victimCharacter);
 		if (kind === undefined) return;
 		Remotes.HitConfirm.FireClient(shooter, kind, true);
 		if (kind === "kill") Remotes.HeadBurst.FireAllClients(hitPart.Position);
@@ -174,13 +172,9 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	if (isBot(victimCharacter)) {
 		const reason = implausibleHit(character, victimCharacter, hitPart, origin, hitPosition);
 		if (reason !== undefined) return reject(shooter, reason);
-		if (hitPart.Name === "Head") {
-			if (!killBot(victimCharacter)) return;
-			Remotes.HeadBurst.FireAllClients(hitPart.Position);
-			awardKill(shooter, victimCharacter, rules, "headshot", shotVector.Magnitude);
-		} else {
-			Remotes.HitConfirm.FireClient(shooter, "body", false);
-		}
+		if (!killBot(victimCharacter)) return;
+		Remotes.HeadBurst.FireAllClients(hitPart.Position);
+		awardKill(shooter, victimCharacter, rules, "rail", shotVector.Magnitude);
 		return;
 	}
 
@@ -193,23 +187,20 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	const reason = implausibleHit(character, victimCharacter, hitPart, origin, hitPosition);
 	if (reason !== undefined) return reject(shooter, reason);
 
-	const isHead = hitPart.Name === "Head";
-	// A shield takes rail hits whole: no kill, just wear (see docs/PERKS.md).
-	const shield = hitShield(victim, isHead);
+	// Any hit kills, unless a shield takes it (see docs/PERKS.md).
+	const shield = hitShield(victim);
 	if (shield !== undefined) {
-		Remotes.HitConfirm.FireClient(shooter, shield === "broken" ? "shield" : "body", false);
-	} else if (isHead) {
-		victimHumanoid.Health = 0;
-		Remotes.HeadBurst.FireAllClients(hitPart.Position);
-		awardKill(shooter, victim, rules, "headshot", shotVector.Magnitude);
-	} else {
-		Remotes.HitConfirm.FireClient(shooter, "body", false);
+		Remotes.HitConfirm.FireClient(shooter, shield === "broken" ? "shield" : "absorbed", false);
+		return;
 	}
+	victimHumanoid.Health = 0;
+	Remotes.HeadBurst.FireAllClients(hitPart.Position);
+	awardKill(shooter, victim, rules, "rail", shotVector.Magnitude);
 }
 
 // Everything a kill earns: stats, XP, feedback, the kill feed, and for player victims their
-// recap and the mode's scoring (bots stay out of ratings). Only headshots on players count
-// toward the longest-headshot record. `victim` is a player, or a bot's character.
+// recap and the mode's scoring (bots stay out of ratings). Only kills on players count toward
+// the longest-kill record. `victim` is a player, or a bot's character.
 function awardKill(
 	shooter: Player,
 	victim: Player | Model,
@@ -222,7 +213,7 @@ function awardKill(
 	registerKill(shooter);
 	Remotes.HitConfirm.FireClient(shooter, "kill", false);
 	if (victim.IsA("Player")) {
-		recordKill(shooter, cause === "headshot" ? distance : undefined);
+		recordKill(shooter, distance);
 		Remotes.KillFeed.FireAllClients(shooter, victim, cause);
 		sendDeathRecap(victim, shooter, cause, distance);
 		currentRules.onKill(shooter, victim);

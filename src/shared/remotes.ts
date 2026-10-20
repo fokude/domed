@@ -12,14 +12,15 @@ function remote<T extends Callback>(name: string) {
 	return folder.WaitForChild(name) as RemoteEvent<T>;
 }
 
-export type HitKind = "kill" | "body" | "shield";
+// "absorbed": a shield took the hit and holds. "shield": the hit broke a shield.
+export type HitKind = "kill" | "absorbed" | "shield";
 // Someone in a fight: a player, or a bot by display name.
 export type Combatant = Player | string;
-export type PersonalBestRecord = "topSpeed" | "longestHeadshot";
+export type PersonalBestRecord = "topSpeed" | "longestKill";
 // How a player was killed, for their death recap.
 // Server-wide moments the whole lobby hears about (see server/streaks.ts).
 export type BroadcastKind = "KillingSpree" | "Rampage" | "Godlike" | "Shutdown";
-export type DeathCause = "headshot";
+export type DeathCause = "rail";
 
 export const Remotes = {
 	Fire: remote<(origin: Vector3, hitPosition: Vector3, hitPart: BasePart | undefined) => void>("Fire"),
@@ -42,7 +43,7 @@ export const Remotes = {
 	// To everyone: a streak worth announcing (`subject` is on it), or a Shutdown (`other` ended
 	// `subject`'s streak).
 	Broadcast: remote<(kind: BroadcastKind, subject: Combatant, other?: Combatant) => void>("Broadcast"),
-	// Sent to a shooter whose miss passed close to a head they could have hit.
+	// Sent to a shooter whose miss passed close to someone they could have hit.
 	NearMiss: remote<() => void>("NearMiss"),
 	// Sent to a player who just beat one of their saved records.
 	PersonalBest: remote<(record: PersonalBestRecord, value: number) => void>("PersonalBest"),
@@ -50,7 +51,7 @@ export const Remotes = {
 	PerkTaken: remote<(taker: Player, perk: PerkId) => void>("PerkTaken"),
 	// Client reports it used a held perk (the Super Jump is triggered by client movement).
 	UsePerk: remote<(perk: PerkId) => void>("UsePerk"),
-	// Particle burst at a killed target's head, shown to everyone (players and training dummies).
+	// Particle burst where a target was killed, shown to everyone (players and training dummies).
 	HeadBurst: remote<(position: Vector3) => void>("HeadBurst"),
 	// Client saves the player's settings. The server sanitizes them.
 	SaveSettings: remote<(settings: PlayerSettings) => void>("SaveSettings"),

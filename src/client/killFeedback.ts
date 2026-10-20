@@ -103,7 +103,7 @@ function edgeFlash(color: Color3) {
 	}
 }
 
-// "CLOSE" under the crosshair when a miss just passed a head.
+// "CLOSE" under the crosshair when a miss only just missed someone.
 function nearMiss() {
 	const label = create(
 		"TextLabel",
@@ -152,7 +152,7 @@ function xpPopup(amount: number) {
 	}).Completed.Connect(() => label.Destroy());
 }
 
-// A burst of particles from the victim's head. Everyone sees it.
+// A burst of particles where the victim was hit. Everyone sees it.
 function headBurst(position: Vector3) {
 	const anchor = new Instance("Part");
 	anchor.Anchored = true;
@@ -202,7 +202,7 @@ function onKill(practice: boolean) {
 
 function onHitConfirm(kind: HitKind, practice: boolean) {
 	if (kind === "kill") onKill(practice);
-	else if (kind === "body") playSound("bodyHit");
+	else if (kind === "absorbed") playSound("shieldHit");
 	else {
 		playSound("shieldBreak");
 		showHeadline("SHIELD BROKEN", SHIELD_BLUE);
@@ -283,7 +283,7 @@ export function initKillFeedback() {
 	});
 	Remotes.PersonalBest.OnClientEvent.Connect((record, value) => {
 		playSound("personalBest");
-		showStreak(record === "topSpeed" ? `NEW TOP SPEED: ${value}` : `LONGEST HEADSHOT: ${value} STUDS`, MULTI_GOLD);
+		showStreak(record === "topSpeed" ? `NEW TOP SPEED: ${value}` : `LONGEST KILL: ${value} STUDS`, MULTI_GOLD);
 	});
 	Remotes.PerkTaken.OnClientEvent.Connect((taker) => {
 		if (taker === player) playSound("perkPickup");

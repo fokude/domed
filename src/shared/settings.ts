@@ -7,7 +7,7 @@ export type CrosshairSize = "Small" | "Medium" | "Large";
 
 export const CROSSHAIR_STYLES: CrosshairStyle[] = ["Dot", "Cross", "CrossDot", "Circle"];
 export const CROSSHAIR_SIZES: CrosshairSize[] = ["Small", "Medium", "Large"];
-// No red: the hitmarker flashes red on headshots, and red is hard to see for the most common
+// No red: the hitmarker flashes red on hits, and red is hard to see for the most common
 // kinds of color blindness.
 export const CROSSHAIR_COLORS: Record<CrosshairColor, Color3> = {
 	White: new Color3(1, 1, 1),

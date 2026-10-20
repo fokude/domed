@@ -13,19 +13,14 @@ export interface LifetimeStats {
 	hardpointSeconds: number;
 	playSeconds: number;
 	topSpeed: number;
+	// Longest kill, in studs. Named from the headshot-only days; kept so saved records carry over.
+	// Longest kill, in studs. Named from the headshot-only days; kept so saved records carry over.
 	longestHeadshot: number;
 }
 
 // "intro" marks a player's first deploy; the tip keys mark each first-minute lesson as done.
-export type OnboardingKey = "intro" | "shootTip" | "bhopTip" | "strafeTip" | "doubleJumpTip" | "bodyShotTip";
-export const ONBOARDING_KEYS: OnboardingKey[] = [
-	"intro",
-	"shootTip",
-	"bhopTip",
-	"strafeTip",
-	"doubleJumpTip",
-	"bodyShotTip",
-];
+export type OnboardingKey = "intro" | "shootTip" | "bhopTip" | "strafeTip" | "doubleJumpTip";
+export const ONBOARDING_KEYS: OnboardingKey[] = ["intro", "shootTip", "bhopTip", "strafeTip", "doubleJumpTip"];
 
 // Hidden team-mode skill: estimate and uncertainty. Saved, but never sent to clients.
 export interface PlayerRating {

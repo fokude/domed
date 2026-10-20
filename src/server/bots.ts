@@ -237,19 +237,18 @@ function randomInSphere(radius: number): Vector3 {
 	return direction.Magnitude > 0 ? direction.Unit.mul(radius * math.random()) : Vector3.zero;
 }
 
-// Fires at the target with aim error. Hits are resolved by a server raycast against the aimed
-// point, through the same shield rules as player shots.
+// Fires at the target's torso with aim error. Hits are resolved by a server raycast against the
+// aimed point, through the same shield rules as player shots.
 function shoot(bot: Bot, target: Model) {
-	const targetHead = target.FindFirstChild("Head") as BasePart | undefined;
 	const targetRoot = target.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
-	if (!targetHead || !targetRoot) return;
+	if (!targetRoot) return;
 	const origin = bot.head.Position;
-	const distance = targetHead.Position.sub(origin).Magnitude;
+	const distance = targetRoot.Position.sub(origin).Magnitude;
 	const spread =
 		BotConfig.baseSpread +
 		distance * BotConfig.spreadPerStud +
 		flatSpeed(targetRoot.AssemblyLinearVelocity) * BotConfig.spreadPerSpeed;
-	const aim = targetHead.Position.add(randomInSphere(spread));
+	const aim = targetRoot.Position.add(randomInSphere(spread));
 	const direction = aim.sub(origin).Unit.mul(WeaponConfig.range);
 
 	rayParams.FilterDescendantsInstances = folder ? [folder] : [bot.model];
@@ -262,21 +261,18 @@ function shoot(bot: Bot, target: Model) {
 	if (!victim || !victimHumanoid || victimHumanoid.Health <= 0) return;
 	if (victim.Character?.FindFirstChildOfClass("ForceField")) return;
 
-	const isHead = result.Instance.Name === "Head";
 	// A shield takes the hit whole: no kill.
-	if (hitShield(victim, isHead) !== undefined) return;
-	if (isHead) {
-		victimHumanoid.Health = 0;
-		Remotes.HeadBurst.FireAllClients(result.Position);
-		Remotes.KillFeed.FireAllClients(bot.humanoid.DisplayName, victim, "headshot");
-		Remotes.DeathRecap.FireClient(
-			victim,
-			bot.model,
-			"headshot",
-			math.floor(distance),
-			flatSpeed(bot.root.AssemblyLinearVelocity),
-		);
-	}
+	if (hitShield(victim) !== undefined) return;
+	victimHumanoid.Health = 0;
+	Remotes.HeadBurst.FireAllClients(result.Position);
+	Remotes.KillFeed.FireAllClients(bot.humanoid.DisplayName, victim, "rail");
+	Remotes.DeathRecap.FireClient(
+		victim,
+		bot.model,
+		"rail",
+		math.floor(distance),
+		flatSpeed(bot.root.AssemblyLinearVelocity),
+	);
 }
 
 function requestPath(bot: Bot, goal: Vector3) {
@@ -317,7 +313,7 @@ function roam(bot: Bot, now: number) {
 	if (flat.Magnitude < 3) bot.waypointIndex += 1;
 }
 
-// Strafes sideways relative to the target and hops, so bots aren't free headshots.
+// Strafes sideways relative to the target and hops, so bots aren't free kills.
 function fight(bot: Bot, target: Model, now: number) {
 	if (now > bot.strafeSwitch) {
 		bot.strafeSign = -bot.strafeSign;
@@ -374,20 +370,13 @@ export function getBotName(model: Model): string {
 	return bots.get(model)?.humanoid.DisplayName ?? model.Name;
 }
 
-// Heads of living bots, for near-miss checks.
-export function livingBotHeads(): BasePart[] {
-	const heads: BasePart[] = [];
-	for (const [, bot] of bots) if (living(bot)) heads.push(bot.head);
-	return heads;
-}
-
 export function livingBotRoots(): BasePart[] {
 	const roots: BasePart[] = [];
 	for (const [, bot] of bots) if (living(bot)) roots.push(bot.root);
 	return roots;
 }
 
-// Kills a bot (by hazard, the void, or a headshot). Returns false if it was already down.
+// Kills a bot (by hazard, the void, or a rail hit). Returns false if it was already down.
 export function killBot(model: Model): boolean {
 	const bot = bots.get(model);
 	if (!bot || !living(bot)) return false;

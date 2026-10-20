@@ -1,7 +1,27 @@
 # Railgun
 
-Everyone carries the same one-shot railgun. Code: `client/weapon.ts` (firing),
-`server/combat.ts` (validation); tuning in `WeaponConfig` in `shared/config.ts`.
+Everyone carries the same one-shot railgun, and any hit kills: instagib. Code:
+`client/weapon.ts` (firing), `server/combat.ts` (validation); tuning in `WeaponConfig` in
+`shared/config.ts`.
+
+## Instagib, not headshots only
+
+Until October 2026 only headshots killed. The owner moved DOMED to instagib, after
+[Ratz Instagib](https://store.steampowered.com/app/338170), a one-shot railgun arena shooter
+where any hit kills and a rocket jump keeps targets hard to hit.
+
+- **Movement does the work the head hitbox did.** Instagib is hard because targets move fast,
+  not because the target is small. DOMED already has bunny hopping and air strafing at up to
+  140 studs/s, which is the classic instagib pairing (Quake and Unreal Tournament's instagib
+  modes), so speed stays high.
+- **Fewer frustrating "hits that did nothing".** Under headshot-only most hits on a moving
+  target landed on the body and only pushed it.
+- **Rejected: lowering top speed at the same time.** Instagib makes hitting easier and lower
+  speed makes dodging harder; doing both would make kills far too easy. Speed can be tuned
+  later from playtests.
+
+The kill record is now the longest kill of any kind; it keeps its old saved name
+(`longestHeadshot`) so players' records carry over.
 
 | Setting         | Value  | Notes                                                 |
 | --------------- | ------ | ----------------------------------------------------- |
@@ -31,12 +51,14 @@ which dilutes the game's identity. Every kill stays a rail hit.
 ## Why the cooldown is 0.75 seconds
 
 The cooldown sets how much a miss costs. Too long and missing feels like "waiting an
-eternity", which playtesting showed: headshots on fast-moving targets are hard, so players
-miss often. Too short and spamming shots replaces aiming, and careful aim stops paying off.
+eternity", which playtesting showed: headshots on fast-moving targets were hard, so players
+missed often. Too short and spamming shots replaces aiming, and careful aim stops paying off.
 
 - **Instagib heritage.** Quake III Arena's railgun fires once every 1.5 seconds, and DOMED's
   instagib roots (Quake, Unreal Tournament) all use a slow rail. A full-length rail cooldown
-  suits body-shot kills; headshot-only is much harder, so DOMED is faster.
+  suits body-shot kills; headshot-only was much harder, so DOMED went faster. **Open:** with any
+  hit now lethal, a longer cooldown may suit DOMED again. Judge it in playtests before
+  changing it.
 - **History.** It started at 0.9 seconds and was cut to 0.75 after the owner found misses too
   punishing. A cut to around 0.6 was considered and rejected: the owner wanted careful aim
   still rewarded, so the change stays small.

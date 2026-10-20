@@ -179,7 +179,7 @@ function buildMenu() {
 			TextSize: 16,
 			TextColor3: Palette.White,
 			TextXAlignment: Enum.TextXAlignment.Left,
-			Text: "HEADSHOT ARENA",
+			Text: "INSTAGIB ARENA",
 		},
 		sidebar,
 	);

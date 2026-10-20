@@ -18,7 +18,7 @@ The default matches the original crosshair: a small white dot with a dark outlin
 
 ### Why these options
 
-- **The crosshair matters most in a one-shot headshot game.** Competitive shooters let
+- **The crosshair matters most in a one-shot game.** Competitive shooters let
   players tune it heavily; Valorant exposes color, outline, line length, thickness and gap,
   among others. DOMED offers presets instead of sliders: a few good choices cover most
   preferences, and a short list is easier to use on a phone later.
@@ -26,7 +26,7 @@ The default matches the original crosshair: a small white dot with a dark outlin
   surfaces alike, which matters with maps ranging from night to daylight. The preview shows
   the crosshair over a dark and a light half for the same reason.
 - **No red.** Red and green are hard to tell apart for most color blind players, and the
-  hitmarker already flashes red on headshots. White and cyan, the colors most players pick in
+  hitmarker already flashes red on hits. White and cyan, the colors most players pick in
   Valorant, stay readable for nearly everyone.
 
 ### Rejected or deferred

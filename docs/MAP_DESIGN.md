@@ -1,7 +1,7 @@
 # Map design
 
 Principles for DOMED maps, drawn from published level design writing and adapted to what makes
-DOMED different: one headshot kills, everyone has the same railgun, players bunny hop at up to
+DOMED different: any hit kills, everyone has the same railgun, players bunny hop at up to
 140 studs/s, and matches are 5v5. MAPPING.md covers the technical side (markers, attributes).
 
 ## What DOMED needs

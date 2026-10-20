@@ -26,7 +26,7 @@ const OBJECTIVE_XP: Record<Objective, number> = {
 // Records below these aren't announced when beaten: a new player's first runs and kills would
 // otherwise announce a "record" every few seconds.
 const MIN_ANNOUNCED_SPEED = MovementConfig.hopBoostMaxSpeed;
-const MIN_ANNOUNCED_HEADSHOT = 50;
+const MIN_ANNOUNCED_KILL = 50;
 
 // A new top speed is announced once the player stops accelerating, with the peak, rather than
 // on every rising sample. Holds the record being set and whether it beat an announced level.
@@ -58,16 +58,16 @@ export function startMatchXp() {
 	matchXp.clear();
 }
 
-// `headshotDistance` is undefined for kills that don't count toward the record (bots).
-export function recordKill(shooter: Player, headshotDistance: number | undefined) {
+// `distance` is undefined for kills that don't count toward the record (bots).
+export function recordKill(shooter: Player, distance: number | undefined) {
 	const previous = getProfile(shooter)?.stats.longestHeadshot;
-	const studs = headshotDistance !== undefined ? math.floor(headshotDistance) : 0;
+	const studs = distance !== undefined ? math.floor(distance) : 0;
 	updateProfile(shooter, (data) => {
 		data.stats.kills += 1;
 		data.stats.longestHeadshot = math.max(data.stats.longestHeadshot, studs);
 	});
-	if (previous !== undefined && previous >= MIN_ANNOUNCED_HEADSHOT && studs > previous) {
-		Remotes.PersonalBest.FireClient(shooter, "longestHeadshot", studs);
+	if (previous !== undefined && previous >= MIN_ANNOUNCED_KILL && studs > previous) {
+		Remotes.PersonalBest.FireClient(shooter, "longestKill", studs);
 	}
 	awardXp(shooter, XpConfig.kill);
 	logOnboardingStep(shooter, "firstKill");

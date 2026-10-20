@@ -81,14 +81,11 @@ function step(dt: number) {
 	}
 }
 
-// Heads of the dummies currently standing.
-export function livingDummyHeads(): BasePart[] {
-	const heads: BasePart[] = [];
-	for (const [model, dummy] of dummies) {
-		const head = model.FindFirstChild("Head");
-		if (dummy.alive && head?.IsA("BasePart")) heads.push(head);
-	}
-	return heads;
+// Roots of the dummies currently standing.
+export function livingDummyRoots(): BasePart[] {
+	const roots: BasePart[] = [];
+	for (const [, dummy] of dummies) if (dummy.alive) roots.push(dummy.root);
+	return roots;
 }
 
 export function isDummy(model: Model): boolean {
@@ -97,16 +94,15 @@ export function isDummy(model: Model): boolean {
 
 // Applies a validated hit to a dummy. Returns what happened, for the shooter's feedback, or
 // undefined if the dummy was already down.
-export function hitDummy(model: Model, isHead: boolean): HitKind | undefined {
+export function hitDummy(model: Model): HitKind | undefined {
 	const dummy = dummies.get(model);
 	if (!dummy || !dummy.alive) return undefined;
-	// Shields work as on players: a headshot breaks one, body shots wear it down.
+	// Shields work as on players.
 	if (dummy.shieldHits > 0) {
-		dummy.shieldHits = shieldHitsAfter(dummy.shieldHits, isHead);
+		dummy.shieldHits = shieldHitsAfter(dummy.shieldHits);
 		setShieldBubbleStrength(model, dummy.shieldHits);
-		return dummy.shieldHits === 0 ? "shield" : "body";
+		return dummy.shieldHits === 0 ? "shield" : "absorbed";
 	}
-	if (!isHead) return "body";
 
 	dummy.alive = false;
 	dummy.root.Anchored = false;

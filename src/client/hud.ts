@@ -48,7 +48,7 @@ function buildCrosshair(gui: ScreenGui) {
 				Position: UDim2.fromScale(0.5, 0.5),
 				Size: new UDim2(1, 0, 0, 2),
 				Rotation: rotation,
-				BackgroundColor3: Palette.White,
+				BackgroundColor3: Palette.Accent,
 				BorderSizePixel: 0,
 			},
 			hitmarker,
@@ -153,11 +153,8 @@ export function initHud() {
 	buildPanels(gui);
 }
 
-export function showHitmarker(isHeadshot: boolean) {
+export function showHitmarker() {
 	const token = ++hitmarkerToken;
-	for (const bar of hitmarker.GetChildren()) {
-		if (bar.IsA("Frame")) bar.BackgroundColor3 = isHeadshot ? Palette.Accent : Palette.White;
-	}
 	hitmarker.Visible = true;
 	task.delay(HITMARKER_TIME, () => {
 		if (hitmarkerToken === token) hitmarker.Visible = false;

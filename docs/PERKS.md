@@ -5,20 +5,20 @@ Glowing orbs at fixed spots on each map, each granting a one-time or short effec
 feed), `shared/perks.ts` (definitions, Overcharge cooldown); tuning in `PerkConfig` in
 `src/shared/config.ts`.
 
-| Perk       | Effect                                   | Respawn | Counterplay                               |
-| ---------- | ---------------------------------------- | ------- | ----------------------------------------- |
-| Super Jump | The next double jump launches far higher | 25 s    | None needed: pure movement                |
-| Shield     | Absorbs one headshot or three hits       | 40 s    | A visible bubble that fades as it weakens |
-| Radar      | Outlines enemies through walls for 4 s   | 45 s    | Shooting still needs real line of sight   |
-| Overcharge | Rail recharges twice as fast for 10 s    | 60 s    | The player's beams turn gold              |
+| Perk       | Effect                                   | Respawn | Counterplay                             |
+| ---------- | ---------------------------------------- | ------- | --------------------------------------- |
+| Super Jump | The next double jump launches far higher | 25 s    | None needed: pure movement              |
+| Shield     | Absorbs one hit                          | 40 s    | A visible bubble                        |
+| Radar      | Outlines enemies through walls for 4 s   | 45 s    | Shooting still needs real line of sight |
+| Overcharge | Rail recharges twice as fast for 10 s    | 60 s    | The player's beams turn gold            |
 
 Every pickup is announced in the kill feed. Perks are lost on death.
 
-The Shield breaks on the first headshot, or after three hits of any kind. It first absorbed
-one headshot and ignored body shots, which played like god mode: headshots are hard, so a
-shielded player could shrug off fire for a long time. Counting body shots means sustained
-pressure always breaks it, and the fading bubble shows how close it is. Rejected: needing
-three headshots, which would make the Shield even stronger.
+The Shield absorbs one hit: an extra life. Under headshot-only it broke on the first headshot
+or after three hits of any kind, because body shots were common and harmless. With instagib
+every hit counts, so three hits would be three extra lives, which plays like god mode in a
+one-shot game. `PerkConfig.shieldHits` still allows more if playtests call for it, and the
+bubble fades as it weakens.
 
 ## Why perks
 

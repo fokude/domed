@@ -24,14 +24,16 @@ Bots fill near-empty free-for-all matches. Code: `server/bots.ts`; tuning in `Bo
   pathfinding cost), and hop now and then. In a fight they strafe side to side and hop. They
   don't air strafe, so a skilled player is faster.
 - **Aim.** A bot spots the nearest visible player within 250 studs, waits a reaction time
-  (0.6 s), and fires 30% slower than a player. Each shot aims at the head with a random error
+  (0.6 s), and fires 30% slower than a player. Each shot aims at the torso with a random error
   whose radius grows with distance and the target's speed, so moving targets are harder to
-  hit, as for players. Rough headshot odds: about 65% at 20 studs against a still target,
-  about 13% at 60 studs against one moving at 30.
+  hit, as for players. Under headshot-only, bots aimed at the head and hit about 65% of the
+  time at 20 studs against a still target, and 13% at 60 studs against one moving at 30.
+  With instagib any hit kills, so the error was scaled up 2.5 times to keep roughly those
+  odds against a whole body (untested; tune `BotConfig` after playtests).
   Spawn-protected players aren't targeted, and shields work against bots as against players.
 - **Rewards.** Killing a bot counts as a kill for the match score and pays XP, with full kill
   feedback. Bots never affect
-  ratings, never appear in standings, and don't count toward the longest-headshot record, so
+  ratings, never appear in standings, and don't count toward the longest-kill record, so
   they can't inflate anything that measures skill against players.
 - **Clearly bots.** Named "[BOT] Name" in the kill feed and above their heads. Disguising
   bots as players is rejected: Fortnite drew criticism when bot-filled lobbies weren't made

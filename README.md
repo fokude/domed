@@ -1,8 +1,7 @@
-# DOMED: Headshot Arena
+# DOMED: Instagib Arena
 
 A Roblox arena shooter in the style of Quake and Unreal Tournament. Bunny hop, air strafe,
-and double jump around the map. The only weapon is a railgun, and only headshots kill.
-Body shots knock the target back.
+and double jump around the map. The only weapon is a railgun, and any hit kills.
 
 Written in TypeScript with [roblox-ts](https://roblox-ts.com) and synced into Roblox Studio
 with [Rojo](https://rojo.space).

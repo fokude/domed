@@ -26,7 +26,7 @@ function statRows(stats: LifetimeStats): [string, string][] {
 		["POINT CAPTURES", tostring(stats.pointCaptures)],
 		["HARDPOINT TIME", formatDuration(stats.hardpointSeconds)],
 		["TOP SPEED", tostring(stats.topSpeed)],
-		["LONGEST HEADSHOT", `${stats.longestHeadshot} studs`],
+		["LONGEST KILL", `${stats.longestHeadshot} studs`],
 		["TIME PLAYED", formatDuration(stats.playSeconds)],
 	];
 }

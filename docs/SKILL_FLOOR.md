@@ -1,6 +1,6 @@
 # Hard but sticky
 
-DOMED is hard on purpose: one-shot headshots and air strafing are the game, and they stay.
+DOMED is hard on purpose: one-shot kills and air strafing are the game, and they stay.
 "A game for everyone is a game for no one." This doc collects research on why players stick
 with hard games, and how DOMED helps new players climb without lowering the floor. Check new
 features against it.
@@ -45,23 +45,23 @@ features against it.
 | Fast, cheap failure | 1.5 s respawns in free-for-all and Team Deathmatch; spawn protection                                     |
 | Fair deaths         | Client-side hits (what you see is what lands); visible beams; death recap with distance and killer speed |
 | Early competence    | Teams balanced by hidden rating; warm-up and dummies                                                     |
-| Visible improvement | Levels, lifetime stats, top speed and longest headshot records, announced when beaten                    |
+| Visible improvement | Levels, lifetime stats, top speed and longest kill records, announced when beaten                        |
 | Friends             | Short matches; friends kept on the same team when it stays fair                                          |
-| Depth               | Air strafing, bhop, long-range headshots in the air                                                      |
+| Depth               | Air strafing, bhop, long-range rail kills in the air                                                     |
 | Fast first minute   | First-time players skip the menu; one lesson at a time on screen, cleared by doing it                    |
 
 ## Ideas that keep the identity
 
-None of these change one-shot headshots or air strafing. Ranked by expected value:
+None of these change one-shot kills or air strafing. Ranked by expected value:
 
 1. **Bots** to fill near-empty servers and give early wins: Fortnite's lesson. Shipped for
    free-for-all; see BOTS.md.
 2. **Death recap.** Shipped, with the killer outlined until respawn. A moment after dying, show who killed you, from how far and how fast they
    were moving. It turns a "random death" into "they were bhopping at 90 from 140 studs":
    fair, and something to aspire to.
-3. **Near-miss feedback.** Shipped. When a shot passes just over a head, flash "CLOSE". It tells new
-   players they're nearly there, and teaches that only heads count.
-4. **Personal bests during play.** Shipped. "NEW TOP SPEED" or "LONGEST HEADSHOT" the moment it
+3. **Near-miss feedback.** Shipped. When a shot only just misses someone, flash "CLOSE". It tells new
+   players they're nearly there.
+4. **Personal bests during play.** Shipped. "NEW TOP SPEED" or "LONGEST KILL" the moment it
    happens, from stats already saved. Visible improvement that doesn't need kills.
 5. **Knockback kill credit.** Shipped, then removed with knockback in the move to instagib
    (see WEAPON.md). Knocking someone into a hazard or off the map counted as your kill.
@@ -74,8 +74,9 @@ None of these change one-shot headshots or air strafing. Ranked by expected valu
    an Invite Friends button. Prefer keeping Roblox friends on the same team when balance allows,
    and add an invite button.
 
-Rejected: body-shot damage, which makes spraying at bodies a strategy and dilutes every
-kill; aim assist in player fights, which undermines what a headshot means.
+Rejected: aim assist in player fights, which undermines what a hit means. Body-shot damage was
+rejected under headshot-only; the move to instagib (any hit kills, see WEAPON.md) replaced
+that rule rather than adding damage, so there is still no chip damage.
 
 ## Sources
 
