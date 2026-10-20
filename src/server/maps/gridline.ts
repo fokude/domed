@@ -451,8 +451,8 @@ export const Gridline: MapBuilder = {
 		setMapLighting(map, {
 			clockTime: 17.8,
 			brightness: 2,
-			ambient: Color3.fromRGB(120, 80, 140),
-			outdoorAmbient: Color3.fromRGB(150, 100, 160),
+			ambient: Color3.fromRGB(165, 135, 175),
+			outdoorAmbient: Color3.fromRGB(180, 145, 185),
 			atmosphere: {
 				density: 0.25,
 				color: Color3.fromRGB(255, 120, 170),

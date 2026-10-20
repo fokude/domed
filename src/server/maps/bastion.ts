@@ -408,8 +408,8 @@ export const Bastion: MapBuilder = {
 		setMapLighting(map, {
 			clockTime: 17.2,
 			brightness: 2.5,
-			ambient: Color3.fromRGB(120, 100, 85),
-			outdoorAmbient: Color3.fromRGB(150, 125, 100),
+			ambient: Color3.fromRGB(160, 145, 130),
+			outdoorAmbient: Color3.fromRGB(180, 160, 140),
 			atmosphere: {
 				density: 0.28,
 				color: Color3.fromRGB(230, 170, 120),

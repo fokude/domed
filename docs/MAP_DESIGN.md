@@ -189,6 +189,13 @@ wide exits.
 **CTF bases.** It should be obvious whose flag room it is. Defenders should be able to see a
 carrier on the move. Give flag rooms at least two entrances.
 
+**Visibility.** In a one-hit game, a player you can't see is a death you can't explain. Every
+map must keep players readable against every surface: ambient light of at least about 150
+grey, fog no denser than about 0.3, and no true darkness. Mood comes from the tint, sky and
+colors, never from dimming the whole map. The owner found the night and dusk maps "really
+bad" for visibility in October 2026; their ambient light was raised, Infernal Spire's fog
+thinned, and Foundry moved to daylight.
+
 **Landmarks.** Every area needs something memorable to navigate by, like a tower, a sun, a
 statue or a color.
 

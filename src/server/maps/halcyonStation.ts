@@ -304,9 +304,9 @@ export const HalcyonStation: MapBuilder = {
 
 		setMapLighting(map, {
 			clockTime: 0,
-			brightness: 2,
-			ambient: Color3.fromRGB(190, 195, 205),
-			outdoorAmbient: Color3.fromRGB(170, 180, 195),
+			brightness: 2.5,
+			ambient: Color3.fromRGB(205, 210, 220),
+			outdoorAmbient: Color3.fromRGB(190, 200, 210),
 			bloom: { intensity: 0.6, size: 20, threshold: 1.3 },
 			colorCorrection: {
 				tint: Color3.fromRGB(245, 250, 255),

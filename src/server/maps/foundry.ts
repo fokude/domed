@@ -270,10 +270,11 @@ export const Foundry: MapBuilder = {
 		perkMarker(arena, new Vector3(0, CATWALK, Z_EDGE - CATWALK_DEPTH / 2), "SuperJump");
 
 		setMapLighting(arena, {
-			clockTime: 0,
-			brightness: 1,
-			ambient: Color3.fromRGB(110, 85, 70),
-			outdoorAmbient: Color3.fromRGB(110, 85, 70),
+			// Daylight through the open top, warmed by the tint: dark forges hid players.
+			clockTime: 14,
+			brightness: 2.5,
+			ambient: Color3.fromRGB(160, 140, 125),
+			outdoorAmbient: Color3.fromRGB(170, 150, 135),
 			bloom: { intensity: 0.9, size: 24, threshold: 0.9 },
 			colorCorrection: {
 				tint: Color3.fromRGB(255, 236, 220),

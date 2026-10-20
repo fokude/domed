@@ -397,15 +397,15 @@ export const InfernalSpire: MapBuilder = {
 
 		setMapLighting(arena, {
 			clockTime: 0,
-			brightness: 1,
-			ambient: Color3.fromRGB(70, 30, 25),
-			outdoorAmbient: Color3.fromRGB(110, 45, 30),
+			brightness: 2,
+			ambient: Color3.fromRGB(150, 105, 95),
+			outdoorAmbient: Color3.fromRGB(175, 120, 100),
 			atmosphere: {
-				density: 0.4,
+				density: 0.25,
 				color: Color3.fromRGB(130, 45, 25),
 				decay: Color3.fromRGB(70, 15, 5),
 				glare: 0,
-				haze: 2.5,
+				haze: 1,
 			},
 			bloom: { intensity: 0.8, size: 24, threshold: 0.95 },
 			colorCorrection: {
