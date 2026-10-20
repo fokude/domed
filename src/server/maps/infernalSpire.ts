@@ -393,7 +393,7 @@ export const InfernalSpire: MapBuilder = {
 		buildSpire(arena);
 		buildIslands(arena);
 		// The tournament's crowd floats beyond the rampart, between the spawn rooms.
-		spectatorRing(arena, CENTER, 175, 48, 8, Color3.fromRGB(255, 100, 30), EIGHTH / 2 + EIGHTH / 2);
+		spectatorRing(arena, CENTER, 175, 48, Color3.fromRGB(255, 100, 30));
 
 		setMapLighting(arena, {
 			clockTime: 0,

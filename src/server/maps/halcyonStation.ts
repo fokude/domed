@@ -300,7 +300,7 @@ export const HalcyonStation: MapBuilder = {
 		buildConnectors(map);
 		buildAtrium(map);
 		// The crowd floats outside the station's windows.
-		spectatorRing(map, Vector3.zero, 220, 20, 8, Color3.fromRGB(90, 230, 220));
+		spectatorRing(map, Vector3.zero, 220, 20, Color3.fromRGB(90, 230, 220));
 
 		setMapLighting(map, {
 			clockTime: 0,

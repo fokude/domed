@@ -403,7 +403,7 @@ export const Bastion: MapBuilder = {
 		buildBase(map, "Blue", -1);
 		buildBackdrop(map);
 		// The crowd floats above the desert, ringing both fortresses.
-		spectatorRing(map, Vector3.zero, 400, 70, 12, Color3.fromRGB(255, 140, 40));
+		spectatorRing(map, Vector3.zero, 400, 70, Color3.fromRGB(255, 140, 40));
 
 		setMapLighting(map, {
 			clockTime: 17.2,

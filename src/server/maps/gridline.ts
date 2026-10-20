@@ -446,7 +446,7 @@ export const Gridline: MapBuilder = {
 		buildBase(map, "Blue", -1);
 		buildSun(map);
 
-		spectatorRing(map, Vector3.zero, 270, 46, 10, Color3.fromRGB(255, 60, 200));
+		spectatorRing(map, Vector3.zero, 270, 46, Color3.fromRGB(255, 60, 200));
 
 		setMapLighting(map, {
 			clockTime: 17.8,

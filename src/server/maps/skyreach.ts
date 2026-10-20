@@ -268,7 +268,7 @@ export const Skyreach: MapBuilder = {
 		buildCrown(arena);
 		buildMonoliths(arena);
 		buildSky(arena);
-		spectatorRing(arena, CENTER, 175, 50, 8, Color3.fromRGB(230, 180, 70), EIGHTH / 2);
+		spectatorRing(arena, CENTER, 175, 50, Color3.fromRGB(230, 180, 70));
 
 		// Domination: west island, the Crown, east island; equally far from both teams.
 		controlPointMarker(arena, at(LOW_RADIUS, QUARTER, LOW), "A", 12, "Domination");

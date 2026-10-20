@@ -24,9 +24,13 @@ and fun, never gore or grimness, which suits an arcade shooter and Roblox's youn
   every map can look completely different while belonging to one game.
 - **Spectators around every arena.** Floating stands, hovering camera drones and holographic
   scoreboards ring each map. It's DOMED's shared visual signature, and it makes every arena
-  read as a stage. `spectatorRing` in `maps/spectators.ts` places stands of crowd silhouettes
-  under a banner in the arena's color, with camera drones; it all goes in the map's `Art`
-  folder, so it's visual only.
+  read as a stage. `spectatorRing` in `maps/spectators.ts` wraps the whole arena in a closed
+  ring of stands, edge to edge like an intergalactic colosseum, each with four rows of crowd
+  silhouettes under a banner in the arena's color and a camera drone off every third stand; it
+  all goes in the map's `Art` folder, so it's visual only. The ring started as 6 to 12 separate
+  stands with gaps between them; the owner wanted the crowd to surround the entire map. A full
+  ring is a lot of parts (about 65 per stand, 36 stands on Infernal Spire, 82 on Bastion), so
+  watch frame rates on phones.
 - **The crowd reacts.** The crowd roars for the biggest moments: a GODLIKE streak, or a
   shutdown that ends someone's run. Ring-outs used to be the crowd-pleaser, and went with
   knockback in the move to instagib (see WEAPON.md).

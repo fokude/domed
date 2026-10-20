@@ -1,6 +1,6 @@
-// Floating spectator stands: the tournament's crowd, hovering around every arena (docs/LORE.md).
-// Each stand is a tilted grandstand of crowd silhouettes under a glowing banner, with camera
-// drones hovering nearby. Everything goes in the map's Art folder, so it's visual only: players
+// Floating spectator stands: the tournament's crowd, wrapped all the way around every arena like
+// an intergalactic colosseum (docs/LORE.md). Each stand is a tilted grandstand of crowd
+// silhouettes under a glowing banner; stands sit edge to edge, with camera drones between some. Everything goes in the map's Art folder, so it's visual only: players
 // can't stand on it and shots pass through (see docs/MAPPING.md).
 
 import { ART_FOLDER } from "shared/mapMarkers";
@@ -20,10 +20,13 @@ const CROWD_COLORS = [
 	Color3.fromRGB(240, 240, 240),
 ];
 
-const ROWS = 3;
+const ROWS = 4;
 const SEATS_PER_ROW = 9;
 const ROW_DEPTH = 4;
 const ROW_RISE = 3;
+const STAND_WIDTH = SEATS_PER_ROW * 3 + 4;
+// A camera drone hovers off every this many stands.
+const DRONE_EVERY = 3;
 
 function artFolder(map: Model): Folder {
 	const existing = map.FindFirstChild(ART_FOLDER);
@@ -35,11 +38,18 @@ function artFolder(map: Model): Folder {
 }
 
 // One floating grandstand at `position`, facing `lookAt` (usually the arena's center).
-export function spectatorStand(map: Model, position: Vector3, lookAt: Vector3, bannerColor: Color3, seed: number) {
+export function spectatorStand(
+	map: Model,
+	position: Vector3,
+	lookAt: Vector3,
+	bannerColor: Color3,
+	seed: number,
+	withDrone = true,
+) {
 	const art = artFolder(map);
 	const frame = CFrame.lookAt(position, new Vector3(lookAt.X, position.Y, lookAt.Z));
 	const onStand = (x: number, y: number, z: number) => frame.mul(new CFrame(x, y, z));
-	const width = SEATS_PER_ROW * 3 + 4;
+	const width = STAND_WIDTH;
 
 	// Hull: a wedge-shaped underside, so the stand reads as floating rather than standing.
 	block(art, new Vector3(width, 2, ROWS * ROW_DEPTH + 4), onStand(0, -1, ROWS * ROW_DEPTH * 0.5), Hull, "StandHull");
@@ -88,6 +98,7 @@ export function spectatorStand(map: Model, position: Vector3, lookAt: Vector3, b
 	);
 
 	// A camera drone hovering off one end of the stand, lens toward the arena.
+	if (!withDrone) return;
 	const side = seed % 2 === 0 ? 1 : -1;
 	const dronePosition = onStand(side * (width / 2 + 6), 4, -4).Position;
 	const drone = cylinder(art, dronePosition.add(new Vector3(0, 1, 0)), 2, 3, Hull, "CameraDrone");
@@ -101,22 +112,13 @@ export function spectatorStand(map: Model, position: Vector3, lookAt: Vector3, b
 	);
 }
 
-// A ring of stands around an arena: `count` stands at `radius` from `center`, at `height`,
-// alternating a little in height so the ring doesn't look mechanical.
-export function spectatorRing(
-	map: Model,
-	center: Vector3,
-	radius: number,
-	height: number,
-	count: number,
-	bannerColor: Color3,
-	angleOffset = 0,
-) {
+// A closed ring of stands around an arena, `radius` from `center` at `height`: as many stands
+// as fit edge to edge, so the crowd wraps the whole map with no gaps.
+export function spectatorRing(map: Model, center: Vector3, radius: number, height: number, bannerColor: Color3) {
+	const count = math.ceil((2 * math.pi * radius) / STAND_WIDTH);
 	for (let i = 0; i < count; i++) {
-		const angle = angleOffset + (i / count) * 2 * math.pi;
-		const position = center.add(
-			new Vector3(math.sin(angle) * radius, height + (i % 2) * 8, -math.cos(angle) * radius),
-		);
-		spectatorStand(map, position, center, bannerColor, i);
+		const angle = (i / count) * 2 * math.pi;
+		const position = center.add(new Vector3(math.sin(angle) * radius, height, -math.cos(angle) * radius));
+		spectatorStand(map, position, center, bannerColor, i, i % DRONE_EVERY === 0);
 	}
 }

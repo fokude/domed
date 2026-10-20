@@ -276,7 +276,7 @@ export const Foundry: MapBuilder = {
 			);
 		}
 		// The crowd watches through the roof's windows, so to speak: stands above the forge.
-		spectatorRing(arena, Vector3.zero, 190, 60, 6, Color3.fromRGB(255, 140, 40));
+		spectatorRing(arena, Vector3.zero, 190, 60, Color3.fromRGB(255, 140, 40));
 
 		// Hardpoints rotate along the center line, so neither team is closer: the bridge, the
 		// Furnace Row, the Mezzanine, then the crane.
