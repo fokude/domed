@@ -146,14 +146,14 @@ atrium, which are the low-gravity map's character.
 
 A character is about 5.5 studs tall, so a stud is roughly 0.3 m.
 
-- **Walking** is 32 studs/s, a good bhop is 50 to 80, and the cap is 140.
+- **Walking** is 45 studs/s, a good bhop is 60 to 100, and the cap is 140.
 - **Rocket jump** from standing reaches about 20 studs; jump first and it goes further. With a
   double jump on top, about 35 studs. A tier 15 to 20 studs above another is a comfortable
   rocket jump.
 - **Footprint.** Main maps about **350 to 450 by 250 to 300 studs**, and nothing smaller than
   about 300 by 220.
-- **CTF.** 20 to 25 seconds of carrying at around 32 to 45 studs/s (carriers are capped at 55)
-  means a base-to-base route of roughly **600 to 900 studs**.
+- **CTF.** 20 to 25 seconds of carrying at around 45 to 55 studs/s (carriers are capped at 55)
+  means a base-to-base route of roughly **900 to 1,300 studs**, longer than any current map: with walking this fast, the carrier cap or the carry-time target needs revisiting before CTF maps are rebuilt.
 - **Spaces.** Corridors at least 30 studs wide, rooms at least 60, so a bhop can turn without
   hitting a wall.
 - **Jumps.** A jump is about 7.5 studs high and a double jump about 15. Gaps should be clearly

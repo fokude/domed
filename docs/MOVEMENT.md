@@ -15,10 +15,13 @@ to [Engine quirks](#engine-quirks) so it isn't undone later.
 | Double jump | Space in the air                          | `doubleJumpVelocity`                          |
 | Rocket jump | Right-click at a nearby surface           | `rocketJump*`                                 |
 
-**Walk speed** is 32 studs/s (`walkSpeed`), raised from 26 after the move to instagib: the
-owner wanted base movement noticeably faster, since moving is how players survive one-hit
-kills. Air acceleration scales with walk speed (as Quake's does with the wish speed), so
-strafing also gains speed about 23% faster. The 140 cap is unchanged.
+**Walk speed** is 45 studs/s (`walkSpeed`), raised from 26 to 32 and then 45 after the move
+to instagib: the owner wanted base movement much faster, since moving is how players survive
+one-hit kills. Air acceleration scales with walk speed (as Quake's does with the wish speed),
+so the step to 32 also made strafing gain speed about 23% faster. For the step to 45,
+`airAccelerate` went from 30 to 21 to keep that strafing feel, so only ground speed changed.
+`hopBoostMaxSpeed` went from 50 to 60 so chained hops still have a range to boost through
+above walking speed. The 140 cap is unchanged.
 
 Use `/map TestRange` in Studio to test movement on its bhop strip and jump pads. Wall jump, wall slide, slide and dodge
 were tried and cut; see the git history if they come back.

@@ -59,7 +59,7 @@ studs from the head under headshot-only.
 
 **Personal bests** ("NEW TOP SPEED: 92", "LONGEST KILL: 140 STUDS") call out in gold the
 moment a saved record falls. Speed records announce once the player stops accelerating, with
-the peak, and low records (under 50 speed or 50 studs) stay quiet so new players aren't
+the peak, and low records (under 60 speed or 50 studs) stay quiet so new players aren't
 flooded. They show improvement that doesn't depend on winning fights (see SKILL_FLOOR.md).
 
 ## Server-wide moments

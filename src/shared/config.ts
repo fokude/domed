@@ -3,12 +3,12 @@ import { ModeId } from "./modes";
 // Gameplay tuning shared by server and client.
 
 export const MovementConfig = {
-	walkSpeed: 32,
+	walkSpeed: 45,
 	jumpHeight: 7.5,
 
 	// Air strafing follows the Quake/Half-Life model: the air speed cap is tiny,
 	// so speed is only gained by strafing while turning the camera.
-	airAccelerate: 30,
+	airAccelerate: 21,
 	airSpeedCap: 6,
 	maxAirSpeed: 140,
 
@@ -18,7 +18,7 @@ export const MovementConfig = {
 	// Low-speed strafing gains little because each push swings the velocity a long way, so
 	// chained hops get a boost until hopBoostMaxSpeed. 0 turns it off.
 	hopBoost: 0.12,
-	hopBoostMaxSpeed: 50,
+	hopBoostMaxSpeed: 60,
 
 	doubleJumpVelocity: 55,
 
