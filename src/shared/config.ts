@@ -22,6 +22,10 @@ export const MovementConfig = {
 
 	doubleJumpVelocity: 55,
 
+	// Right-click blasts the player along their look direction (see docs/MOVEMENT.md).
+	rocketJumpVelocity: 80,
+	rocketJumpCooldown: 3,
+
 	// Roblox FieldOfView is vertical; 80 is roughly 110 horizontal at 16:9.
 	baseFov: 80,
 	speedFovBoost: 12,

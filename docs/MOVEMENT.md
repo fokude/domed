@@ -13,6 +13,7 @@ to [Engine quirks](#engine-quirks) so it isn't undone later.
 | Air strafe  | A or D while turning the mouse in the air | `airAccelerate`, `airSpeedCap`, `maxAirSpeed` |
 | Bunny hop   | Hold Space, or scroll, through landings   | `bhopWindow`, `bhopSpeedLoss`, `hopBoost*`    |
 | Double jump | Space in the air                          | `doubleJumpVelocity`                          |
+| Rocket jump | Right-click                               | `rocketJumpVelocity`, `rocketJumpCooldown`    |
 
 Use `/map TestRange` in Studio to test movement on its bhop strip and jump pads. Wall jump, wall slide, slide and dodge
 were tried and cut; see the git history if they come back.
@@ -55,7 +56,27 @@ player and the module adopts the measured velocity.
 **Double jump** sets vertical speed and redirects horizontal momentum toward the input
 direction, keeping at least walk speed.
 
-**Launches** (`launchCharacter`) are used by jump pads. From
+**Rocket jump** (`client/rocketJump.ts`) adds 80 studs/s along the look direction, every 3
+seconds, on the ground or in the air. The downward part of the look direction is dropped, so
+looking up sends the player up, looking ahead is a dash, and aiming at the floor only pushes
+sideways. It never hurts anyone. The white bar under the rail's cooldown shows when it's
+ready. Horizontal speed is still capped at `maxAirSpeed` on the next frame, so it can't push
+past the speed limit, only redirect and lift.
+
+Why: the move to instagib (WEAPON.md) took its lead from
+[Ratz Instagib](https://store.steampowered.com/app/338170), whose rocket-jump button makes
+moving targets harder to hit. Any hit kills, so a quick way out of a sightline matters more.
+It takes right-click from the removed shove.
+
+- **Look direction, not Quake's blast-away-from-your-feet.** The owner asked for "look up and
+  right-click to fly up". A blast that pushes away from where you aim (aim down to go up)
+  needs a surface to hit and is harder to learn; it was rejected for now.
+- **Rejected: rocket jump plus shove on one button** (blast a player to push them, a surface
+  to launch yourself). Too complex to read; the owner preferred separate controls.
+- **Untested.** Strength and cooldown are first guesses: 80 straight up is about 16 studs of
+  height, between a double jump (55) and a Super Jump (110).
+
+**Launches** (`launchCharacter`) are used by jump pads and the rocket jump. From
 the ground they start a real jump and replace its vertical speed on the first airborne
 frame. In the air they set velocity directly.
 
