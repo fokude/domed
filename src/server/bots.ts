@@ -264,12 +264,13 @@ function shoot(bot: Bot, target: Model) {
 	// A shield takes the hit whole: no kill.
 	if (hitShield(victim) !== undefined) return;
 	victimHumanoid.Health = 0;
-	Remotes.HeadBurst.FireAllClients(result.Position);
-	Remotes.KillFeed.FireAllClients(bot.humanoid.DisplayName, victim, "rail");
+	const cause = result.Instance.Name === "Head" ? "headshot" : "rail";
+	Remotes.HeadBurst.FireAllClients(result.Position, cause === "headshot");
+	Remotes.KillFeed.FireAllClients(bot.humanoid.DisplayName, victim, cause);
 	Remotes.DeathRecap.FireClient(
 		victim,
 		bot.model,
-		"rail",
+		cause,
 		math.floor(distance),
 		flatSpeed(bot.root.AssemblyLinearVelocity),
 	);

@@ -7,6 +7,8 @@ export const Palette = {
 	Accent: Color3.fromRGB(255, 60, 40),
 	Panel: Color3.fromRGB(20, 22, 28),
 	Cyan: Color3.fromRGB(0, 220, 255),
+	// Headshots: hitmarker, kill feed and headline. Distinct from multi-kill gold.
+	Headshot: Color3.fromRGB(255, 70, 200),
 };
 
 // Creates an instance and applies properties before parenting, so it never appears half-built.

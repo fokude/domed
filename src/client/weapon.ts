@@ -90,7 +90,7 @@ function fire() {
 	const hitPlayer = hitCharacter?.IsA("Model") ? Players.GetPlayerFromCharacter(hitCharacter) : undefined;
 	const isTeammate = hitPlayer !== undefined && player.Team !== undefined && hitPlayer.Team === player.Team;
 	if (hitPart && hitCharacter?.IsA("Model") && isAlive(hitCharacter) && !isTeammate) {
-		showHitmarker();
+		showHitmarker(hitPart.Name === "Head");
 	}
 
 	Remotes.Fire.FireServer(origin, hitPosition, hitPart);

@@ -156,15 +156,18 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 	const victimCharacter = hitPart.Parent;
 	if (!victimCharacter?.IsA("Model")) return;
 	const shotVector = hitPosition.sub(origin);
+	const cause: DeathCause = hitPart.Name === "Head" ? "headshot" : "rail";
 
 	// Training dummies take hits through the same validation as players.
 	if (isDummy(victimCharacter)) {
 		const reason = implausibleHit(character, victimCharacter, hitPart, origin, hitPosition);
 		if (reason !== undefined) return reject(shooter, reason);
-		const kind = hitDummy(victimCharacter);
+		const kind = hitDummy(victimCharacter, hitPart.Name === "Head");
 		if (kind === undefined) return;
 		Remotes.HitConfirm.FireClient(shooter, kind, true);
-		if (kind === "kill") Remotes.HeadBurst.FireAllClients(hitPart.Position);
+		if (kind === "kill" || kind === "headshot") {
+			Remotes.HeadBurst.FireAllClients(hitPart.Position, kind === "headshot");
+		}
 		return;
 	}
 
@@ -173,8 +176,8 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 		const reason = implausibleHit(character, victimCharacter, hitPart, origin, hitPosition);
 		if (reason !== undefined) return reject(shooter, reason);
 		if (!killBot(victimCharacter)) return;
-		Remotes.HeadBurst.FireAllClients(hitPart.Position);
-		awardKill(shooter, victimCharacter, rules, "rail", shotVector.Magnitude);
+		Remotes.HeadBurst.FireAllClients(hitPart.Position, cause === "headshot");
+		awardKill(shooter, victimCharacter, rules, cause, shotVector.Magnitude);
 		return;
 	}
 
@@ -194,8 +197,8 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 		return;
 	}
 	victimHumanoid.Health = 0;
-	Remotes.HeadBurst.FireAllClients(hitPart.Position);
-	awardKill(shooter, victim, rules, "rail", shotVector.Magnitude);
+	Remotes.HeadBurst.FireAllClients(hitPart.Position, cause === "headshot");
+	awardKill(shooter, victim, rules, cause, shotVector.Magnitude);
 }
 
 // Everything a kill earns: stats, XP, feedback, the kill feed, and for player victims their
@@ -211,7 +214,7 @@ function awardKill(
 	incrementStat(shooter, "Kills");
 	if (victim.IsA("Player")) registerKilledBy(victim, shooter);
 	registerKill(shooter);
-	Remotes.HitConfirm.FireClient(shooter, "kill", false);
+	Remotes.HitConfirm.FireClient(shooter, cause === "headshot" ? "headshot" : "kill", false);
 	if (victim.IsA("Player")) {
 		recordKill(shooter, distance);
 		Remotes.KillFeed.FireAllClients(shooter, victim, cause);

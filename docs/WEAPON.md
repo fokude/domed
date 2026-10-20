@@ -20,6 +20,9 @@ where any hit kills and a rocket jump keeps targets hard to hit.
   speed makes dodging harder; doing both would make kills far too easy. Speed can be tuned
   later from playtests.
 
+Headshots still get their own flashier feedback and sound (DOMED, versus GIBBED for other
+hits; see FEEDBACK.md), but no extra reward.
+
 The kill record is now the longest kill of any kind; it keeps its old saved name
 (`longestHeadshot`) so players' records carry over.
 

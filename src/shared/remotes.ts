@@ -12,15 +12,17 @@ function remote<T extends Callback>(name: string) {
 	return folder.WaitForChild(name) as RemoteEvent<T>;
 }
 
-// "absorbed": a shield took the hit and holds. "shield": the hit broke a shield.
-export type HitKind = "kill" | "absorbed" | "shield";
+// "headshot": a kill by a hit to the head. "absorbed": a shield took the hit and holds.
+// "shield": the hit broke a shield.
+export type HitKind = "kill" | "headshot" | "absorbed" | "shield";
 // Someone in a fight: a player, or a bot by display name.
 export type Combatant = Player | string;
 export type PersonalBestRecord = "topSpeed" | "longestKill";
 // How a player was killed, for their death recap.
 // Server-wide moments the whole lobby hears about (see server/streaks.ts).
 export type BroadcastKind = "KillingSpree" | "Rampage" | "Godlike" | "Shutdown";
-export type DeathCause = "rail";
+// "headshot" kills are DOMED; any other rail hit is GIBBED.
+export type DeathCause = "rail" | "headshot";
 
 export const Remotes = {
 	Fire: remote<(origin: Vector3, hitPosition: Vector3, hitPart: BasePart | undefined) => void>("Fire"),
@@ -52,7 +54,8 @@ export const Remotes = {
 	// Client reports it used a held perk (the Super Jump is triggered by client movement).
 	UsePerk: remote<(perk: PerkId) => void>("UsePerk"),
 	// Particle burst where a target was killed, shown to everyone (players and training dummies).
-	HeadBurst: remote<(position: Vector3) => void>("HeadBurst"),
+	// Headshots get a bigger one.
+	HeadBurst: remote<(position: Vector3, headshot: boolean) => void>("HeadBurst"),
 	// Client saves the player's settings. The server sanitizes them.
 	SaveSettings: remote<(settings: PlayerSettings) => void>("SaveSettings"),
 	CastVote: remote<(optionIndex: number) => void>("CastVote"),

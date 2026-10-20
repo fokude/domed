@@ -4,7 +4,7 @@
 
 import { MatchConfig } from "shared/config";
 import { getMatchState } from "shared/matchState";
-import { Remotes } from "shared/remotes";
+import { DeathCause, Remotes } from "shared/remotes";
 import { showDeathDetail } from "./hud";
 
 const Players = game.GetService("Players");
@@ -14,8 +14,9 @@ const KILLER_COLOR = Color3.fromRGB(255, 60, 40);
 
 const player = Players.LocalPlayer;
 
-function describe(distance: number, killerSpeed: number): string {
-	return `${distance} STUDS  ·  THEY WERE MOVING AT ${killerSpeed}`;
+function describe(cause: DeathCause, distance: number, killerSpeed: number): string {
+	const how = cause === "headshot" ? `HEADSHOT FROM ${distance} STUDS` : `${distance} STUDS`;
+	return `${how}  ·  THEY WERE MOVING AT ${killerSpeed}`;
 }
 
 function outlineKiller(character: Model, seconds: number) {
@@ -35,8 +36,8 @@ function outlineKiller(character: Model, seconds: number) {
 }
 
 export function initDeathRecap() {
-	Remotes.DeathRecap.OnClientEvent.Connect((killerCharacter, _, distance, killerSpeed) => {
-		showDeathDetail(describe(distance, killerSpeed));
+	Remotes.DeathRecap.OnClientEvent.Connect((killerCharacter, cause, distance, killerSpeed) => {
+		showDeathDetail(describe(cause, distance, killerSpeed));
 		if (killerCharacter) outlineKiller(killerCharacter, getMatchState("RespawnTime") ?? MatchConfig.respawnTime);
 	});
 }

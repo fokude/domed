@@ -73,11 +73,15 @@ function combatantName(combatant: Combatant | undefined): string {
 	return typeIs(combatant, "string") ? combatant : (combatant?.DisplayName ?? "?");
 }
 
-Remotes.KillFeed.OnClientEvent.Connect((killer, victim) => {
+Remotes.KillFeed.OnClientEvent.Connect((killer, victim, cause) => {
 	const killerName = combatantName(killer);
 	const victimName = combatantName(victim);
-	addKill(killerName, victimName);
-	if (victim === player) showBanner(`DOMED BY ${killerName}`, Palette.Accent, currentRespawnTime());
+	const headshot = cause === "headshot";
+	addKill(killerName, victimName, headshot);
+	if (victim === player) {
+		const banner = headshot ? `DOMED BY ${killerName}` : `GIBBED BY ${killerName}`;
+		showBanner(banner, headshot ? Palette.Headshot : Palette.Accent, currentRespawnTime());
+	}
 });
 
 Remotes.MatchEnded.OnClientEvent.Connect(showMatchEnd);

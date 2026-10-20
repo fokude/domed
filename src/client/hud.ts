@@ -172,8 +172,13 @@ export function initHud() {
 	buildPanels(gui);
 }
 
-export function showHitmarker() {
+// Headshots get a bigger hitmarker in the headshot color.
+export function showHitmarker(isHeadshot: boolean) {
 	const token = ++hitmarkerToken;
+	hitmarker.Size = UDim2.fromOffset(isHeadshot ? 32 : 22, isHeadshot ? 32 : 22);
+	for (const bar of hitmarker.GetChildren()) {
+		if (bar.IsA("Frame")) bar.BackgroundColor3 = isHeadshot ? Palette.Headshot : Palette.Accent;
+	}
 	hitmarker.Visible = true;
 	task.delay(HITMARKER_TIME, () => {
 		if (hitmarkerToken === token) hitmarker.Visible = false;
@@ -255,8 +260,12 @@ function addFeedLine(richText: string) {
 	});
 }
 
-export function addKill(killerName: string, victimName: string) {
-	addFeedLine(`${escapeRichText(killerName)}  <font color="#ff3c28">DOMED</font>  ${escapeRichText(victimName)} `);
+// Headshots read DOMED; other hits read GIBBED.
+export function addKill(killerName: string, victimName: string, headshot: boolean) {
+	const verb = headshot
+		? `<font color="#${Palette.Headshot.ToHex()}">DOMED</font>`
+		: `<font color="#${Palette.Accent.ToHex()}">GIBBED</font>`;
+	addFeedLine(`${escapeRichText(killerName)}  ${verb}  ${escapeRichText(victimName)} `);
 }
 
 export function addPerkTaken(playerName: string, perkName: string, color: Color3) {

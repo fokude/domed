@@ -94,7 +94,7 @@ export function isDummy(model: Model): boolean {
 
 // Applies a validated hit to a dummy. Returns what happened, for the shooter's feedback, or
 // undefined if the dummy was already down.
-export function hitDummy(model: Model): HitKind | undefined {
+export function hitDummy(model: Model, isHead: boolean): HitKind | undefined {
 	const dummy = dummies.get(model);
 	if (!dummy || !dummy.alive) return undefined;
 	// Shields work as on players.
@@ -114,7 +114,7 @@ export function hitDummy(model: Model): HitKind | undefined {
 		model.Destroy();
 		spawnDummy(dummy.spawn);
 	});
-	return "kill";
+	return isHead ? "headshot" : "kill";
 }
 
 export function startDummies(map: LoadedMap) {

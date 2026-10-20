@@ -12,15 +12,25 @@ playing against their interest. Roblox's audience is young, which makes this mat
 
 ## What happens on a kill
 
-| Layer           | Detail                                            | Who sees it |
-| --------------- | ------------------------------------------------- | ----------- |
-| Headline        | "DOMED" pops in oversized and settles, then fades | Killer      |
-| Crosshair burst | A ring expands from the crosshair                 | Killer      |
-| Edge flash      | A brief red flash at the screen edges             | Killer      |
-| XP popup        | "+10 XP" drifts up beside the crosshair           | Killer      |
-| Sound           | A bright tick layered over a low thump            | Killer      |
-| Hit burst       | Particles burst where the victim was hit          | Everyone    |
-| Death sound     | Plays for the victim                              | Victim      |
+| Layer           | Detail                                             | Who sees it |
+| --------------- | -------------------------------------------------- | ----------- |
+| Headline        | "GIBBED" pops in oversized and settles, then fades | Killer      |
+| Crosshair burst | A ring expands from the crosshair                  | Killer      |
+| Edge flash      | A brief red flash at the screen edges              | Killer      |
+| XP popup        | "+10 XP" drifts up beside the crosshair            | Killer      |
+| Sound           | A bright tick layered over a low thump             | Killer      |
+| Hit burst       | Particles burst where the victim was hit           | Everyone    |
+| Death sound     | Plays for the victim                               | Victim      |
+
+**Headshots** still kill like any hit, but they look and sound special. The headline reads
+"DOMED" instead of "GIBBED", in pink (`Palette.Headshot`, kept apart from multi-kill gold),
+pops in bigger, and the crosshair ring and edge flash match. An extra ping plays over the
+kill sound, the hit burst is bigger and pink for everyone, the hitmarker is bigger and pink,
+the kill feed says DOMED instead of GIBBED, and the victim's banner and recap say DOMED BY and
+HEADSHOT FROM. Why: after the move to instagib (WEAPON.md) the owner wanted headshots to stay
+the flashiest kill, and the game's name already means one. They earn nothing extra (no bonus
+XP or score), so the kill rules stay simple and nobody is pushed back into headshot-only
+play. The ping is a placeholder until a Creator Store sound is picked.
 
 **Multi-kills** (each within 4 seconds of the last) escalate the headline (DOUBLE DOME, TRIPLE
 DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch each step.

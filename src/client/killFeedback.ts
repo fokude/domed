@@ -14,7 +14,8 @@ const Workspace = game.GetService("Workspace");
 
 // Kills within this many seconds of each other chain into a multi-kill.
 const MULTI_KILL_WINDOW = 4;
-const MULTI_KILL_NAMES = ["DOMED", "DOUBLE DOME", "TRIPLE DOME", "QUAD DOME", "UNSTOPPABLE"];
+// The first kill reads GIBBED, or DOMED for a headshot; chained kills escalate from there.
+const MULTI_KILL_NAMES = ["GIBBED", "DOUBLE DOME", "TRIPLE DOME", "QUAD DOME", "UNSTOPPABLE"];
 // Kill streak milestones (kills without dying) and their callouts.
 const STREAK_CALLOUTS = new Map<number, string>([
 	[3, "ON A ROLL"],
@@ -50,14 +51,14 @@ function tween(instance: Instance, seconds: number, goals: object, style: Enum.E
 	return animation;
 }
 
-// Big text that pops in oversized and settles, then fades.
-function showHeadline(text: string, color: Color3) {
+// Big text that pops in oversized and settles, then fades. `pop` is how oversized it starts.
+function showHeadline(text: string, color: Color3, pop = 1.6) {
 	const token = ++headlineToken;
 	headline.Text = text;
 	headline.TextColor3 = color;
 	headline.TextTransparency = 0;
 	headline.TextStrokeTransparency = 0.2;
-	headlineScale.Scale = 1.6;
+	headlineScale.Scale = pop;
 	tween(headlineScale, 0.18, { Scale: 1 }, Enum.EasingStyle.Back);
 	task.delay(0.9, () => {
 		if (headlineToken !== token) return;
@@ -76,8 +77,8 @@ function showStreak(text: string, color = STREAK_PURPLE) {
 	});
 }
 
-// A ring that bursts outward from the crosshair.
-function crosshairBurst(color: Color3) {
+// A ring that bursts outward from the crosshair, to `size` pixels across.
+function crosshairBurst(color: Color3, size = 56) {
 	const ring = create(
 		"Frame",
 		{
@@ -90,7 +91,7 @@ function crosshairBurst(color: Color3) {
 	);
 	create("UICorner", { CornerRadius: new UDim(1, 0) }, ring);
 	const stroke = create("UIStroke", { Color: color, Thickness: 3 }, ring);
-	tween(ring, 0.25, { Size: UDim2.fromOffset(56, 56) });
+	tween(ring, 0.25, { Size: UDim2.fromOffset(size, size) });
 	tween(stroke, 0.25, { Transparency: 1 }).Completed.Connect(() => ring.Destroy());
 }
 
@@ -152,8 +153,9 @@ function xpPopup(amount: number) {
 	}).Completed.Connect(() => label.Destroy());
 }
 
-// A burst of particles where the victim was hit. Everyone sees it.
-function headBurst(position: Vector3) {
+// A burst of particles where the victim was hit. Everyone sees it; headshots burst bigger, in
+// the headshot color.
+function headBurst(position: Vector3, headshot: boolean) {
 	const anchor = new Instance("Part");
 	anchor.Anchored = true;
 	anchor.CanCollide = false;
@@ -165,21 +167,23 @@ function headBurst(position: Vector3) {
 	anchor.Parent = Workspace;
 
 	const emitter = new Instance("ParticleEmitter");
-	emitter.Color = new ColorSequence(KILL_RED, Palette.White);
+	emitter.Color = new ColorSequence(headshot ? Palette.Headshot : KILL_RED, Palette.White);
 	emitter.LightEmission = 1;
-	emitter.Size = new NumberSequence([new NumberSequenceKeypoint(0, 0.6), new NumberSequenceKeypoint(1, 0)]);
-	emitter.Speed = new NumberRange(18, 34);
+	const startSize = headshot ? 0.9 : 0.6;
+	emitter.Size = new NumberSequence([new NumberSequenceKeypoint(0, startSize), new NumberSequenceKeypoint(1, 0)]);
+	emitter.Speed = headshot ? new NumberRange(26, 48) : new NumberRange(18, 34);
 	emitter.SpreadAngle = new Vector2(180, 180);
 	emitter.Lifetime = new NumberRange(0.25, 0.45);
 	emitter.Enabled = false;
 	emitter.Parent = anchor;
-	emitter.Emit(28);
+	emitter.Emit(headshot ? 60 : 28);
 	task.delay(1, () => anchor.Destroy());
 }
 
 // Practice kills (training dummies) escalate multi-kills, so they can be tried out, but earn no
-// XP and don't count toward streaks.
-function onKill(practice: boolean) {
+// XP and don't count toward streaks. Headshots read DOMED in the headshot color, pop bigger,
+// and add the headshot sound.
+function onKill(practice: boolean, headshot: boolean) {
 	const now = os.clock();
 	multiKill = now - lastKillAt <= MULTI_KILL_WINDOW ? multiKill + 1 : 1;
 	lastKillAt = now;
@@ -189,10 +193,13 @@ function onKill(practice: boolean) {
 	const pitch = math.min(1 + step * PITCH_STEP, PITCH_CAP);
 	playSound("kill", pitch);
 	playSound("killThump");
+	if (headshot) playSound("headshot");
 
-	showHeadline(MULTI_KILL_NAMES[step], multiKill > 1 ? MULTI_GOLD : KILL_RED);
-	crosshairBurst(multiKill > 1 ? MULTI_GOLD : KILL_RED);
-	edgeFlash(KILL_RED);
+	const killColor = headshot ? Palette.Headshot : KILL_RED;
+	const name = step === 0 && headshot ? "DOMED" : MULTI_KILL_NAMES[step];
+	showHeadline(name, multiKill > 1 ? MULTI_GOLD : killColor, headshot ? 2.2 : 1.6);
+	crosshairBurst(multiKill > 1 ? MULTI_GOLD : killColor, headshot ? 80 : 56);
+	edgeFlash(killColor);
 	if (practice) return;
 	xpPopup(XpConfig.kill);
 
@@ -201,7 +208,7 @@ function onKill(practice: boolean) {
 }
 
 function onHitConfirm(kind: HitKind, practice: boolean) {
-	if (kind === "kill") onKill(practice);
+	if (kind === "kill" || kind === "headshot") onKill(practice, kind === "headshot");
 	else if (kind === "absorbed") playSound("shieldHit");
 	else {
 		playSound("shieldBreak");
