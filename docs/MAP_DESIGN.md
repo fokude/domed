@@ -1,32 +1,67 @@
 # Map design
 
 Principles for DOMED maps, drawn from published level design writing and adapted to what makes
-DOMED different: any hit kills, everyone has the same railgun, players bunny hop at up to
-140 studs/s, and matches are 5v5. MAPPING.md covers the technical side (markers, attributes).
+DOMED different: any hit kills, everyone has the same railgun, players bunny hop at up to 140
+studs/s and rocket jump off surfaces, and matches are 5v5. MAPPING.md covers the technical side
+(markers, attributes).
 
 ## What DOMED needs
 
-- **Sightlines decide fights.** With one-shot kills, whoever sees the other first usually wins.
-  Too many open angles makes deaths feel random. Instagib maps are built to keep openness low.
-- **Speed needs runways.** Bhopping is most of the fun, and it takes distance to build. Maps need
-  long, safe lanes to build speed in, ending in places where fights happen.
-- **Rooms give fights structure.** Interiors break sightlines, create close fights that reward
-  movement, and give teams places to hold.
+- **Movement is the defence.** Any hit kills, so players survive by being hard to hit: fast,
+  airborne, changing direction. Maps have to let them move. Clutter that stops a bhop or a
+  rocket jump is worse than an open sightline.
+- **Speed needs runways.** Bhopping takes distance to build. Maps need long, clear lanes with
+  nothing to clip on, ending in places where fights happen.
+- **Height is reached by rocket jump.** Rocket jumps and double jumps are how players get up,
+  so high ground sits within rocket-jump reach of nearby surfaces, not only at the top of ramps.
+- **Room to breathe.** Big spaces, high ceilings, few walls. A map should feel like an arena,
+  not a maze.
 - **5v5 means teams.** Team Deathmatch and CTF, so maps should be symmetric between two sides.
+
+### Why this changed (October 2026)
+
+The first rules were written for headshot-only. They said "instagib maps are built to keep
+openness low" and aimed for about 25% openness, with rooms, 14-stud corridors, 18-stud
+ceilings and cover breaking every long sightline. Each map pass added pillars, screens and
+pockets to bring the numbers down. After the move to instagib with rocket jumps (WEAPON.md,
+MOVEMENT.md), the owner found the maps cramped: "way too much obstacles really restricting
+movement", too little runway, too claustrophobic. Fast, airborne targets are hard to hit
+across open space, so long sightlines cost far less than they did under headshot-only, and
+clutter costs far more.
+
+### Reference games
+
+DOMED draws on the whole fast arena shooter genre, not one game. What these share is open
+space, height reached by movement, and few small obstacles:
+
+- **Quake III Arena** instagib and rocket-jump play: The Longest Yard is open platforms in the
+  sky, reached by jump pads and rocket jumps.
+- **Unreal Tournament** instagib: Facing Worlds is two towers across open ground and long
+  sightlines, and still one of the most played instagib maps.
+- **Xonotic** and **Warsow / Warfork**: fast movement shooters with instagib modes, whose maps
+  are built around strafe-jumping and keeping momentum.
+- **Team Fortress 2**'s Soldier: rocket jumping off floors and walls, the model for DOMED's
+  right-click.
+- **Ratz Instagib**: reviews say some of its maps are "way too cramped for 5+ players", and
+  that its high ground is reached by jumping.
+
+These are archetypes to learn from, never layouts to copy (see Roster).
 
 ## Targets
 
-| Measure                                                          | Target                                                 | Source                                             |
-| ---------------------------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------- |
-| Openness: share of random standing spots that can see each other | about 25%                                              | InstaGib Arena map brief                           |
-| Spawn exposure: share of standing spots that can see a spawn     | under 20%                                              | InstaGib Arena map brief                           |
-| Height tiers                                                     | 3 to 4, with one contested high point                  | InstaGib Arena, from Q3, UT and Ratz Instagib maps |
-| CTF carry time, flag to capture                                  | 20 to 25 seconds at a normal pace                      | Unreal Tournament: Blitz level design              |
-| Routes between bases                                             | 3 lanes; about 3 large loops with smaller ones between | Titanfall 2 (Respawn); Celia Wagar                 |
-| Chokepoints                                                      | 3 to 4, impossible to cover all from one spot          | The Level Design Book                              |
-| Entrances to a strong position                                   | at least 3                                             | Deathmatch Map Design: The Architecture of Flow    |
-| Exits from a team's spawn area                                   | at least 2                                             | Unreal Tournament: Blitz level design              |
+| Measure                                                          | Target                                                       | Source                                     |
+| ---------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------ |
+| Openness: share of random standing spots that can see each other | 35 to 50%                                                    | Owner playtests after the instagib move    |
+| Spawn exposure: share of standing spots that can see a spawn     | under 20%                                                    | InstaGib Arena map brief                   |
+| Runway                                                           | at least one clear lane 150+ studs long and 40+ wide per map | Owner playtests; DOMED scale below         |
+| Ceiling                                                          | 40 studs or open air                                         | Rocket jump plus double jump reach (below) |
+| Height tiers                                                     | 3 to 4, each reachable by rocket jump from the one below     | Ratz Instagib reviews; Q3 and UT maps      |
+| Void edges                                                       | only where deliberate; main runways get a lip or wall        | Owner playtests                            |
+| CTF carry time, flag to capture                                  | 20 to 25 seconds at a normal pace                            | Unreal Tournament: Blitz level design      |
+| Routes between bases                                             | 3 lanes; about 3 large loops                                 | Titanfall 2 (Respawn); Celia Wagar         |
+| Exits from a team's spawn area                                   | at least 2, each 20+ studs wide                              | Unreal Tournament: Blitz level design      |
 
+The openness target is a starting range, not a measured optimum: retune it from playtests.
 Use `/openness` in a Studio playtest to measure the current map (it samples 250 standing spots
 across every floor). `npm run preview -- <MapId>` measures the same thing offline
 (see MAPPING.md).
@@ -44,8 +79,9 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 | Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map                                        |
 | Foundry         | 10%      | 18%            | Close quarters by design: well under the open-map target                                                 |
 
-Free-for-all maps that scatter spawns everywhere score high on spawn exposure almost by
-design; openness is the clearer signal for them.
+These were measured against the old 25% openness target. Free-for-all maps that scatter spawns
+everywhere score high on spawn exposure almost by design; openness is the clearer signal for
+them.
 
 **The Infernal Spire redesign** was the first map built with the preview loop. The original
 was an open lava lake with spawns on the open ring. Three iterations: spawn rooms behind
@@ -94,47 +130,47 @@ atrium, which are the low-gravity map's character.
 A character is about 5.5 studs tall, so a stud is roughly 0.3 m.
 
 - **Walking** is 32 studs/s, a good bhop is 50 to 80, and the cap is 140.
-- **Footprint.** InstaGib Arena standardized on 96 by 72 m maps for small groups. DOMED has more
-  players and moves faster, so main maps should be about **350 to 450 by 250 to 300 studs**.
-- **CTF.** 20 to 25 seconds of carrying at around 26 to 40 studs/s (carriers are capped at 55)
-  means a base-to-base route of roughly **500 to 700 studs**.
-- **Rooms and corridors** need space to strafe: corridors at least 14 studs wide, rooms at least
-  30, and ceilings at least 18 studs so a double jump doesn't hit the ceiling.
+- **Rocket jump** from standing reaches about 20 studs; jump first and it goes further. With a
+  double jump on top, about 35 studs. A tier 15 to 20 studs above another is a comfortable
+  rocket jump.
+- **Footprint.** Main maps about **350 to 450 by 250 to 300 studs**, and nothing smaller than
+  about 300 by 220.
+- **CTF.** 20 to 25 seconds of carrying at around 32 to 45 studs/s (carriers are capped at 55)
+  means a base-to-base route of roughly **600 to 900 studs**.
+- **Spaces.** Corridors at least 30 studs wide, rooms at least 60, so a bhop can turn without
+  hitting a wall.
 - **Jumps.** A jump is about 7.5 studs high and a double jump about 15. Gaps should be clearly
   jumpable or clearly not.
 
 ## Principles
 
+**Clear floors.** Nothing knee-high or waist-high in the middle of a lane: no crates, low walls
+or scattered boxes. Cover comes from a few big structures (platforms, towers, the edges of
+higher tiers) that players move around and over, not small obstacles they clip on.
+
 **Lanes.** Give each map three readable routes between the sides, such as high, middle and
-low, or left, center and right. Respawn moved Titanfall 2 to three-lane layouts because "any
-point to any point" maps made deaths hard to understand. Lanes should connect at a few
-crossing points, forming loops.
+low, or left, center and right. Lanes should connect at a few crossing points, forming loops.
 
 **Loops, not dead ends.** Players should never have to stop and turn around on a main route
-(Tim Willits, id Software). Overlay a few large loops with smaller ones between them. In CTF the
-flag rooms are the only acceptable dead ends.
+(Tim Willits, id Software). In CTF the flag rooms are the only acceptable dead ends.
 
-**Control sightlines.** Mix short and long sightlines, but make long ones rare lanes players
-choose to cross. Break the rest with walls, height changes and turns. Prefer 45-degree turns
-to 90-degree ones, so fights don't line up head-on across open ground.
+**Sightlines.** Long sightlines are fine; a fast target is hard to hit across open space. Break
+up only the ones that would let a player watch a spawn or a whole route from safety.
 
-**Bowls and chokepoints.** Alternate open combat bowls, where fights happen, with tighter
-chokepoints that funnel attacks. The contrast is what makes both readable.
+**Height.** Three to four tiers, each a rocket jump above the last, with one contested high
+point. High ground should be strong but exposed, with at least three ways up.
 
-**Height.** Three to four tiers, with one contested high point per map. High ground should be
-strong but exposed, and reachable by at least three routes.
+**Speed runways.** At least one long, clear lane for building bhop speed, ending at a fight,
+not a wall.
 
-**Speed runways.** Give each map at least one long, protected route for building bhop speed:
-a trench, an aqueduct, a long hall. It should end at a fight, not a wall.
+**Edges.** Falling off the map is part of the game, but only at deliberate edges. Main runways
+and the ground around spawns get a lip or wall, so a missed strafe doesn't end in the void.
 
-**Spawns.** Spawns sit back from the front, at least halfway into a base in CTF, with two or
-more exits, and out of sight of the areas the enemy fights in.
+**Spawns.** Spawns sit back from the front, out of sight of the main fights, with two or more
+wide exits.
 
 **CTF bases.** It should be obvious whose flag room it is. Defenders should be able to see a
-carrier on the move, so bases shouldn't be mazes. Give flag rooms at least two entrances.
-
-**Cover.** Err on too little. Build cover from the architecture, such as pillars, walls and
-height changes, rather than scattering boxes.
+carrier on the move. Give flag rooms at least two entrances.
 
 **Landmarks.** Every area needs something memorable to navigate by, like a tower, a sun, a
 statue or a color.
@@ -169,4 +205,6 @@ checked in Studio with `/openness`.
 - [Deathmatch Map Design: The Architecture of Flow](https://www.gamedeveloper.com/design/deathmatch-map-design-the-architecture-of-flow), Game Developer
 - [Good FPS Map Design](https://critpoints.net/2018/02/18/good-fps-map-design/), Celia Wagar
 - [Map balance](https://book.leveldesignbook.com/process/combat/balance) and [Metrics](https://book.leveldesignbook.com/process/blockout/metrics), The Level Design Book
-- [InstaGib Arena map redesign](https://github.com/8tp/instagib-arena/pull/49), openness measurements and size targets
+- [InstaGib Arena map redesign](https://github.com/8tp/instagib-arena/pull/49), the spawn exposure target and the original openness target
+- [Ratz Instagib Early Access review](https://www.pcgamesn.com/ratz-instagib/ratz-instagib-early-access-review), PCGamesN, and [Steam reviews](https://steamcommunity.com/app/338170/reviews/?browsefilter=toprated): cramped maps and jump-reached high ground
+- [Lvlworld map reviews](https://lvlworld.com/review/id:2431): open layouts with height variation suit rocket jumping
