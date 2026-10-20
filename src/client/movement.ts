@@ -40,6 +40,10 @@ let keepVelocityOnTakeoff = false;
 // Vertical speed to apply on the first airborne frame of a launch from the ground.
 let pendingVerticalVelocity: number | undefined;
 let doubleJumpUsed = false;
+// One rocket jump per airtime, refreshed on landing, so it can't be chained into flight.
+let airRocketJumpUsed = false;
+// Air speed cap, raised by a rocket jump and easing back to maxAirSpeed.
+let launchSpeedCap = 0;
 // Set when a Super Jump is used, until the server clears the perk, so it can't fire twice.
 let superJumpSpent = false;
 // MoveDirection is zeroed while airborne, so input handlers read the last real value here.
@@ -148,6 +152,7 @@ function onPreSimulation(dt: number) {
 			wasAirborne = false;
 			groundTime = 0;
 			doubleJumpUsed = false;
+			airRocketJumpUsed = false;
 			// Re-jump on the landing frame itself; waiting for the Humanoid's own auto-jump
 			// leaves us on the ground long enough for friction to eat the hop.
 			if (wantsToJump()) currentHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
@@ -175,8 +180,10 @@ function onPreSimulation(dt: number) {
 	}
 
 	airVelocity = airAccelerate(airVelocity, wishDirection, dt);
-	const maxSpeed =
-		player.GetAttribute(CARRYING_FLAG_ATTRIBUTE) === true ? CtfConfig.carrierMaxSpeed : Config.maxAirSpeed;
+	// Rocket jumps can pass maxAirSpeed; the cap eases back down so strafing can't hold the extra.
+	// Flag carriers stay at their own cap so defenders can catch them.
+	launchSpeedCap = math.max(Config.maxAirSpeed, launchSpeedCap - Config.rocketJumpSpeedDecay * dt);
+	const maxSpeed = player.GetAttribute(CARRYING_FLAG_ATTRIBUTE) === true ? CtfConfig.carrierMaxSpeed : launchSpeedCap;
 	if (airVelocity.Magnitude > maxSpeed) airVelocity = airVelocity.Unit.mul(maxSpeed);
 	airVelocity = clipToWalls(airVelocity, rootPart, dt);
 
@@ -250,6 +257,8 @@ function onCharacterAdded(newCharacter: Model) {
 	wasAirborne = false;
 	keepVelocityOnTakeoff = false;
 	doubleJumpUsed = false;
+	airRocketJumpUsed = false;
+	launchSpeedCap = 0;
 }
 
 function trackJumpPad(pad: Instance) {
@@ -291,9 +300,30 @@ export function launchCharacter(velocity: Vector3, additive: boolean) {
 	const [currentHumanoid, rootPart] = body;
 
 	const newVelocity = additive ? rootPart.AssemblyLinearVelocity.add(velocity) : velocity;
-	airVelocity = flatten(newVelocity);
 	if (!additive) doubleJumpUsed = false;
+	applyLaunch(currentHumanoid, rootPart, newVelocity);
+}
 
+// Blasts the character by `blast` on top of its momentum, cancelling any fall first so a
+// rocket jump always lifts. Returns false if the airborne rocket jump is already spent.
+export function rocketJumpCharacter(blast: Vector3): boolean {
+	const body = getLiveBody();
+	if (!body) return false;
+	const [currentHumanoid, rootPart] = body;
+	if (isAirborne(currentHumanoid)) {
+		if (airRocketJumpUsed) return false;
+		airRocketJumpUsed = true;
+	}
+
+	const current = rootPart.AssemblyLinearVelocity;
+	const newVelocity = new Vector3(current.X, math.max(current.Y, 0), current.Z).add(blast);
+	launchSpeedCap = math.max(launchSpeedCap, flatten(newVelocity).Magnitude);
+	applyLaunch(currentHumanoid, rootPart, newVelocity);
+	return true;
+}
+
+function applyLaunch(currentHumanoid: Humanoid, rootPart: BasePart, newVelocity: Vector3) {
+	airVelocity = flatten(newVelocity);
 	if (!isAirborne(currentHumanoid)) {
 		// A real jump is the only reliable way off the ground: in any other state the Humanoid
 		// sees the floor and snaps back to walking. The jump's own vertical speed is replaced on

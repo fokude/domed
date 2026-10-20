@@ -22,9 +22,10 @@ export const MovementConfig = {
 
 	doubleJumpVelocity: 55,
 
-	// Right-click blasts the player along their look direction (see docs/MOVEMENT.md).
-	rocketJumpVelocity: 80,
-	rocketJumpCooldown: 3,
+	// Right-click blasts the player along their look direction, on the rail's cooldown (see
+	// docs/MOVEMENT.md). Speed past maxAirSpeed eases back down at rocketJumpSpeedDecay per second.
+	rocketJumpVelocity: 180,
+	rocketJumpSpeedDecay: 100,
 
 	// Roblox FieldOfView is vertical; 80 is roughly 110 horizontal at 16:9.
 	baseFov: 80,

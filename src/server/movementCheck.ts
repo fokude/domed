@@ -9,8 +9,9 @@ import { MovementConfig } from "shared/config";
 const Players = game.GetService("Players");
 
 const SAMPLE_INTERVAL = 0.5;
-// Fastest legitimate horizontal speed: the air speed cap plus a jump pad's push, with headroom.
-const MAX_HORIZONTAL_SPEED = MovementConfig.maxAirSpeed + 80;
+// Fastest legitimate horizontal speed: the air speed cap plus a rocket jump's blast, with
+// headroom for a jump pad's push.
+const MAX_HORIZONTAL_SPEED = MovementConfig.maxAirSpeed + MovementConfig.rocketJumpVelocity + 80;
 // Kick after this many violations within the window.
 const STRIKES_TO_KICK = 4;
 const STRIKE_WINDOW = 20;

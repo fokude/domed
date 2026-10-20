@@ -13,7 +13,7 @@ to [Engine quirks](#engine-quirks) so it isn't undone later.
 | Air strafe  | A or D while turning the mouse in the air | `airAccelerate`, `airSpeedCap`, `maxAirSpeed` |
 | Bunny hop   | Hold Space, or scroll, through landings   | `bhopWindow`, `bhopSpeedLoss`, `hopBoost*`    |
 | Double jump | Space in the air                          | `doubleJumpVelocity`                          |
-| Rocket jump | Right-click                               | `rocketJumpVelocity`, `rocketJumpCooldown`    |
+| Rocket jump | Right-click                               | `rocketJumpVelocity`, `rocketJumpSpeedDecay`  |
 
 Use `/map TestRange` in Studio to test movement on its bhop strip and jump pads. Wall jump, wall slide, slide and dodge
 were tried and cut; see the git history if they come back.
@@ -56,12 +56,23 @@ player and the module adopts the measured velocity.
 **Double jump** sets vertical speed and redirects horizontal momentum toward the input
 direction, keeping at least walk speed.
 
-**Rocket jump** (`client/rocketJump.ts`) adds 80 studs/s along the look direction, every 3
-seconds, on the ground or in the air. The downward part of the look direction is dropped, so
-looking up sends the player up, looking ahead is a dash, and aiming at the floor only pushes
-sideways. It never hurts anyone. The white bar under the rail's cooldown shows when it's
-ready. Horizontal speed is still capped at `maxAirSpeed` on the next frame, so it can't push
-past the speed limit, only redirect and lift.
+**Rocket jump** (`client/rocketJump.ts`, `rocketJumpCharacter` in `movement.ts`) adds 180
+studs/s along the look direction on top of the player's momentum. Any fall is cancelled first,
+so it always lifts. The downward part of the look direction is dropped, so looking up sends
+the player up (about 80 studs high at normal gravity), looking ahead is a huge dash, and aiming
+at the floor only pushes sideways. It never hurts anyone.
+
+- **Cooldown matches the rail** (`WeaponConfig.cooldown`, 0.75 s), shown by the white bar
+  under the rail's. The owner wanted both buttons on the same rhythm.
+- **Once per airtime.** On the ground it only waits for the cooldown; in the air it works once
+  and comes back on landing, like the double jump. Without this, a 0.75 s cooldown would let a
+  player chain blasts upward and fly indefinitely.
+- **It can pass the speed cap.** A blast raises the air speed cap to the new speed, and the cap
+  then eases back to `maxAirSpeed` at `rocketJumpSpeedDecay` (100 studs/s per second).
+  Strafing can't hold the extra speed because the cap only goes down. Flag carriers keep
+  `carrierMaxSpeed`. The server's speed check allows for the blast (`movementCheck.ts`), and
+  top-speed records still ignore anything past `maxAirSpeed` + 10, so records stay about
+  strafing.
 
 Why: the move to instagib (WEAPON.md) took its lead from
 [Ratz Instagib](https://store.steampowered.com/app/338170), whose rocket-jump button makes
@@ -73,8 +84,10 @@ It takes right-click from the removed shove.
   needs a surface to hit and is harder to learn; it was rejected for now.
 - **Rejected: rocket jump plus shove on one button** (blast a player to push them, a surface
   to launch yourself). Too complex to read; the owner preferred separate controls.
-- **Untested.** Strength and cooldown are first guesses: 80 straight up is about 16 studs of
-  height, between a double jump (55) and a Super Jump (110).
+- **Ridiculously strong on purpose.** It started at 80 studs/s every 3 seconds; the owner
+  found it far too weak for a movement shooter and asked for it much stronger, on the rail's
+  cooldown. 180 is a first guess, untested in Studio. Maps built before it may have roofs and
+  ledges that are now reachable; check them with `npm run preview` and in playtests.
 
 **Launches** (`launchCharacter`) are used by jump pads and the rocket jump. From
 the ground they start a real jump and replace its vertical speed on the first airborne
