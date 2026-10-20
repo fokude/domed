@@ -271,11 +271,11 @@ metrics = {
     "spots": len(spots),
     "openness": round(visible / pairs, 3) if pairs else 0,
     "spawnExposure": round(sum(exposed) / len(spots), 3) if spots else 0,
-    "targets": {"openness": 0.25, "spawnExposure": 0.2},
+    "targets": {"openness": [0.35, 0.5], "spawnExposure": 0.2},
 }
 with open(os.path.join(out_dir, "metrics.json"), "w") as f:
     json.dump(metrics, f, indent=2)
-print(f"Openness {metrics['openness']:.0%} (target ~25%), spawn exposure {metrics['spawnExposure']:.0%} (target <20%)")
+print(f"Openness {metrics['openness']:.0%} (target 35 to 50%), spawn exposure {metrics['spawnExposure']:.0%} (target <20%)")
 
 # Exposure dots for the exposure plan: red spots can see a spawn, green can't.
 exposure_dots = []
