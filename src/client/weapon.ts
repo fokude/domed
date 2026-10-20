@@ -17,7 +17,6 @@ const UserInputService = game.GetService("UserInputService");
 const Workspace = game.GetService("Workspace");
 
 const LOCAL_BEAM_COLOR = Color3.fromRGB(0, 220, 255);
-const ROCKET_BEAM_COLOR = Color3.fromRGB(255, 150, 40);
 const ENEMY_BEAM_COLOR = Color3.fromRGB(255, 70, 40);
 const BEAM_FADE_TIME = 0.5;
 // Where the beam appears to leave the gun, relative to the camera (right, up, forward).
@@ -84,14 +83,6 @@ function rocketBlast(character: Model, blastPoint: Vector3) {
 	const full = MovementConfig.rocketJumpFullRadius;
 	const falloff = 1 - math.max(0, distance - full) / (MovementConfig.rocketJumpRadius - full);
 	rocketJumpCharacter(offset.Unit.mul(MovementConfig.rocketJumpVelocity * falloff));
-
-	// Purely visual: no pressure, no broken joints, and only this client sees it.
-	const explosion = new Instance("Explosion");
-	explosion.Position = blastPoint;
-	explosion.BlastPressure = 0;
-	explosion.BlastRadius = 4;
-	explosion.DestroyJointRadiusPercent = 0;
-	explosion.Parent = effects;
 	playSound("rocketJump");
 }
 
@@ -114,8 +105,7 @@ function fire(rocket: boolean) {
 	const hitPosition = result ? result.Position : origin.add(direction);
 	const hitPart = result?.Instance.IsA("BasePart") ? resolveHitPart(result.Instance) : undefined;
 
-	const color = rocket ? ROCKET_BEAM_COLOR : beamColor(player, LOCAL_BEAM_COLOR);
-	drawBeam(cameraCFrame.PointToWorldSpace(MUZZLE_OFFSET), hitPosition, color);
+	drawBeam(cameraCFrame.PointToWorldSpace(MUZZLE_OFFSET), hitPosition, beamColor(player, LOCAL_BEAM_COLOR));
 
 	// The server sees a rocket shot as a miss, so others still see the beam and the shared
 	// cooldown is enforced there too.

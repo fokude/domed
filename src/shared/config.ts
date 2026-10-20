@@ -26,7 +26,7 @@ export const MovementConfig = {
 	// player away at up to rocketJumpVelocity: full strength within rocketJumpFullRadius studs of
 	// their root, fading to nothing at rocketJumpRadius. Speed past maxAirSpeed eases back down
 	// at rocketJumpSpeedDecay per second. See docs/MOVEMENT.md.
-	rocketJumpVelocity: 180,
+	rocketJumpVelocity: 90,
 	rocketJumpFullRadius: 4,
 	rocketJumpRadius: 12,
 	rocketJumpSpeedDecay: 100,

@@ -57,11 +57,11 @@ player and the module adopts the measured velocity.
 direction, keeping at least walk speed.
 
 **Rocket jump** (right-click, in `client/weapon.ts`; the push is `rocketJumpCharacter` in
-`movement.ts`) works like a TF2 Soldier's. Right-click fires an orange shot along the look
+`movement.ts`) works like a TF2 Soldier's. Right-click fires a normal rail shot (same beam, no explosion) along the look
 direction. Where it lands, it blasts the shooter away from that point, if the point is within
 `rocketJumpRadius` (12 studs) of their root. Inside `rocketJumpFullRadius` (4 studs) the blast
-is full strength (`rocketJumpVelocity`, 180 studs/s), fading linearly to nothing at 12. Aim at
-your feet to go straight up (about 80 studs high at normal gravity), down and behind you to
+is full strength (`rocketJumpVelocity`, 90 studs/s), fading linearly to nothing at 12. Aim at
+your feet to go straight up (about 20 studs high at normal gravity), down and behind you to
 launch forward, or at a wall to kick off it. Aiming at open sky does nothing.
 
 - **No damage.** The shot never hits anyone; kills stay on left-click. The server sees it as a
@@ -96,8 +96,8 @@ History and rejected options:
   would add a second way to kill; nobody dies to a rocket jump they didn't aim at them.
 - **Rejected: rocket jump plus shove on one button** (blast a player to push them, a surface
   to launch yourself). Too complex to read; the owner preferred separate controls.
-- **Ridiculously strong on purpose.** It started at 80 studs/s; the owner found it far too
-  weak for a movement shooter. 180 is a first guess, untested in Studio. Maps built before it
+- **Strength.** It started at 80 studs/s; the owner found it far too
+  weak for a movement shooter, so it went to 180, then was halved to 90 after the owner tried it. Untested in Studio. Maps built before it
   may have roofs and ledges that are now reachable; check them with `npm run preview` and in
   playtests.
 
