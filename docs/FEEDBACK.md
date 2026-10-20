@@ -32,8 +32,11 @@ the flashiest kill, and the game's name already means one. They earn nothing ext
 XP or score), so the kill rules stay simple and nobody is pushed back into headshot-only
 play. The ping is a placeholder until a Creator Store sound is picked.
 
-**Multi-kills** (each within 4 seconds of the last) escalate the headline (DOUBLE DOME, TRIPLE
-DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch each step.
+**Multi-kills** (each within 4 seconds of the last) escalate the headline (DOUBLE KILL, TRIPLE
+KILL, QUAD KILL, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch each step. If
+every kill in the chain was a headshot it reads DOUBLE DOME, TRIPLE DOME, QUAD DOME instead,
+in the headshot pink; one body kill switches the chain to the KILL names, since "dome" means a
+headshot.
 **Streaks** (kills without dying) call out milestones at 3, 5, 10 and 15. Training dummy kills
 (on the Test Range and in the warm-up) escalate multi-kills but earn no XP popup and don't
 count toward streaks, so practice can't carry a streak into a match. Shield hits, shield

@@ -14,8 +14,10 @@ const Workspace = game.GetService("Workspace");
 
 // Kills within this many seconds of each other chain into a multi-kill.
 const MULTI_KILL_WINDOW = 4;
-// The first kill reads GIBBED, or DOMED for a headshot; chained kills escalate from there.
-const MULTI_KILL_NAMES = ["GIBBED", "DOUBLE DOME", "TRIPLE DOME", "QUAD DOME", "UNSTOPPABLE"];
+// Headlines by multi-kill step. A chain where every kill was a headshot uses the DOME names;
+// any body kill in the chain switches it to the KILL names.
+const MULTI_KILL_NAMES = ["GIBBED", "DOUBLE KILL", "TRIPLE KILL", "QUAD KILL", "UNSTOPPABLE"];
+const MULTI_DOME_NAMES = ["DOMED", "DOUBLE DOME", "TRIPLE DOME", "QUAD DOME", "UNSTOPPABLE"];
 // Kill streak milestones (kills without dying) and their callouts.
 const STREAK_CALLOUTS = new Map<number, string>([
 	[3, "ON A ROLL"],
@@ -42,6 +44,8 @@ const edges: Frame[] = [];
 let headlineToken = 0;
 let streakToken = 0;
 let multiKill = 0;
+// Whether every kill in the current multi-kill chain was a headshot.
+let allHeadshots = false;
 let lastKillAt = -math.huge;
 let streak = 0;
 
@@ -181,11 +185,13 @@ function headBurst(position: Vector3, headshot: boolean) {
 }
 
 // Practice kills (training dummies) escalate multi-kills, so they can be tried out, but earn no
-// XP and don't count toward streaks. Headshots read DOMED in the headshot color, pop bigger,
-// and add the headshot sound.
+// XP and don't count toward streaks. Headshots pop bigger and add the headshot sound; an
+// all-headshot chain reads DOMED, DOUBLE DOME and up in the headshot color.
 function onKill(practice: boolean, headshot: boolean) {
 	const now = os.clock();
-	multiKill = now - lastKillAt <= MULTI_KILL_WINDOW ? multiKill + 1 : 1;
+	const chained = now - lastKillAt <= MULTI_KILL_WINDOW;
+	multiKill = chained ? multiKill + 1 : 1;
+	allHeadshots = headshot && (!chained || allHeadshots);
 	lastKillAt = now;
 	if (!practice) streak += 1;
 
@@ -196,9 +202,11 @@ function onKill(practice: boolean, headshot: boolean) {
 	if (headshot) playSound("headshot");
 
 	const killColor = headshot ? Palette.Headshot : KILL_RED;
-	const name = step === 0 && headshot ? "DOMED" : MULTI_KILL_NAMES[step];
-	showHeadline(name, multiKill > 1 ? MULTI_GOLD : killColor, headshot ? 2.2 : 1.6);
-	crosshairBurst(multiKill > 1 ? MULTI_GOLD : killColor, headshot ? 80 : 56);
+	// All-headshot chains stay in the headshot color; mixed chains turn gold.
+	const headlineColor = allHeadshots ? Palette.Headshot : multiKill > 1 ? MULTI_GOLD : KILL_RED;
+	const name = (allHeadshots ? MULTI_DOME_NAMES : MULTI_KILL_NAMES)[step];
+	showHeadline(name, headlineColor, headshot ? 2.2 : 1.6);
+	crosshairBurst(headlineColor, headshot ? 80 : 56);
 	edgeFlash(killColor);
 	if (practice) return;
 	xpPopup(XpConfig.kill);
