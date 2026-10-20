@@ -93,7 +93,7 @@ atrium, which are the low-gravity map's character.
 
 A character is about 5.5 studs tall, so a stud is roughly 0.3 m.
 
-- **Walking** is 26 studs/s, a good bhop is 50 to 80, and the cap is 140.
+- **Walking** is 32 studs/s, a good bhop is 50 to 80, and the cap is 140.
 - **Footprint.** InstaGib Arena standardized on 96 by 72 m maps for small groups. DOMED has more
   players and moves faster, so main maps should be about **350 to 450 by 250 to 300 studs**.
 - **CTF.** 20 to 25 seconds of carrying at around 26 to 40 studs/s (carriers are capped at 55)

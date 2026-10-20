@@ -3,7 +3,7 @@ import { ModeId } from "./modes";
 // Gameplay tuning shared by server and client.
 
 export const MovementConfig = {
-	walkSpeed: 26,
+	walkSpeed: 32,
 	jumpHeight: 7.5,
 
 	// Air strafing follows the Quake/Half-Life model: the air speed cap is tiny,
