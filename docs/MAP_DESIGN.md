@@ -77,7 +77,7 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 | Halcyon Station | 31%      | 10%            | Spawn pockets and escape pods; the walkable tube roofs and balcony stay open by design (was 40% and 86%) |
 | Infernal Spire  | 19%      | 10%            | Gallery tunnel round the lake, spawn rooms, lava columns (was 72% and 99.6%)                             |
 | Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map                                        |
-| Foundry         | 10%      | 18%            | Close quarters by design: well under the open-map target                                                 |
+| Foundry         | 37%      | 16%            | Rebuilt for instagib: one open hall, rocket-jump tiers, spawn rooms behind the walls (was 10% and 18%)   |
 
 These were measured against the old 25% openness target. Free-for-all maps that scatter spawns
 everywhere score high on spawn exposure almost by design; openness is the clearer signal for
@@ -106,7 +106,24 @@ the raised mid islands looking into the temples past the screens, so the temples
 fronts and side doors (14%). Ruined walls on the low islands' inner edges brought openness to
 28%, which suits an open-air map.
 
-**Foundry** first measured 32% open, because the sampler counted its unreachable roof; the
+**Foundry** was rebuilt in October 2026 as the pilot for the instagib rules. It had been a
+three-by-three grid of rooms with 14-stud doorways, baffle walls down its runway, crates and a
+roof at 52 (10% open): exactly the clutter the owner found restricted movement. Now it is one
+360 by 260 hall open to the sky, so the colosseum crowd looks down into it. Four tiers, each a
+rocket jump above the last: the floor, four big ingot stacks at 10 (the floor's only cover,
+big enough to land on at speed), full-width team catwalks at 20 with ramps alongside their
+front edges, and the crane at 38 over the molten pit, also reached by two jump pads. Walls are
+70 tall so nobody rocket jumps out. The side lanes past the wall furnaces are 260-stud
+runways, and the lanes in front of the catwalks run 300.
+
+Spawns took two passes. Pockets under the catwalks measured 40% exposure, since their open
+ends faced the side lanes. Spawn rooms behind the north and south walls, entered through four
+20-stud doors under each catwalk, measured 50%: from the middle of the hall, rays passed
+diagonally through the inner doors to the free-for-all spawns at the back. A baffle wall just
+inside each door, wider than the door, brought it to 16%; openness is 37% (the spawn rooms,
+which are sampled too, pull it down a little).
+
+The previous version's history: it first measured 32% open, because the sampler counted its unreachable roof; the
 `PlayableTop` map attribute now excludes spots above the playable space. The exposure plan
 then showed spawns in the open in the corners and Furnace Row (68%), so every spawn moved into
 a pocket: a wall across the back of the room with the way out at one end (18%). At 10% open
@@ -191,7 +208,7 @@ can't.
 | Gridline        | Mid-size synthwave map built around a speed trench     | Speed lanes                | All five                                    |
 | Halcyon Station | Low-gravity station interiors: hangars, tubes, reactor | Indoor low gravity         | All five                                    |
 | Skyreach        | Floating sky islands linked by jump pads, air control  | Quake 3's The Longest Yard | Deathmatch, Team Deathmatch, Domination     |
-| Foundry         | Dense industrial interior, many levels, close fights   | Unreal Tournament's Deck16 | Deathmatch, Team Deathmatch, Hardpoint      |
+| Foundry         | Open forge hall around a molten pit, rocket-jump tiers | Rocket-jump arena          | Deathmatch, Team Deathmatch, Hardpoint      |
 
 Every map is measured with `npm run preview` against the targets above before it ships, and
 checked in Studio with `/openness`.
