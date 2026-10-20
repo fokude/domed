@@ -7,8 +7,9 @@ Everyone carries the same one-shot railgun, and any hit kills: instagib. Code:
 ## Instagib, not headshots only
 
 Until October 2026 only headshots killed. The owner moved DOMED to instagib, after
-[Ratz Instagib](https://store.steampowered.com/app/338170), a one-shot railgun arena shooter
-where any hit kills and a rocket jump keeps targets hard to hit.
+[Ratz Instagib](https://store.steampowered.com/app/338170), which its Steam page describes as
+a one-shot railgun arena shooter with a rocket-jump button that makes moving targets harder to
+hit. Right-click is now a TF2-style rocket jump on the rail's cooldown (see MOVEMENT.md).
 
 - **Movement does the work the head hitbox did.** Instagib is hard because targets move fast,
   not because the target is small. DOMED already has bunny hopping and air strafing at up to

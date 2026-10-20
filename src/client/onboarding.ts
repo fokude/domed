@@ -39,7 +39,7 @@ const STEPS: [string, string][] = [
 	["BUNNY HOP", "Hold SPACE, or spin the scroll wheel, to jump again the moment you land."],
 	["AIR STRAFE", "In the air, hold A and turn your mouse left (or D and right) to gain speed."],
 	["DOUBLE JUMP", "Press SPACE again in the air."],
-	["ROCKET JUMP", "Right-click to blast yourself the way you're looking. Look up to fly."],
+	["ROCKET JUMP", "Right-click at the floor or a wall to blast yourself away. Aim at your feet to fly up."],
 	["MENU", "Press M to open the menu any time. Leaving mid-match counts as a death."],
 ];
 

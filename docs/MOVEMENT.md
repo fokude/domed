@@ -13,7 +13,7 @@ to [Engine quirks](#engine-quirks) so it isn't undone later.
 | Air strafe  | A or D while turning the mouse in the air | `airAccelerate`, `airSpeedCap`, `maxAirSpeed` |
 | Bunny hop   | Hold Space, or scroll, through landings   | `bhopWindow`, `bhopSpeedLoss`, `hopBoost*`    |
 | Double jump | Space in the air                          | `doubleJumpVelocity`                          |
-| Rocket jump | Right-click                               | `rocketJumpVelocity`, `rocketJumpSpeedDecay`  |
+| Rocket jump | Right-click at a nearby surface           | `rocketJump*`                                 |
 
 Use `/map TestRange` in Studio to test movement on its bhop strip and jump pads. Wall jump, wall slide, slide and dodge
 were tried and cut; see the git history if they come back.
@@ -56,38 +56,50 @@ player and the module adopts the measured velocity.
 **Double jump** sets vertical speed and redirects horizontal momentum toward the input
 direction, keeping at least walk speed.
 
-**Rocket jump** (`client/rocketJump.ts`, `rocketJumpCharacter` in `movement.ts`) adds 180
-studs/s along the look direction on top of the player's momentum. Any fall is cancelled first,
-so it always lifts. The downward part of the look direction is dropped, so looking up sends
-the player up (about 80 studs high at normal gravity), looking ahead is a huge dash, and aiming
-at the floor only pushes sideways. It never hurts anyone.
+**Rocket jump** (right-click, in `client/weapon.ts`; the push is `rocketJumpCharacter` in
+`movement.ts`) works like a TF2 Soldier's. Right-click fires an orange shot along the look
+direction. Where it lands, it blasts the shooter away from that point, if the point is within
+`rocketJumpRadius` (12 studs) of their root. Inside `rocketJumpFullRadius` (4 studs) the blast
+is full strength (`rocketJumpVelocity`, 180 studs/s), fading linearly to nothing at 12. Aim at
+your feet to go straight up (about 80 studs high at normal gravity), down and behind you to
+launch forward, or at a wall to kick off it. Aiming at open sky does nothing.
 
-- **Cooldown matches the rail** (`WeaponConfig.cooldown`, 0.75 s), shown by the white bar
-  under the rail's. The owner wanted both buttons on the same rhythm.
-- **Once per airtime.** On the ground it only waits for the cooldown; in the air it works once
-  and comes back on landing, like the double jump. Without this, a 0.75 s cooldown would let a
-  player chain blasts upward and fly indefinitely.
+- **No damage.** The shot never hits anyone; kills stay on left-click. The server sees it as a
+  missed rail shot, so other players see the beam.
+- **Shares the rail's cooldown.** One weapon with two fire modes: a rocket jump uses up your
+  shot (0.75 s, halved by Overcharge), so jumping away costs you a shot. The server's fire-rate
+  check covers both.
+- **No airtime limit.** The surface requirement already stops endless flight in open air;
+  blasting up a wall again and again is a skill, as in TF2. Watch for players climbing onto
+  roofs maps weren't built for.
 - **It can pass the speed cap.** A blast raises the air speed cap to the new speed, and the cap
   then eases back to `maxAirSpeed` at `rocketJumpSpeedDecay` (100 studs/s per second).
   Strafing can't hold the extra speed because the cap only goes down. Flag carriers keep
   `carrierMaxSpeed`. The server's speed check allows for the blast (`movementCheck.ts`), and
   top-speed records still ignore anything past `maxAirSpeed` + 10, so records stay about
   strafing.
+- **An upward blast cancels any fall first**, so it always lifts.
 
-Why: the move to instagib (WEAPON.md) took its lead from
-[Ratz Instagib](https://store.steampowered.com/app/338170), whose rocket-jump button makes
-moving targets harder to hit. Any hit kills, so a quick way out of a sightline matters more.
-It takes right-click from the removed shove.
+Why: the move to instagib (WEAPON.md) followed Ratz Instagib, whose
+[Steam page](https://store.steampowered.com/app/338170) describes a dedicated rocket-jump
+button that makes moving targets harder to hit. How Ratz's rocket jump works in detail wasn't
+researched; the mechanics here follow TF2's Soldier, which the owner named. Any hit kills, so
+a quick way out of a sightline matters more. It takes right-click from the removed shove.
 
-- **Look direction, not Quake's blast-away-from-your-feet.** The owner asked for "look up and
-  right-click to fly up". A blast that pushes away from where you aim (aim down to go up)
-  needs a surface to hit and is harder to learn; it was rejected for now.
+History and rejected options:
+
+- **First version pushed along the look direction** (look up to fly up), from a misreading of
+  the request. The owner wanted the TF2 rocket jump: shoot, and fly away from the shot.
+- **Rejected: recoil that works anywhere** (aim down to fly up, even mid-air). Simpler, but
+  loses the surface skill; the owner picked the TF2 blast.
+- **Rejected: the rocket shot killing**, either as a second rail shot or with blast damage. It
+  would add a second way to kill; nobody dies to a rocket jump they didn't aim at them.
 - **Rejected: rocket jump plus shove on one button** (blast a player to push them, a surface
   to launch yourself). Too complex to read; the owner preferred separate controls.
-- **Ridiculously strong on purpose.** It started at 80 studs/s every 3 seconds; the owner
-  found it far too weak for a movement shooter and asked for it much stronger, on the rail's
-  cooldown. 180 is a first guess, untested in Studio. Maps built before it may have roofs and
-  ledges that are now reachable; check them with `npm run preview` and in playtests.
+- **Ridiculously strong on purpose.** It started at 80 studs/s; the owner found it far too
+  weak for a movement shooter. 180 is a first guess, untested in Studio. Maps built before it
+  may have roofs and ledges that are now reachable; check them with `npm run preview` and in
+  playtests.
 
 **Launches** (`launchCharacter`) are used by jump pads and the rocket jump. From
 the ground they start a real jump and replace its vertical speed on the first airborne

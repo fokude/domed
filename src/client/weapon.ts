@@ -1,10 +1,14 @@
-// The railgun: hitscan from the camera, one shot per cooldown, hold to keep firing.
+// The railgun: hitscan from the camera, one shot per cooldown, hold to keep firing. Right-click
+// fires a rocket-jump shot on the same cooldown: it hurts no one, and blasts the shooter away
+// from where it lands if that's close enough (see docs/MOVEMENT.md).
 
 import { isAlive } from "shared/characters";
-import { WeaponConfig as Config } from "shared/config";
+import { MovementConfig, WeaponConfig as Config } from "shared/config";
 import { PERK_INFO, PerkAttribute, railCooldown, timeLeft } from "shared/perks";
 import { Remotes } from "shared/remotes";
 import { setCooldown, showHitmarker } from "./hud";
+import { rocketJumpCharacter } from "./movement";
+import { playSound } from "./sounds";
 
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
@@ -13,6 +17,7 @@ const UserInputService = game.GetService("UserInputService");
 const Workspace = game.GetService("Workspace");
 
 const LOCAL_BEAM_COLOR = Color3.fromRGB(0, 220, 255);
+const ROCKET_BEAM_COLOR = Color3.fromRGB(255, 150, 40);
 const ENEMY_BEAM_COLOR = Color3.fromRGB(255, 70, 40);
 const BEAM_FADE_TIME = 0.5;
 // Where the beam appears to leave the gun, relative to the camera (right, up, forward).
@@ -29,6 +34,7 @@ rayParams.FilterType = Enum.RaycastFilterType.Exclude;
 
 let lastShotAt = -math.huge;
 let triggerHeld = false;
+let rocketTriggerHeld = false;
 
 function drawBeam(from: Vector3, to: Vector3, color: Color3) {
 	const length = to.sub(from).Magnitude;
@@ -66,7 +72,31 @@ function resolveHitPart(part: BasePart): BasePart | undefined {
 	return undefined;
 }
 
-function fire() {
+// A rocket-jump shot landing at `blastPoint`: blasts the shooter away from it, full strength
+// within rocketJumpFullRadius of their root and fading to nothing at rocketJumpRadius.
+function rocketBlast(character: Model, blastPoint: Vector3) {
+	const root = character.FindFirstChild("HumanoidRootPart");
+	if (!root?.IsA("BasePart")) return;
+	const offset = root.Position.sub(blastPoint);
+	const distance = offset.Magnitude;
+	if (distance > MovementConfig.rocketJumpRadius || distance < 0.01) return;
+
+	const full = MovementConfig.rocketJumpFullRadius;
+	const falloff = 1 - math.max(0, distance - full) / (MovementConfig.rocketJumpRadius - full);
+	rocketJumpCharacter(offset.Unit.mul(MovementConfig.rocketJumpVelocity * falloff));
+
+	// Purely visual: no pressure, no broken joints, and only this client sees it.
+	const explosion = new Instance("Explosion");
+	explosion.Position = blastPoint;
+	explosion.BlastPressure = 0;
+	explosion.BlastRadius = 4;
+	explosion.DestroyJointRadiusPercent = 0;
+	explosion.Parent = effects;
+	playSound("rocketJump");
+}
+
+// `rocket` fires the right-click rocket-jump shot, which never claims a hit.
+function fire(rocket: boolean) {
 	const character = player.Character;
 	const camera = Workspace.CurrentCamera;
 	if (!character || !camera || !isAlive(character)) return;
@@ -84,7 +114,16 @@ function fire() {
 	const hitPosition = result ? result.Position : origin.add(direction);
 	const hitPart = result?.Instance.IsA("BasePart") ? resolveHitPart(result.Instance) : undefined;
 
-	drawBeam(cameraCFrame.PointToWorldSpace(MUZZLE_OFFSET), hitPosition, beamColor(player, LOCAL_BEAM_COLOR));
+	const color = rocket ? ROCKET_BEAM_COLOR : beamColor(player, LOCAL_BEAM_COLOR);
+	drawBeam(cameraCFrame.PointToWorldSpace(MUZZLE_OFFSET), hitPosition, color);
+
+	// The server sees a rocket shot as a miss, so others still see the beam and the shared
+	// cooldown is enforced there too.
+	if (rocket) {
+		Remotes.Fire.FireServer(origin, hitPosition, undefined);
+		if (result) rocketBlast(character, hitPosition);
+		return;
+	}
 
 	const hitCharacter = hitPart?.Parent;
 	const hitPlayer = hitCharacter?.IsA("Model") ? Players.GetPlayerFromCharacter(hitCharacter) : undefined;
@@ -111,14 +150,18 @@ function beamColor(shooter: Player, normal: Color3): Color3 {
 
 export function initWeapon() {
 	UserInputService.InputBegan.Connect((input, gameProcessed) => {
-		if (input.UserInputType === Enum.UserInputType.MouseButton1 && !gameProcessed) triggerHeld = true;
+		if (gameProcessed) return;
+		if (input.UserInputType === Enum.UserInputType.MouseButton1) triggerHeld = true;
+		if (input.UserInputType === Enum.UserInputType.MouseButton2) rocketTriggerHeld = true;
 	});
 	UserInputService.InputEnded.Connect((input) => {
 		if (input.UserInputType === Enum.UserInputType.MouseButton1) triggerHeld = false;
+		if (input.UserInputType === Enum.UserInputType.MouseButton2) rocketTriggerHeld = false;
 	});
 
 	RunService.RenderStepped.Connect(() => {
-		if (triggerHeld) fire();
+		if (triggerHeld) fire(false);
+		else if (rocketTriggerHeld) fire(true);
 		setCooldown(math.clamp((os.clock() - lastShotAt) / railCooldown(player), 0, 1));
 	});
 

@@ -59,8 +59,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | ------------------- | ----------------------------------------------------------------------- |
 | `main.client.ts`    | Entry point: camera setup and wiring server events to the UI            |
 | `movement.ts`       | All movement (see MOVEMENT.md)                                          |
-| `weapon.ts`         | Firing the railgun and drawing beams                                    |
-| `rocketJump.ts`     | The right-click rocket jump and its cooldown bar (see MOVEMENT.md)      |
+| `weapon.ts`         | Firing the railgun, the rocket-jump shot, and beams                     |
 | `menu.ts`           | Main menu and the orbiting menu camera                                  |
 | `mapVote.ts`        | Vote cards in the menu, and the on-screen vote list in the warm-up      |
 | `hud.ts`            | Crosshair, hitmarker, cooldown, kill feed, banners, respawn countdown   |

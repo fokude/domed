@@ -40,8 +40,6 @@ let keepVelocityOnTakeoff = false;
 // Vertical speed to apply on the first airborne frame of a launch from the ground.
 let pendingVerticalVelocity: number | undefined;
 let doubleJumpUsed = false;
-// One rocket jump per airtime, refreshed on landing, so it can't be chained into flight.
-let airRocketJumpUsed = false;
 // Air speed cap, raised by a rocket jump and easing back to maxAirSpeed.
 let launchSpeedCap = 0;
 // Set when a Super Jump is used, until the server clears the perk, so it can't fire twice.
@@ -152,7 +150,6 @@ function onPreSimulation(dt: number) {
 			wasAirborne = false;
 			groundTime = 0;
 			doubleJumpUsed = false;
-			airRocketJumpUsed = false;
 			// Re-jump on the landing frame itself; waiting for the Humanoid's own auto-jump
 			// leaves us on the ground long enough for friction to eat the hop.
 			if (wantsToJump()) currentHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
@@ -257,7 +254,6 @@ function onCharacterAdded(newCharacter: Model) {
 	wasAirborne = false;
 	keepVelocityOnTakeoff = false;
 	doubleJumpUsed = false;
-	airRocketJumpUsed = false;
 	launchSpeedCap = 0;
 }
 
@@ -304,22 +300,17 @@ export function launchCharacter(velocity: Vector3, additive: boolean) {
 	applyLaunch(currentHumanoid, rootPart, newVelocity);
 }
 
-// Blasts the character by `blast` on top of its momentum, cancelling any fall first so a
-// rocket jump always lifts. Returns false if the airborne rocket jump is already spent.
-export function rocketJumpCharacter(blast: Vector3): boolean {
+// Blasts the character by `blast` on top of its momentum. An upward blast cancels any fall
+// first, so a rocket jump always lifts.
+export function rocketJumpCharacter(blast: Vector3) {
 	const body = getLiveBody();
-	if (!body) return false;
+	if (!body) return;
 	const [currentHumanoid, rootPart] = body;
-	if (isAirborne(currentHumanoid)) {
-		if (airRocketJumpUsed) return false;
-		airRocketJumpUsed = true;
-	}
-
 	const current = rootPart.AssemblyLinearVelocity;
-	const newVelocity = new Vector3(current.X, math.max(current.Y, 0), current.Z).add(blast);
+	const startY = blast.Y > 0 ? math.max(current.Y, 0) : current.Y;
+	const newVelocity = new Vector3(current.X, startY, current.Z).add(blast);
 	launchSpeedCap = math.max(launchSpeedCap, flatten(newVelocity).Magnitude);
 	applyLaunch(currentHumanoid, rootPart, newVelocity);
-	return true;
 }
 
 function applyLaunch(currentHumanoid: Humanoid, rootPart: BasePart, newVelocity: Vector3) {

@@ -11,7 +11,6 @@ const HITMARKER_TIME = 0.15;
 
 let hitmarker: Frame;
 let cooldownFill: Frame;
-let rocketJumpFill: Frame;
 let feed: Frame;
 let banner: TextLabel;
 let respawnLabel: TextLabel;
@@ -72,24 +71,6 @@ function buildCrosshair(gui: ScreenGui) {
 		"Frame",
 		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: Palette.Cyan, BorderSizePixel: 0 },
 		cooldownTrack,
-	);
-	// The rocket jump's cooldown, shorter and white, just under the rail's.
-	const rocketJumpTrack = create(
-		"Frame",
-		{
-			AnchorPoint: new Vector2(0.5, 0),
-			Position: new UDim2(0.5, 0, 0.5, 24),
-			Size: UDim2.fromOffset(24, 2),
-			BackgroundColor3: Palette.Black,
-			BackgroundTransparency: 0.5,
-			BorderSizePixel: 0,
-		},
-		gui,
-	);
-	rocketJumpFill = create(
-		"Frame",
-		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: Palette.White, BorderSizePixel: 0 },
-		rocketJumpTrack,
 	);
 }
 
@@ -222,10 +203,6 @@ export function showBanner(text: string, color: Color3, duration: number) {
 
 export function setCooldown(fraction: number) {
 	cooldownFill.Size = UDim2.fromScale(fraction, 1);
-}
-
-export function setRocketJumpCooldown(fraction: number) {
-	rocketJumpFill.Size = UDim2.fromScale(fraction, 1);
 }
 
 // Adds a line to the kill feed; `richText` may use <font> tags.
