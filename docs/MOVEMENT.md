@@ -15,14 +15,13 @@ to [Engine quirks](#engine-quirks) so it isn't undone later.
 | Double jump | Space in the air                          | `doubleJumpVelocity`                          |
 | Rocket jump | Right-click at a nearby surface           | `rocketJump*`                                 |
 
-**Walk speed** is 60 studs/s (`walkSpeed`), raised from 26 to 32, 45 and then 60 after the
-move to instagib: the owner wanted base movement much faster, since moving is how players
-survive one-hit kills. Air acceleration scales with walk speed (as Quake's does with the wish
-speed), so the step to 32 also made strafing gain speed about 23% faster. For the later steps
-`airAccelerate` came down (30, then 21, now 16) to keep that strafing feel, so only ground
-speed changed. `hopBoostMaxSpeed` rose with it (50, 60, now 75) so chained hops still have a
-range to boost through above walking speed, and the CTF carrier cap (`carrierMaxSpeed`) went
-from 55 to 70 so carriers aren't slower than walking. The 140 cap is unchanged.
+**Walk speed** is 45 studs/s (`walkSpeed`), raised from 26 to 32 and then 45 after the move
+to instagib: the owner wanted base movement much faster, since moving is how players survive
+one-hit kills. Air acceleration scales with walk speed (as Quake's does with the wish speed),
+so the step to 32 also made strafing gain speed about 23% faster. For the step to 45,
+`airAccelerate` went from 30 to 21 to keep that strafing feel, so only ground speed changed.
+`hopBoostMaxSpeed` went from 50 to 60 so chained hops still have a range to boost through
+above walking speed. The 140 cap is unchanged. A step to 60 (with `airAccelerate` 16, hop boost to 75 and the carrier cap at 70) was tried and reverted: the owner preferred 45.
 
 Use `/map TestRange` in Studio to test movement on its bhop strip and jump pads. Wall jump, wall slide, slide and dodge
 were tried and cut; see the git history if they come back.

@@ -3,12 +3,12 @@ import { ModeId } from "./modes";
 // Gameplay tuning shared by server and client.
 
 export const MovementConfig = {
-	walkSpeed: 60,
+	walkSpeed: 45,
 	jumpHeight: 7.5,
 
 	// Air strafing follows the Quake/Half-Life model: the air speed cap is tiny,
 	// so speed is only gained by strafing while turning the camera.
-	airAccelerate: 16,
+	airAccelerate: 21,
 	airSpeedCap: 6,
 	maxAirSpeed: 140,
 
@@ -18,7 +18,7 @@ export const MovementConfig = {
 	// Low-speed strafing gains little because each push swings the velocity a long way, so
 	// chained hops get a boost until hopBoostMaxSpeed. 0 turns it off.
 	hopBoost: 0.12,
-	hopBoostMaxSpeed: 75,
+	hopBoostMaxSpeed: 60,
 
 	doubleJumpVelocity: 55,
 
@@ -170,7 +170,7 @@ export const CtfConfig = {
 	// Seconds a dropped flag waits before returning home on its own.
 	flagReturnTime: 20,
 	// Top air speed while carrying a flag, so defenders can catch runners.
-	carrierMaxSpeed: 70,
+	carrierMaxSpeed: 55,
 	pickupRadius: 5,
 	captureRadius: 7,
 };
