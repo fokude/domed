@@ -40,15 +40,15 @@ features against it.
 
 ## How DOMED applies this
 
-| Principle           | Already in DOMED                                                                                                                              |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Fast, cheap failure | 1.5 s respawns in free-for-all and Team Deathmatch; spawn protection                                                                          |
-| Fair deaths         | Client-side hits (what you see is what lands); visible beams; death recap with distance and killer speed                                      |
-| Early competence    | Body-shot knockback, which earns the kill if it sends someone into a hazard or the void; teams balanced by hidden rating; warm-up and dummies |
-| Visible improvement | Levels, lifetime stats, top speed and longest headshot records, announced when beaten                                                         |
-| Friends             | Short matches; friends kept on the same team when it stays fair                                                                               |
-| Depth               | Air strafing, bhop, long-range headshots in the air                                                                                           |
-| Fast first minute   | First-time players skip the menu; one lesson at a time on screen, cleared by doing it                                                         |
+| Principle           | Already in DOMED                                                                                         |
+| ------------------- | -------------------------------------------------------------------------------------------------------- |
+| Fast, cheap failure | 1.5 s respawns in free-for-all and Team Deathmatch; spawn protection                                     |
+| Fair deaths         | Client-side hits (what you see is what lands); visible beams; death recap with distance and killer speed |
+| Early competence    | Teams balanced by hidden rating; warm-up and dummies                                                     |
+| Visible improvement | Levels, lifetime stats, top speed and longest headshot records, announced when beaten                    |
+| Friends             | Short matches; friends kept on the same team when it stays fair                                          |
+| Depth               | Air strafing, bhop, long-range headshots in the air                                                      |
+| Fast first minute   | First-time players skip the menu; one lesson at a time on screen, cleared by doing it                    |
 
 ## Ideas that keep the identity
 
@@ -63,9 +63,8 @@ None of these change one-shot headshots or air strafing. Ranked by expected valu
    players they're nearly there, and teaches that only heads count.
 4. **Personal bests during play.** Shipped. "NEW TOP SPEED" or "LONGEST HEADSHOT" the moment it
    happens, from stats already saved. Visible improvement that doesn't need kills.
-5. **Knockback kill credit.** Shipped: within 4 seconds of the body shot, with full kill
-   rewards except the longest-headshot record. Knocking someone into a hazard or off the map counts as your
-   kill. Rewards body shots near edges without body-shot damage.
+5. **Knockback kill credit.** Shipped, then removed with knockback in the move to instagib
+   (see WEAPON.md). Knocking someone into a hazard or off the map counted as your kill.
 6. **Faster first impression.** Shipped. First-time players skip the menu and drop straight
    into the warm-up or match (spawn protection covers a mid-match landing). Instead of a card
    of rules, one lesson shows at a time (shoot, bunny hop, air strafe, double jump) and clears

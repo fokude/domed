@@ -27,10 +27,10 @@ Bots fill near-empty free-for-all matches. Code: `server/bots.ts`; tuning in `Bo
   (0.6 s), and fires 30% slower than a player. Each shot aims at the head with a random error
   whose radius grows with distance and the target's speed, so moving targets are harder to
   hit, as for players. Rough headshot odds: about 65% at 20 studs against a still target,
-  about 13% at 60 studs against one moving at 30. Misses near the body still push the target.
+  about 13% at 60 studs against one moving at 30.
   Spawn-protected players aren't targeted, and shields work against bots as against players.
 - **Rewards.** Killing a bot counts as a kill for the match score and pays XP, with full kill
-  feedback, and body shots that knock a bot into a hazard credit the kill. Bots never affect
+  feedback. Bots never affect
   ratings, never appear in standings, and don't count toward the longest-headshot record, so
   they can't inflate anything that measures skill against players.
 - **Clearly bots.** Named "[BOT] Name" in the kill feed and above their heads. Disguising

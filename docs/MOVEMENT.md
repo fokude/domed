@@ -55,7 +55,7 @@ player and the module adopts the measured velocity.
 **Double jump** sets vertical speed and redirects horizontal momentum toward the input
 direction, keeping at least walk speed.
 
-**Launches** (`launchCharacter`) are used by jump pads and body-shot knockback. From
+**Launches** (`launchCharacter`) are used by jump pads. From
 the ground they start a real jump and replace its vertical speed on the first airborne
 frame. In the air they set velocity directly.
 
@@ -87,7 +87,7 @@ simplifying the code it explains.
 5. **`UserInputService.MouseDeltaSensitivity` has no effect on the default first-person
    camera.** Sensitivity is left to each player's Roblox setting.
 6. **Clients own their character's physics.** Movement must run on the client, and the
-   server can't push a player by setting velocity. Knockback is sent to the victim's client
-   through the `Knockback` remote.
+   server can't push a player by setting velocity. Anything that pushes a player has to run
+   on, or be sent to, their client.
 7. **`Workspace:Spherecast` ignores parts the sphere starts inside.** The wall probe starts
    at the root, so it relies on the root never being inside a wall.

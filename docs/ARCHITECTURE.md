@@ -28,8 +28,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | File                  | Owns                                                                                     |
 | --------------------- | ---------------------------------------------------------------------------------------- |
 | `main.server.ts`      | Entry point: wires the modules together                                                  |
-| `combat.ts`           | Validating railgun shots and shoves, kills, knockback and kill credit                    |
-| `knockback.ts`        | The body-shot push, shared by player and bot shots; pauses speed records                 |
+| `combat.ts`           | Validating railgun shots, and kills                                                      |
 | `streaks.ts`          | Kill streaks, broadcast to everyone when they get big or end                             |
 | `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection                           |
 | `hazards.ts`          | Lava and falling out of the map                                                          |
@@ -61,7 +60,6 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `main.client.ts`    | Entry point: camera setup and wiring server events to the UI                  |
 | `movement.ts`       | All movement (see MOVEMENT.md)                                                |
 | `weapon.ts`         | Firing the railgun and drawing beams                                          |
-| `shove.ts`          | The shove input and its cooldown bar (see WEAPON.md)                          |
 | `menu.ts`           | Main menu and the orbiting menu camera                                        |
 | `mapVote.ts`        | Vote cards in the menu, and the on-screen vote list in the warm-up            |
 | `hud.ts`            | Crosshair, hitmarker, cooldown, kill feed, banners, respawn countdown         |

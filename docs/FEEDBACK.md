@@ -12,16 +12,15 @@ playing against their interest. Roblox's audience is young, which makes this mat
 
 ## What happens on a kill
 
-| Layer           | Detail                                                                    | Who sees it               |
-| --------------- | ------------------------------------------------------------------------- | ------------------------- |
-| Headline        | "DOMED" pops in oversized and settles, then fades                         | Killer                    |
-| Crosshair burst | A ring expands from the crosshair                                         | Killer                    |
-| Edge flash      | A brief red flash at the screen edges                                     | Killer                    |
-| XP popup        | "+10 XP" drifts up beside the crosshair                                   | Killer                    |
-| Sound           | A bright tick layered over a low thump                                    | Killer                    |
-| Head burst      | Particles burst from the victim's head                                    | Everyone                  |
-| Death sound     | Plays for the victim                                                      | Victim                    |
-| Ring-out        | "RING OUT!" headline in gold, RING OUT in the kill feed, and a crowd roar | Killer; roar for everyone |
+| Layer           | Detail                                            | Who sees it |
+| --------------- | ------------------------------------------------- | ----------- |
+| Headline        | "DOMED" pops in oversized and settles, then fades | Killer      |
+| Crosshair burst | A ring expands from the crosshair                 | Killer      |
+| Edge flash      | A brief red flash at the screen edges             | Killer      |
+| XP popup        | "+10 XP" drifts up beside the crosshair           | Killer      |
+| Sound           | A bright tick layered over a low thump            | Killer      |
+| Head burst      | Particles burst from the victim's head            | Everyone    |
+| Death sound     | Plays for the victim                              | Victim      |
 
 **Multi-kills** (each within 4 seconds of the last) escalate the headline (DOUBLE DOME, TRIPLE
 DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch each step.
@@ -30,13 +29,9 @@ DOME, QUAD DOME, UNSTOPPABLE), turn it gold, and raise the kill sound's pitch ea
 count toward streaks, so practice can't carry a streak into a match. Body shots, shield
 breaks and perk pickups each have their own cue.
 
-**Ring-outs** (a kill by knocking someone into a hazard or off the map) are the crowd's
-favorite in the tournament lore (LORE.md): everyone hears a crowd roar, the killer's headline
-reads "RING OUT!", and the kill feed says RING OUT instead of DOMED. They're DOMED's most
-distinctive kill, so they get the biggest reaction. The roar is a placeholder sound until a
-Creator Store crowd cheer is picked. Ring-outs join the multi-kill chain ("DOUBLE RING OUT!"), and only
-one roar plays at a time: another can't start within 2 seconds, so a burst of ring-outs
-stays one big moment instead of stacked noise (`playSoundThrottled` in `sounds.ts`).
+**Ring-outs** (knocking someone into a hazard or off the map) used to get a gold "RING OUT!"
+headline and a crowd roar for everyone. They went with knockback when DOMED moved to
+instagib (see WEAPON.md).
 
 **Death recap**: the killed player sees how far away the killer was and how fast they were
 moving, under the respawn countdown, and the killer is outlined through walls until respawn.
@@ -50,8 +45,7 @@ faked, and it's only shown to the shooter.
 
 **Personal bests** ("NEW TOP SPEED: 92", "LONGEST HEADSHOT: 140 STUDS") call out in gold the
 moment a saved record falls. Speed records announce once the player stops accelerating, with
-the peak, and speed doesn't count for 3 seconds after being knocked back, since a push from
-someone else isn't the player's own speed (the owner's call after playtesting), and low records (under 50 speed or 50 studs) stay quiet so new players aren't
+the peak, and low records (under 50 speed or 50 studs) stay quiet so new players aren't
 flooded. They show improvement that doesn't depend on winning fights (see SKILL_FLOOR.md).
 
 ## Server-wide moments
@@ -63,20 +57,21 @@ Tournament's announcer did:
 
 | Moment                       | Everyone sees                                    | Sound             |
 | ---------------------------- | ------------------------------------------------ | ----------------- |
-| Ring-out                     | RING OUT in the kill feed                        | Crowd roar        |
 | Streak of 5 / 10 / 15        | "VOLT IS ON A KILLING SPREE" / RAMPAGE / GODLIKE | Sting; roar at 15 |
 | Ending a streak of 5 or more | "NOVA SHUT DOWN VOLT!"                           | Crowd roar        |
 
 Streaks are tracked on the server (`server/streaks.ts`); bots' kills don't build streaks.
 
 **When moments collide.** Each kind of feedback has its own channel, so they don't fight:
-your headline (kills, ring-outs), the line under it (your streaks, personal bests), and the
+your headline (kills), the line under it (your streaks, personal bests), and the
 broadcast banner under the match bar (server-wide moments, `client/announcer.ts`). The banner
 shows one announcement at a time for about two seconds through a small priority queue: a
 shutdown or GODLIKE jumps ahead of a killing spree, at most three wait, the lowest priority is
 dropped first when it's full, and anything older than four seconds is dropped as stale.
 Broadcasts about you are skipped, since your own callout covers them. The crowd is one voice:
-roars share one throttle, so ring-outs and shutdowns in a burst never stack.
+only one roar plays at a time (another can't start within 2 seconds, `playSoundThrottled` in
+`sounds.ts`), so shutdowns and GODLIKEs in a burst never stack. The roar is a placeholder
+sound until a Creator Store crowd cheer is picked.
 
 ## Why this design
 

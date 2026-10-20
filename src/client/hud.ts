@@ -11,7 +11,6 @@ const HITMARKER_TIME = 0.15;
 
 let hitmarker: Frame;
 let cooldownFill: Frame;
-let shoveFill: Frame;
 let feed: Frame;
 let banner: TextLabel;
 let respawnLabel: TextLabel;
@@ -72,24 +71,6 @@ function buildCrosshair(gui: ScreenGui) {
 		"Frame",
 		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: Palette.Cyan, BorderSizePixel: 0 },
 		cooldownTrack,
-	);
-	// The shove's cooldown, shorter and white, just under the rail's.
-	const shoveTrack = create(
-		"Frame",
-		{
-			AnchorPoint: new Vector2(0.5, 0),
-			Position: new UDim2(0.5, 0, 0.5, 24),
-			Size: UDim2.fromOffset(24, 2),
-			BackgroundColor3: Palette.Black,
-			BackgroundTransparency: 0.5,
-			BorderSizePixel: 0,
-		},
-		gui,
-	);
-	shoveFill = create(
-		"Frame",
-		{ Size: UDim2.fromScale(1, 1), BackgroundColor3: Palette.White, BorderSizePixel: 0 },
-		shoveTrack,
 	);
 }
 
@@ -222,10 +203,6 @@ export function setCooldown(fraction: number) {
 	cooldownFill.Size = UDim2.fromScale(fraction, 1);
 }
 
-export function setShoveCooldown(fraction: number) {
-	shoveFill.Size = UDim2.fromScale(fraction, 1);
-}
-
 // Adds a line to the kill feed; `richText` may use <font> tags.
 function addFeedLine(richText: string) {
 	if (feedEntries.size() >= MAX_FEED_ENTRIES) {
@@ -258,10 +235,8 @@ function addFeedLine(richText: string) {
 	});
 }
 
-// A ring-out (knocked into a hazard or off the map) reads RING OUT instead of DOMED.
-export function addKill(killerName: string, victimName: string, ringOut = false) {
-	const verb = ringOut ? '<font color="#ffc828">RING OUT</font>' : '<font color="#ff3c28">DOMED</font>';
-	addFeedLine(`${escapeRichText(killerName)}  ${verb}  ${escapeRichText(victimName)} `);
+export function addKill(killerName: string, victimName: string) {
+	addFeedLine(`${escapeRichText(killerName)}  <font color="#ff3c28">DOMED</font>  ${escapeRichText(victimName)} `);
 }
 
 export function addPerkTaken(playerName: string, perkName: string, color: Color3) {

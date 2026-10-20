@@ -1,7 +1,7 @@
 // Foundry: a forge at a planet's core, the tournament's close-quarters arena. Dense and indoor,
 // in the spirit of Unreal Tournament's industrial deathmatch maps (an archetype, not a copy):
 // a three-by-three grid of rooms where fights are short and sudden. In the middle, the
-// Crucible Hall: a pit of molten metal (ring-outs), a bridge across it, and a crane platform
+// Crucible Hall: a pit of molten metal, a bridge across it, and a crane platform
 // above, reached by jump pads. Red's bay is north (-Z), Blue's south (+Z); the long Furnace
 // Row on the east side is the speed runway, and the two-level Mezzanine is on the west.
 //

@@ -1,10 +1,8 @@
-// Kills characters that touch hazard parts (lava) or fall below the map's kill height, crediting
-// whoever knocked them there (see combat.ts).
+// Kills characters that touch hazard parts (lava) or fall below the map's kill height.
 
 import { getLiveRoot } from "shared/characters";
 import { MapTag } from "shared/mapMarkers";
 import { isBot, killBot, livingBotRoots } from "./bots";
-import { creditEnvironmentalKill } from "./combat";
 
 const CollectionService = game.GetService("CollectionService");
 const Players = game.GetService("Players");
@@ -17,14 +15,13 @@ function killCharacterOf(part: BasePart) {
 	const character = part.Parent;
 	if (!character?.IsA("Model")) return;
 	if (isBot(character)) {
-		if (killBot(character)) creditEnvironmentalKill(character, character);
+		killBot(character);
 		return;
 	}
 	const player = Players.GetPlayerFromCharacter(character);
 	const humanoid = character.FindFirstChildOfClass("Humanoid");
 	if (!player || !humanoid || humanoid.Health <= 0) return;
 	humanoid.Health = 0;
-	creditEnvironmentalKill(player, character);
 }
 
 function watchHazard(instance: Instance) {

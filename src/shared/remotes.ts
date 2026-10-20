@@ -19,7 +19,7 @@ export type PersonalBestRecord = "topSpeed" | "longestHeadshot";
 // How a player was killed, for their death recap.
 // Server-wide moments the whole lobby hears about (see server/streaks.ts).
 export type BroadcastKind = "KillingSpree" | "Rampage" | "Godlike" | "Shutdown";
-export type DeathCause = "headshot" | "knockback";
+export type DeathCause = "headshot";
 
 export const Remotes = {
 	Fire: remote<(origin: Vector3, hitPosition: Vector3, hitPart: BasePart | undefined) => void>("Fire"),
@@ -27,9 +27,7 @@ export const Remotes = {
 	ShotFired: remote<(shooter: Player | undefined, origin: Vector3, hitPosition: Vector3) => void>("ShotFired"),
 	// `practice` is true for hits on training dummies, which earn no XP and don't count toward streaks.
 	HitConfirm: remote<(kind: HitKind, practice: boolean) => void>("HitConfirm"),
-	Knockback: remote<(impulse: Vector3) => void>("Knockback"),
 	// Either player may have left by the time a client receives this.
-	// `cause` "knockback" is a ring-out: knocked into a hazard or off the map.
 	KillFeed: remote<(killer?: Combatant, victim?: Combatant, cause?: DeathCause) => void>("KillFeed"),
 	// Client reports that the player has seen an onboarding step.
 	MarkOnboarding: remote<(key: OnboardingKey) => void>("MarkOnboarding"),
@@ -50,8 +48,6 @@ export const Remotes = {
 	PersonalBest: remote<(record: PersonalBestRecord, value: number) => void>("PersonalBest"),
 	// Everyone is told when a player takes a perk, so there's counterplay.
 	PerkTaken: remote<(taker: Player, perk: PerkId) => void>("PerkTaken"),
-	// Client shoves in the direction it's looking. The server picks who, if anyone, is hit.
-	Shove: remote<(direction: Vector3) => void>("Shove"),
 	// Client reports it used a held perk (the Super Jump is triggered by client movement).
 	UsePerk: remote<(perk: PerkId) => void>("UsePerk"),
 	// Particle burst at a killed target's head, shown to everyone (players and training dummies).

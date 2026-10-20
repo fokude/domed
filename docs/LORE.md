@@ -27,9 +27,9 @@ and fun, never gore or grimness, which suits an arcade shooter and Roblox's youn
   read as a stage. `spectatorRing` in `maps/spectators.ts` places stands of crowd silhouettes
   under a banner in the arena's color, with camera drones; it all goes in the map's `Art`
   folder, so it's visual only.
-- **The crowd reacts.** The biggest crowd-pleaser is the **ring-out**: knocking someone into
-  lava or off the map with a body shot or shove. It's announced as "RING OUT!" with a crowd
-  roar for everyone, the knockback fantasy that sets DOMED apart.
+- **The crowd reacts.** The crowd roars for the biggest moments: a GODLIKE streak, or a
+  shutdown that ends someone's run. Ring-outs used to be the crowd-pleaser, and went with
+  knockback in the move to instagib (see WEAPON.md).
 - **The announcer is the tournament's voice.** Multi-kill and streak callouts ("DOUBLE DOME",
   "GODLIKE") are the broadcast hyping the action.
 - **Ceremony.** The end-of-match podium is a winners' ceremony; the warm-up is the practice
@@ -51,8 +51,7 @@ and fun, never gore or grimness, which suits an arcade shooter and Roblox's youn
 - Unreal Tournament: a corporate-run tournament of fighters across arenas on different worlds.
 - Dungeon Crawler Carl (Matt Dinniman): a deadly contest staged as a galaxy-wide TV show,
   with sponsors and a crowd that loves a spectacle.
-- Super Smash Bros: ring-outs as the crowd-pleasing finish.
 - Game shows and sports broadcasts: announcers, podiums, crowds.
 
 The owner chose this direction for its personality, and because a televised tournament is a
-well-tested fantasy that ties DOMED's varied maps, callouts and knockback together.
+well-tested fantasy that ties DOMED's varied maps, callouts and announcer together.

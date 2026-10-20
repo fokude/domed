@@ -3,45 +3,30 @@
 Everyone carries the same one-shot railgun. Code: `client/weapon.ts` (firing),
 `server/combat.ts` (validation); tuning in `WeaponConfig` in `shared/config.ts`.
 
-| Setting             | Value  | Notes                                                 |
-| ------------------- | ------ | ----------------------------------------------------- |
-| Cooldown            | 0.75 s | Halved while Overcharged (see PERKS.md)               |
-| Range               | 1000   | Studs                                                 |
-| Body-shot knockback | 70     | Body shots never kill; they push the target           |
-| Server leniency     | 0.15 s | Shots this much early still count, for network jitter |
+| Setting         | Value  | Notes                                                 |
+| --------------- | ------ | ----------------------------------------------------- |
+| Cooldown        | 0.75 s | Halved while Overcharged (see PERKS.md)               |
+| Range           | 1000   | Studs                                                 |
+| Server leniency | 0.15 s | Shots this much early still count, for network jitter |
 
-## Body shots
+## Removed: knockback and the shove
 
-Body shots never kill directly; they push the target. A player who dies to a hazard or falls
-out of the map within 4 seconds of a body shot counts as the shooter's kill, with the kill
-feed, XP and kill feedback (but not the longest-headshot record). It makes body shots near
-edges and lava worth taking without body-shot damage, which was rejected because it would
-make spraying at bodies a strategy (see SKILL_FLOOR.md). Teammates can't be credited, and
-the credit is tied to the character that was pushed, so it can't carry over a respawn.
+Body shots used to push the target, F or right-click shoved anyone within 8 studs, and
+knocking someone into a hazard or the void within 4 seconds counted as a "RING OUT" kill.
+All of it was removed in October 2026, when the owner moved DOMED to instagib (any hit
+kills) with a right-click rocket jump, after Ratz Instagib.
 
-## Shove
+- **Instagib leaves nothing for knockback to do.** A hit that pushes is a hit that would have
+  killed, so body-shot knockback has no place once every hit is lethal.
+- **The shove's job is gone.** It existed to give a player something to do after missing up
+  close. With any hit lethal, close misses are rarer, and the rocket jump gives a missed
+  player a way out instead.
+- **Right-click was needed.** The rocket jump takes the shove's button.
 
-F or right-click shoves the nearest enemy within 8 studs, inside a 45-degree cone in front of
-you and in line of sight. It never damages; it pushes 1.5 times as hard as a body shot, mostly
-horizontally, and has its own 2-second cooldown (the short white bar under the rail's). Like
-a body shot, it counts as a hit against a shield and earns the kill if the target lands in a
-hazard or the void within 4 seconds. The server picks the target, so a client can't shove
-from across the map.
+Hazards and the void still kill, but nobody is credited for them.
 
-**Why:** missing a shot up close left a player helpless for the whole cooldown. The shove
-gives that moment a play, rewards closing in rather than sitting back, and makes ledges and
-lava part of fights, with knockback kill credit already in place. It echoes Unreal
-Tournament's Impact Hammer, a close-range weapon that also sends players flying, minus the
-damage.
-
-**Rejected: melee damage.** A melee kill would be a second way to kill besides the headshot,
-which dilutes the game's identity the same way body-shot damage would. Every kill stays a
-headshot or the environment.
-
-**Later:** shoving a wall or the floor could launch the shover, like UT's Impact Hammer jump,
-as a movement trick. Worth trying once the basic shove feels right. Watch in playtests for
-players trading shoves back and forth (fix: brief immunity after being shoved) and for ledge
-camping.
+**Rejected: melee damage.** A melee kill would be a second way to kill besides the rail,
+which dilutes the game's identity. Every kill stays a rail hit.
 
 ## Why the cooldown is 0.75 seconds
 

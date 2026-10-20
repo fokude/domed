@@ -12,7 +12,7 @@ import { initMatchBar } from "./matchBar";
 import { initMenu } from "./menu";
 import { initMusic } from "./music";
 import { initPlayerSettings } from "./playerSettings";
-import { getSpeed, initMovement, launchCharacter } from "./movement";
+import { getSpeed, initMovement } from "./movement";
 import { initObjectives } from "./objectives";
 import { initOnboarding } from "./onboarding";
 import { initPerks } from "./perks";
@@ -20,7 +20,6 @@ import { Palette } from "./ui";
 import { initPodium, setMatchXp, showMatchEnd } from "./podium";
 import { initProfileScreen } from "./profileScreen";
 import { initSettingsScreen } from "./settingsScreen";
-import { initShove } from "./shove";
 import { initSpeedometer, setSpeed } from "./speedometer";
 import { initTeammates } from "./teammates";
 import { initWeapon } from "./weapon";
@@ -43,7 +42,6 @@ initPodium();
 initSpeedometer();
 initMovement();
 initWeapon();
-initShove();
 initKillFeedback();
 initMenu();
 initMapVote();
@@ -55,8 +53,6 @@ initTeammates();
 initDeathRecap();
 initAnnouncer();
 initMusic();
-
-Remotes.Knockback.OnClientEvent.Connect((impulse) => launchCharacter(impulse, true));
 
 function currentRespawnTime(): number {
 	return getMatchState("RespawnTime") ?? MatchConfig.respawnTime;
@@ -75,10 +71,10 @@ function combatantName(combatant: Combatant | undefined): string {
 	return typeIs(combatant, "string") ? combatant : (combatant?.DisplayName ?? "?");
 }
 
-Remotes.KillFeed.OnClientEvent.Connect((killer, victim, cause) => {
+Remotes.KillFeed.OnClientEvent.Connect((killer, victim) => {
 	const killerName = combatantName(killer);
 	const victimName = combatantName(victim);
-	addKill(killerName, victimName, cause === "knockback");
+	addKill(killerName, victimName);
 	if (victim === player) showBanner(`DOMED BY ${killerName}`, Palette.Accent, currentRespawnTime());
 });
 

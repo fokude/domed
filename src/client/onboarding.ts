@@ -38,11 +38,10 @@ const LESSONS: [OnboardingKey, string][] = [
 const PANEL_ID = "howToPlay";
 
 const STEPS: [string, string][] = [
-	["ONE SHOT. HEADSHOTS ONLY.", "Click to fire. Body shots only knock enemies back."],
+	["ONE SHOT. HEADSHOTS ONLY.", "Click to fire. Body shots don't kill."],
 	["BUNNY HOP", "Hold SPACE, or spin the scroll wheel, to jump again the moment you land."],
 	["AIR STRAFE", "In the air, hold A and turn your mouse left (or D and right) to gain speed."],
 	["DOUBLE JUMP", "Press SPACE again in the air."],
-	["SHOVE", "F or right-click pushes anyone right in front of you. Shove them into lava for the kill."],
 	["MENU", "Press M to open the menu any time. Leaving mid-match counts as a death."],
 ];
 
@@ -255,7 +254,7 @@ export function initOnboarding() {
 	});
 	Remotes.HitConfirm.OnClientEvent.Connect((kind) => {
 		if (kind !== "body" || hasSeen("bodyShotTip")) return;
-		showTip("Body shots only knock enemies back. Aim for the head.");
+		showTip("Body shots don't kill. Aim for the head.");
 		markSeen("bodyShotTip");
 	});
 	RunService.Heartbeat.Connect(updateLesson);

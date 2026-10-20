@@ -10,7 +10,6 @@ import { MapTag } from "shared/mapMarkers";
 import { DEPLOYED_ATTRIBUTE } from "shared/matchState";
 import { Remotes } from "shared/remotes";
 import { LoadedMap } from "./maps/loader";
-import { knockBack, knockbackImpulse } from "./knockback";
 import { hitShield } from "./perks";
 import { addThreatSource, pickSpawnAwayFrom } from "./spawning";
 
@@ -264,7 +263,7 @@ function shoot(bot: Bot, target: Model) {
 	if (victim.Character?.FindFirstChildOfClass("ForceField")) return;
 
 	const isHead = result.Instance.Name === "Head";
-	// A shield takes the hit whole: no kill and no knockback.
+	// A shield takes the hit whole: no kill.
 	if (hitShield(victim, isHead) !== undefined) return;
 	if (isHead) {
 		victimHumanoid.Health = 0;
@@ -277,9 +276,7 @@ function shoot(bot: Bot, target: Model) {
 			math.floor(distance),
 			flatSpeed(bot.root.AssemblyLinearVelocity),
 		);
-		return;
 	}
-	knockBack(victim, direction);
 }
 
 function requestPath(bot: Bot, goal: Vector3) {
@@ -396,13 +393,6 @@ export function killBot(model: Model): boolean {
 	if (!bot || !living(bot)) return false;
 	bot.humanoid.Health = 0;
 	return true;
-}
-
-// Pushes a bot like a body shot (or, scaled, a shove) pushes a player.
-export function pushBot(model: Model, direction: Vector3, scale = 1) {
-	const bot = bots.get(model);
-	if (!bot || !living(bot)) return;
-	bot.root.AssemblyLinearVelocity = bot.root.AssemblyLinearVelocity.add(knockbackImpulse(direction, scale));
 }
 
 // Studio only: sets how many players and bots to fill to, or undefined for the default.

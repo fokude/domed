@@ -27,9 +27,6 @@
 				"HitConfirm": {
 					"$className": "RemoteEvent"
 				},
-				"Knockback": {
-					"$className": "RemoteEvent"
-				},
 				"KillFeed": {
 					"$className": "RemoteEvent"
 				},
@@ -73,9 +70,6 @@
 					"$className": "RemoteEvent"
 				},
 				"DeathRecap": {
-					"$className": "RemoteEvent"
-				},
-				"Shove": {
 					"$className": "RemoteEvent"
 				},
 				"Broadcast": {

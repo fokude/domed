@@ -5,7 +5,7 @@
 
 import { XpConfig } from "shared/config";
 import { HitKind, Remotes } from "shared/remotes";
-import { playSound, playSoundThrottled } from "./sounds";
+import { playSound } from "./sounds";
 import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
@@ -15,9 +15,6 @@ const Workspace = game.GetService("Workspace");
 // Kills within this many seconds of each other chain into a multi-kill.
 const MULTI_KILL_WINDOW = 4;
 const MULTI_KILL_NAMES = ["DOMED", "DOUBLE DOME", "TRIPLE DOME", "QUAD DOME", "UNSTOPPABLE"];
-const RING_OUT_PREFIXES = ["", "DOUBLE ", "TRIPLE ", "QUAD "];
-// Seconds before another crowd roar can start.
-const ROAR_COOLDOWN = 2;
 // Kill streak milestones (kills without dying) and their callouts.
 const STREAK_CALLOUTS = new Map<number, string>([
 	[3, "ON A ROLL"],
@@ -203,12 +200,6 @@ function onKill(practice: boolean) {
 	if (callout !== undefined) showStreak(callout);
 }
 
-// "RING OUT!", or "DOUBLE RING OUT!" and up when it's part of a multi-kill.
-function ringOutHeadline(): string {
-	const prefix = RING_OUT_PREFIXES[math.min(multiKill, RING_OUT_PREFIXES.size()) - 1] ?? "";
-	return `${prefix}RING OUT!`;
-}
-
 function onHitConfirm(kind: HitKind, practice: boolean) {
 	if (kind === "kill") onKill(practice);
 	else if (kind === "body") playSound("bodyHit");
@@ -287,16 +278,8 @@ export function initKillFeedback() {
 	Remotes.HitConfirm.OnClientEvent.Connect(onHitConfirm);
 	Remotes.HeadBurst.OnClientEvent.Connect(headBurst);
 	Remotes.NearMiss.OnClientEvent.Connect(nearMiss);
-	Remotes.KillFeed.OnClientEvent.Connect((killer, victim, cause) => {
+	Remotes.KillFeed.OnClientEvent.Connect((_, victim) => {
 		if (victim === player) playSound("death");
-		// Ring-outs are the crowd's favorite: everyone hears the roar, and the killer's headline
-		// calls it (see docs/LORE.md).
-		if (cause === "knockback") {
-			// One roar at a time: ring-outs in a burst would otherwise stack into noise.
-			playSoundThrottled("crowdRoar", ROAR_COOLDOWN);
-			// Ring-outs count toward the killer's multi-kill chain like any kill.
-			if (killer === player) showHeadline(ringOutHeadline(), MULTI_GOLD);
-		}
 	});
 	Remotes.PersonalBest.OnClientEvent.Connect((record, value) => {
 		playSound("personalBest");

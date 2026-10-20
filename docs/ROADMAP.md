@@ -18,4 +18,4 @@ Planned, roughly in order.
 - Crosshair settings
 - Bots in near-empty free-for-all servers
 - New-player features: first-minute lessons, death recap, near-miss and personal-best callouts,
-  knockback kill credit, friends on the same team, invites
+  friends on the same team, invites

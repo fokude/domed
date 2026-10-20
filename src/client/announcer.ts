@@ -15,7 +15,7 @@ const SHOW_SECONDS = 2.2;
 const MAX_QUEUED = 3;
 // Hype that's this old is worse than none.
 const STALE_SECONDS = 4;
-// Shared with the ring-out roar, so crowd sounds never stack.
+// Seconds before another crowd roar can start, so crowd sounds never stack.
 const CROWD_COOLDOWN = 2;
 
 const PRIORITY: Record<BroadcastKind, number> = { KillingSpree: 1, Rampage: 2, Godlike: 3, Shutdown: 3 };

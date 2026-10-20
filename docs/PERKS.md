@@ -5,12 +5,12 @@ Glowing orbs at fixed spots on each map, each granting a one-time or short effec
 feed), `shared/perks.ts` (definitions, Overcharge cooldown); tuning in `PerkConfig` in
 `src/shared/config.ts`.
 
-| Perk       | Effect                                                                | Respawn | Counterplay                               |
-| ---------- | --------------------------------------------------------------------- | ------- | ----------------------------------------- |
-| Super Jump | The next double jump launches far higher                              | 25 s    | None needed: pure movement                |
-| Shield     | Absorbs one headshot or three hits, and rail knockback while it lasts | 40 s    | A visible bubble that fades as it weakens |
-| Radar      | Outlines enemies through walls for 4 s                                | 45 s    | Shooting still needs real line of sight   |
-| Overcharge | Rail recharges twice as fast for 10 s                                 | 60 s    | The player's beams turn gold              |
+| Perk       | Effect                                   | Respawn | Counterplay                               |
+| ---------- | ---------------------------------------- | ------- | ----------------------------------------- |
+| Super Jump | The next double jump launches far higher | 25 s    | None needed: pure movement                |
+| Shield     | Absorbs one headshot or three hits       | 40 s    | A visible bubble that fades as it weakens |
+| Radar      | Outlines enemies through walls for 4 s   | 45 s    | Shooting still needs real line of sight   |
+| Overcharge | Rail recharges twice as fast for 10 s    | 60 s    | The player's beams turn gold              |
 
 Every pickup is announced in the kill feed. Perks are lost on death.
 
@@ -19,11 +19,6 @@ one headshot and ignored body shots, which played like god mode: headshots are h
 shielded player could shrug off fire for a long time. Counting body shots means sustained
 pressure always breaks it, and the fading bubble shows how close it is. Rejected: needing
 three headshots, which would make the Shield even stronger.
-
-While it holds, the Shield also stops rail knockback, so a shielded player can't be pushed
-off a ledge by shots (the owner's call after playtesting: a shield that still lets you be
-knocked into lava doesn't feel like protection). Shoves still push a shielded player, and
-wear the shield down: up close, the shove is the answer to a Shield.
 
 ## Why perks
 

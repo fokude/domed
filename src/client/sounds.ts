@@ -14,7 +14,6 @@ export type SoundCue =
 	| "perkPickup"
 	| "death"
 	| "personalBest"
-	| "shove"
 	| "crowdRoar"
 	| "announce";
 
@@ -35,10 +34,9 @@ export const SOUND_CUES: Record<SoundCue, CueSettings> = {
 	perkPickup: { id: TICK, volume: 0.8, pitch: 1.2 },
 	death: { id: "rbxasset://sounds/ouch.ogg", volume: 0.6, pitch: 1 },
 	personalBest: { id: TICK, volume: 0.9, pitch: 2 },
-	shove: { id: "rbxasset://sounds/swoosh.wav", volume: 0.7, pitch: 1.1 },
 	// A short sting under server-wide announcements.
 	announce: { id: TICK, volume: 0.7, pitch: 0.8 },
-	// The crowd, on ring-outs and the biggest announcements. One roar at a time (see
+	// The crowd, under the biggest announcements. One roar at a time (see
 	// playSoundThrottled). Placeholder until a Creator Store crowd cheer is picked.
 	crowdRoar: { id: "rbxasset://sounds/impact_water.mp3", volume: 0.8, pitch: 0.6 },
 };
