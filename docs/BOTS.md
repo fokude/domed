@@ -24,12 +24,17 @@ Bots fill near-empty free-for-all matches. Code: `server/bots.ts`; tuning in `Bo
   pathfinding cost), and hop now and then. In a fight they strafe side to side and hop. They
   don't air strafe, so a skilled player is faster.
 - **Aim.** A bot spots the nearest visible player within 250 studs, waits a reaction time
-  (0.6 s), and fires 30% slower than a player. Each shot aims at the torso with a random error
+  (0.9 s), and fires 60% slower than a player. Each shot aims at the torso with a random error
   whose radius grows with distance and the target's speed, so moving targets are harder to
-  hit, as for players. Under headshot-only, bots aimed at the head and hit about 65% of the
-  time at 20 studs against a still target, and 13% at 60 studs against one moving at 30.
-  With instagib any hit kills, so the error was scaled up 2.5 times to keep roughly those
-  odds against a whole body (untested; tune `BotConfig` after playtests).
+  hit, as for players. The error is spread evenly through a ball (2.5 studs plus 0.05 per stud
+  of distance and 0.06 per unit of target speed).
+  **History.** Under headshot-only, bots aimed at the head. After the move to instagib they
+  aimed at the torso with 2.5 times the spread, and the owner found them "wayyy too strong".
+  Part of that was a bug: the error picked a random direction and scaled it by a uniformly
+  random length, which bunches shots near the center, so bots hit far more often than their
+  spread implied. The error is now uniform in the ball (rejection sampling), the spread is
+  about twice as wide again, reaction went from 0.6 to 0.9 s and the fire rate from 1.3 to
+  1.6 times the rail cooldown. Untested; tune `BotConfig` after playtests.
   Spawn-protected players aren't targeted, and shields work against bots as against players.
 - **Rewards.** Killing a bot counts as a kill for the match score and pays XP, with full kill
   feedback. Bots never affect

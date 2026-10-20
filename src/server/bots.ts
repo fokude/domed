@@ -232,9 +232,14 @@ function chooseTarget(bot: Bot): Model | undefined {
 	return best;
 }
 
+// A point spread evenly through a ball, by rejection sampling. Scaling a random direction by a
+// uniform random length would bunch points near the center and make bots far more accurate than
+// their spread says.
 function randomInSphere(radius: number): Vector3 {
-	const direction = new Vector3(math.random() * 2 - 1, math.random() * 2 - 1, math.random() * 2 - 1);
-	return direction.Magnitude > 0 ? direction.Unit.mul(radius * math.random()) : Vector3.zero;
+	for (;;) {
+		const point = new Vector3(math.random() * 2 - 1, math.random() * 2 - 1, math.random() * 2 - 1);
+		if (point.Magnitude <= 1) return point.mul(radius);
+	}
 }
 
 // Fires at the target's torso with aim error. Hits are resolved by a server raycast against the

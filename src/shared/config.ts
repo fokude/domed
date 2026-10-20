@@ -99,15 +99,14 @@ export const BotConfig = {
 	// Bots join until this many players and bots are in the match, and leave as players join.
 	fillTo: 4,
 	// Seconds between spotting a target and the first shot.
-	reactionTime: 0.6,
+	reactionTime: 0.9,
 	// Bots fire this much slower than players.
-	cooldownScale: 1.3,
+	cooldownScale: 1.6,
 	// Aim error radius in studs around the target's torso: a base, plus more per stud of distance
-	// and per unit of the target's speed. Bots aim at the torso, a bigger target than the head
-	// they used to aim at, so these are 2.5 times the old headshot spreads (see docs/BOTS.md).
-	baseSpread: 1.25,
-	spreadPerStud: 0.03,
-	spreadPerSpeed: 0.0375,
+	// and per unit of the target's speed. Any hit kills, so these are wide (see docs/BOTS.md).
+	baseSpread: 2.5,
+	spreadPerStud: 0.05,
+	spreadPerSpeed: 0.06,
 	// How far bots look for targets.
 	sightRange: 250,
 };
