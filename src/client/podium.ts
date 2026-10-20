@@ -2,7 +2,7 @@
 // version shown during the intermission after a match.
 
 import { getMatchState, onMatchStateChanged } from "shared/matchState";
-import { getStandings, Standing } from "shared/standings";
+import { BOT_STANDINGS_FOLDER, getStandings, Standing } from "shared/standings";
 import { create, Palette } from "./ui";
 
 const Players = game.GetService("Players");
@@ -35,7 +35,9 @@ let xpLabel: TextLabel;
 let finalColumns: Frame;
 let finalToken = 0;
 
+// Bots (user id 0) have no avatar.
 function avatarImage(userId: number): string {
+	if (userId === 0) return "";
 	return `rbxthumb://type=AvatarHeadShot&id=${userId}&w=150&h=150`;
 }
 
@@ -125,6 +127,27 @@ function watchLeaderstats(leaderstats: Instance) {
 		refreshLive();
 	});
 	refreshLive();
+}
+
+// Bots' standings live in a replicated folder; refresh when any bot's score changes.
+function watchBotStandings() {
+	const ReplicatedStorage = game.GetService("ReplicatedStorage");
+	const watchFolder = (folder: Instance) => {
+		folder.DescendantAdded.Connect((child) => {
+			watchStat(child);
+			refreshLive();
+		});
+		folder.DescendantRemoving.Connect(() => task.defer(refreshLive));
+		folder.GetDescendants().forEach(watchStat);
+		refreshLive();
+	};
+	const existing = ReplicatedStorage.FindFirstChild(BOT_STANDINGS_FOLDER);
+	if (existing) watchFolder(existing);
+	else {
+		ReplicatedStorage.ChildAdded.Connect((child) => {
+			if (child.Name === BOT_STANDINGS_FOLDER) watchFolder(child);
+		});
+	}
 }
 
 function watchPlayer(target: Player) {
@@ -308,6 +331,7 @@ export function initPodium() {
 	Players.PlayerAdded.Connect(watchPlayer);
 	// The leaving player is still listed during PlayerRemoving, so refresh after it's gone.
 	Players.PlayerRemoving.Connect(() => task.defer(refreshLive));
+	watchBotStandings();
 	onMatchStateChanged(["Mode"], refreshLive);
 	refreshLive();
 }

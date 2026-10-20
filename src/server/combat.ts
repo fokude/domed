@@ -173,6 +173,7 @@ function onFire(shooter: Player, origin: unknown, hitPosition: unknown, claimedH
 
 	// Bots take hits through the same validation as players, and count as real kills.
 	if (isBot(victimCharacter)) {
+		if (victimCharacter.FindFirstChildOfClass("ForceField")) return;
 		const reason = implausibleHit(character, victimCharacter, hitPart, origin, hitPosition);
 		if (reason !== undefined) return reject(shooter, reason);
 		if (!killBot(victimCharacter)) return;

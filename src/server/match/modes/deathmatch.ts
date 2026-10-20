@@ -49,7 +49,9 @@ export class Deathmatch implements GameMode {
 	timeUpResult(): MatchResult {
 		const leader = getStandings(Players.GetPlayers())[0];
 		if (!leader) return { title: "MATCH OVER", winners: [] };
-		const winner = Players.GetPlayers().find((player) => player.UserId === leader.userId);
+		// A bot can win; then no player is a winner.
+		const winner =
+			leader.userId === 0 ? undefined : Players.GetPlayers().find((player) => player.UserId === leader.userId);
 		return { title: `${leader.name} WINS`, winners: winner ? [winner] : [] };
 	}
 

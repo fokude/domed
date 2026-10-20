@@ -1,19 +1,21 @@
 // Bots fill near-empty free-for-all matches so a lone player still has someone to fight, and new
 // players get early wins (see docs/BOTS.md). They're server-controlled R15 characters that walk
 // the map by pathfinding, hop and strafe in fights, and shoot with aim error that grows with
-// distance and target speed. They give kills and XP like players, but never affect ratings,
-// standings or records, and they leave as real players join.
+// distance and target speed. They fight players and each other, and are ranked in the match
+// standings, but never affect ratings or records. They leave as real players join.
 
 import { flatSpeed } from "shared/characters";
 import { BotConfig, MatchConfig, MovementConfig, WeaponConfig } from "shared/config";
 import { MapTag } from "shared/mapMarkers";
 import { DEPLOYED_ATTRIBUTE } from "shared/matchState";
 import { Remotes } from "shared/remotes";
+import { BOT_STANDINGS_FOLDER } from "shared/standings";
 import { LoadedMap } from "./maps/loader";
 import { hitShield } from "./perks";
 import { addThreatSource, pickSpawnAwayFrom } from "./spawning";
 
 const CollectionService = game.GetService("CollectionService");
+const ReplicatedStorage = game.GetService("ReplicatedStorage");
 const PathfindingService = game.GetService("PathfindingService");
 const Players = game.GetService("Players");
 const RunService = game.GetService("RunService");
@@ -64,6 +66,31 @@ let fillOverride: number | undefined;
 // Bots being built: building a character waits on Roblox, so they're counted until they exist.
 let spawning = 0;
 
+// Per-bot kills and deaths for this match, replicated so clients can rank bots with players.
+const botStandingsFolder = new Instance("Folder");
+botStandingsFolder.Name = BOT_STANDINGS_FOLDER;
+botStandingsFolder.Parent = ReplicatedStorage;
+
+function botStat(displayName: string, stat: "Kills" | "Deaths"): IntValue {
+	let entry = botStandingsFolder.FindFirstChild(displayName);
+	if (!entry) {
+		entry = new Instance("Folder");
+		entry.Name = displayName;
+		for (const name of ["Kills", "Deaths"]) {
+			const value = new Instance("IntValue");
+			value.Name = name;
+			value.Parent = entry;
+		}
+		entry.Parent = botStandingsFolder;
+	}
+	return entry.FindFirstChild(stat) as IntValue;
+}
+
+// Clears every bot's score, at the start of each match.
+export function resetBotStandings() {
+	botStandingsFolder.ClearAllChildren();
+}
+
 const rayParams = new RaycastParams();
 rayParams.FilterType = Enum.RaycastFilterType.Exclude;
 
@@ -75,8 +102,8 @@ function deployedPlayers(): Player[] {
 	return Players.GetPlayers().filter((player) => player.GetAttribute(DEPLOYED_ATTRIBUTE) === true);
 }
 
-// Player characters a bot can fight: alive and past spawn protection.
-function targetCharacters(): Model[] {
+// Characters a bot can fight: players and other bots, alive and past spawn protection.
+function targetCharacters(seeker?: Bot): Model[] {
 	const targets: Model[] = [];
 	for (const player of deployedPlayers()) {
 		const character = player.Character;
@@ -84,6 +111,10 @@ function targetCharacters(): Model[] {
 		if (!character || !humanoid || humanoid.Health <= 0) continue;
 		if (character.FindFirstChildOfClass("ForceField")) continue;
 		targets.push(character);
+	}
+	for (const [model, other] of bots) {
+		if (other === seeker || !living(other) || model.FindFirstChildOfClass("ForceField")) continue;
+		targets.push(model);
 	}
 	return targets;
 }
@@ -154,6 +185,11 @@ function spawnBot(name: string) {
 	model.PivotTo(cframe.add(new Vector3(0, 3, 0)));
 	model.Parent = folder;
 	root.SetNetworkOwner(undefined);
+	// Spawn protection, as players get: no one can hit or target a bot that just spawned.
+	const shield = new Instance("ForceField");
+	shield.Parent = model;
+	task.delay(MatchConfig.spawnProtection, () => shield.Destroy());
+	botStat(humanoid.DisplayName, "Kills");
 
 	const bot: Bot = {
 		name,
@@ -179,6 +215,7 @@ function spawnBot(name: string) {
 
 function onBotDied(bot: Bot) {
 	bot.alive = false;
+	botStat(bot.humanoid.DisplayName, "Deaths").Value += 1;
 	const spawnedIn = generation;
 	task.delay(MatchConfig.respawnTime, () => {
 		if (generation !== spawnedIn) return;
@@ -222,7 +259,7 @@ function canSee(bot: Bot, character: Model): boolean {
 function chooseTarget(bot: Bot): Model | undefined {
 	let best: Model | undefined;
 	let bestDistance = BotConfig.sightRange;
-	for (const character of targetCharacters()) {
+	for (const character of targetCharacters(bot)) {
 		const distance = character.GetPivot().Position.sub(bot.root.Position).Magnitude;
 		if (distance < bestDistance && canSee(bot, character)) {
 			best = character;
@@ -242,8 +279,17 @@ function randomInSphere(radius: number): Vector3 {
 	}
 }
 
-// Fires at the target's torso with aim error. Hits are resolved by a server raycast against the
-// aimed point, through the same shield rules as player shots.
+// A bot's shot killed another bot.
+function killBotWithShot(bot: Bot, victim: Bot, hit: RaycastResult) {
+	if (victim.model.FindFirstChildOfClass("ForceField") || !killBot(victim.model)) return;
+	const cause = hit.Instance.Name === "Head" ? "headshot" : "rail";
+	botStat(bot.humanoid.DisplayName, "Kills").Value += 1;
+	Remotes.HeadBurst.FireAllClients(hit.Position, cause === "headshot");
+	Remotes.KillFeed.FireAllClients(bot.humanoid.DisplayName, victim.humanoid.DisplayName, cause);
+}
+
+// Fires at the target's torso with aim error, wider against other bots. Hits are resolved by a
+// server raycast against the aimed point, through the same shield rules as player shots.
 function shoot(bot: Bot, target: Model) {
 	const targetRoot = target.FindFirstChild("HumanoidRootPart") as BasePart | undefined;
 	if (!targetRoot) return;
@@ -253,13 +299,18 @@ function shoot(bot: Bot, target: Model) {
 		BotConfig.baseSpread +
 		distance * BotConfig.spreadPerStud +
 		flatSpeed(targetRoot.AssemblyLinearVelocity) * BotConfig.spreadPerSpeed;
-	const aim = targetRoot.Position.add(randomInSphere(spread));
+	const scale = bots.has(target) ? BotConfig.botTargetSpreadScale : 1;
+	const aim = targetRoot.Position.add(randomInSphere(spread * scale));
 	const direction = aim.sub(origin).Unit.mul(WeaponConfig.range);
 
-	rayParams.FilterDescendantsInstances = folder ? [folder] : [bot.model];
+	rayParams.FilterDescendantsInstances = [bot.model];
 	const result = Workspace.Raycast(origin, direction, rayParams);
 	Remotes.ShotFired.FireAllClients(undefined, origin, result?.Position ?? origin.add(direction));
 	if (!result) return;
+
+	const hitModel = result.Instance.Parent;
+	const hitBot = hitModel?.IsA("Model") ? bots.get(hitModel) : undefined;
+	if (hitBot) return killBotWithShot(bot, hitBot, result);
 
 	const victim = Players.GetPlayerFromCharacter(result.Instance.Parent);
 	const victimHumanoid = result.Instance.Parent?.FindFirstChildOfClass("Humanoid");
@@ -269,6 +320,7 @@ function shoot(bot: Bot, target: Model) {
 	// A shield takes the hit whole: no kill.
 	if (hitShield(victim) !== undefined) return;
 	victimHumanoid.Health = 0;
+	botStat(bot.humanoid.DisplayName, "Kills").Value += 1;
 	const cause = result.Instance.Name === "Head" ? "headshot" : "rail";
 	Remotes.HeadBurst.FireAllClients(result.Position, cause === "headshot");
 	Remotes.KillFeed.FireAllClients(bot.humanoid.DisplayName, victim, cause);

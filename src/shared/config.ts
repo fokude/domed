@@ -107,6 +107,9 @@ export const BotConfig = {
 	baseSpread: 2.5,
 	spreadPerStud: 0.05,
 	spreadPerSpeed: 0.06,
+	// Bots aim this much worse at other bots than at players, so bot fights last a few shots
+	// instead of trading instant kills.
+	botTargetSpreadScale: 2,
 	// How far bots look for targets.
 	sightRange: 250,
 };

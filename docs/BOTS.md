@@ -23,7 +23,10 @@ Bots fill near-empty free-for-all matches. Code: `server/bots.ts`; tuning in `Bo
   spawn points by pathfinding, avoiding hazards (lava is non-collidable, so hazards get a
   pathfinding cost), and hop now and then. In a fight they strafe side to side and hop. They
   don't air strafe, so a skilled player is faster.
-- **Aim.** A bot spots the nearest visible player within 250 studs, waits a reaction time
+- **Who they fight.** Players and each other, so a server with only bots in view still has
+  fights going on, and bots act like other competitors rather than turrets aimed at you. The
+  owner asked for this. A bot spots the nearest visible player or bot within 250 studs.
+- **Aim.** A bot waits a reaction time
   (0.9 s), and fires 60% slower than a player. Each shot aims at the torso with a random error
   whose radius grows with distance and the target's speed, so moving targets are harder to
   hit, as for players. The error is spread evenly through a ball (2.5 studs plus 0.05 per stud
@@ -35,11 +38,23 @@ Bots fill near-empty free-for-all matches. Code: `server/bots.ts`; tuning in `Bo
   spread implied. The error is now uniform in the ball (rejection sampling), the spread is
   about twice as wide again, reaction went from 0.6 to 0.9 s and the fire rate from 1.3 to
   1.6 times the rail cooldown. Untested; tune `BotConfig` after playtests.
-  Spawn-protected players aren't targeted, and shields work against bots as against players.
+  Bots aim twice as wide at other bots (`botTargetSpreadScale`) as at players, so bot fights
+  last a few shots instead of trading instant kills.
+- **Spawn protection.** Bots get the same 1.5 seconds of spawn protection as players, as a
+  real ForceField: nobody can target or hit them, so bots spawning near each other don't kill
+  each other on the spot. Spawn-protected players aren't targeted either, and shields work
+  against bots as against players. A bot's own shots used to pass through every bot (its ray
+  ignored the whole Bots folder); now they only ignore the shooter.
 - **Rewards.** Killing a bot counts as a kill for the match score and pays XP, with full kill
-  feedback. Bots never affect
-  ratings, never appear in standings, and don't count toward the longest-kill record, so
-  they can't inflate anything that measures skill against players.
+  feedback.
+- **Standings.** Bots are ranked with players in the free-for-all standings: the live top
+  three, the end-of-match podium, and the winner. A bot can win a match, in which case no
+  player is the winner. Each bot's kills and deaths for the match live in
+  `ReplicatedStorage.BotStandings` (one folder per bot, like a player's leaderstats), cleared
+  when the next match starts. Bots don't appear in Roblox's own player list, which only shows
+  real players. They still never affect ratings or count toward the longest-kill record, so
+  they can't inflate anything saved that measures skill against players. Until October 2026
+  bots were kept out of standings entirely; the owner wanted them to act as competitors.
 - **Clearly bots.** Named "[BOT] Name" in the kill feed and above their heads. Disguising
   bots as players is rejected: Fortnite drew criticism when bot-filled lobbies weren't made
   obvious.

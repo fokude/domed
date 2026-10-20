@@ -10,7 +10,7 @@ import { CombatRules, setCombatArena, setCombatRules } from "../combat";
 import { setKillHeight } from "../hazards";
 import { logMatchFinished, logOnboardingStep } from "../analytics";
 import { onProfileLoaded } from "../data/profiles";
-import { startBots, startBotSystem, stopBots } from "../bots";
+import { resetBotStandings, startBots, startBotSystem, stopBots } from "../bots";
 import { startDummies, stopDummies } from "../dummies";
 import { startPerks, stopPerks } from "../perks";
 import { recordMatchEnd, startMatchXp } from "../progression";
@@ -155,6 +155,8 @@ function startMatch(option: MatchOption): GameMode {
 		onDeploy: (player) => mode.addPlayer(player),
 		respawnTime: mode.respawnTime ?? MatchConfig.respawnTime,
 	});
+	// Last match's bots stay on its results screen until a new match starts.
+	resetBotStandings();
 	// Bots only play free-for-all, which is what near-empty servers run (see docs/BOTS.md).
 	if (mode.id === "Deathmatch") startBots(map);
 
