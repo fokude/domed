@@ -27,8 +27,8 @@ export const MovementConfig = {
 	// their root, fading to nothing at rocketJumpRadius. Speed past maxAirSpeed eases back down
 	// at rocketJumpSpeedDecay per second. See docs/MOVEMENT.md.
 	rocketJumpVelocity: 90,
-	rocketJumpFullRadius: 4,
-	rocketJumpRadius: 12,
+	rocketJumpFullRadius: 10,
+	rocketJumpRadius: 20,
 	rocketJumpSpeedDecay: 100,
 
 	// Roblox FieldOfView is vertical; 80 is roughly 110 horizontal at 16:9.

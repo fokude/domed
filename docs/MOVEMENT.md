@@ -64,10 +64,17 @@ direction, keeping at least walk speed.
 **Rocket jump** (right-click, in `client/weapon.ts`; the push is `rocketJumpCharacter` in
 `movement.ts`) works like a TF2 Soldier's. Right-click fires a normal rail shot (same beam, no explosion) along the look
 direction. Where it lands, it blasts the shooter away from that point, if the point is within
-`rocketJumpRadius` (12 studs) of their root. Inside `rocketJumpFullRadius` (4 studs) the blast
-is full strength (`rocketJumpVelocity`, 90 studs/s), fading linearly to nothing at 12. Aim at
-your feet to go straight up (about 20 studs high at normal gravity), down and behind you to
-launch forward, or at a wall to kick off it. Aiming at open sky does nothing.
+`rocketJumpRadius` (20 studs) of their root. Inside `rocketJumpFullRadius` (10 studs) the
+blast is full strength (`rocketJumpVelocity`, 90 studs/s), fading linearly to nothing at 20.
+Aim at your feet to go straight up (about 20 studs high at normal gravity), down and behind you
+to launch forward, or at a wall to kick off it. Aiming at open sky does nothing.
+
+- **Jump first, then blast.** As in Quake and TF2, the best rocket jump is a jump followed by a
+  blast at the floor: the blast adds to the jump's upward speed, and in the air no ground
+  friction eats the horizontal momentum. The full-strength radius is 10 studs so a blast at
+  the top of a jump (the root is about 3 studs above the feet, plus 7.5 studs of jump) still
+  gets full strength. It was 4 studs (fading to nothing at 12), which made jump-then-blast
+  weak or dead, the opposite of how it should feel.
 
 - **No damage.** The shot never hits anyone; kills stay on left-click. The server sees it as a
   missed rail shot, so other players see the beam.
