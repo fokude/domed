@@ -73,7 +73,7 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 | Map             | Openness | Spawn exposure | Notes                                                                                                  |
 | --------------- | -------- | -------------- | ------------------------------------------------------------------------------------------------------ |
 | Bastion         | 17%      | 9%             | Meets both targets                                                                                     |
-| Gridline        | 26%      | 21%            | Covered arcades down both sides; spawns in pockets (was 31% and 90%)                                   |
+| Gridline        | 36%      | 12%            | Rebuilt for instagib: speed trench, banked embankment runways, overpass (was 26% and 21%)              |
 | Halcyon Station | 36%      | 14%            | Rebuilt for instagib: one hall round the reactor shaft, side-lane runways (was 31% and 10%)            |
 | Infernal Spire  | 36%      | 10%            | Rebuilt for instagib: open octagonal hall, ring runway round the lava, spire tiers (was 19% and 10%)   |
 | Skyreach        | 44%      | 5%             | Rebuilt for instagib: promenade runways, team islands, open sky with monoliths (was 28% and 14%)       |
@@ -159,7 +159,19 @@ then showed spawns in the open in the corners and Furnace Row (68%), so every sp
 a pocket: a wall across the back of the room with the way out at one end (18%). At 10% open
 it's far tighter than the 25% target, which is its role: the roster's close-quarters map.
 
-**Gridline** was a narrow open field (160 wide) with spawns on top of the base platforms and
+**Gridline** was rebuilt for instagib in October 2026. Its covered arcades (18-stud roofs,
+pillars every 25 studs), lane walls, chicanes in a 24-wide trench and billboards everywhere
+were the clutter the owner found restricted movement. Now it is 280 by 420: a 40-wide trench
+down the middle (6 deep, 300 long) to build speed in, an open field either side with four
+billboards as its only cover, and embankments at 18 down both side walls as the high runways,
+reached by a bank up from the field, ramps at their ends and pads. An overpass at 36 crosses
+the middle from embankment to embankment, the high point. Flags sit on platforms at each end,
+380 studs apart, with the spawn rooms behind the end walls as on Foundry. First pass, with a
+10-deep trench, sheer embankments and speaker stacks on the field, measured 26% open: the
+trench and the embankment tops each saw only themselves. A shallower trench without the
+speakers measured 32%, and banking the embankments' inner faces 36%.
+
+The previous version's history: **Gridline** was a narrow open field (160 wide) with spawns on top of the base platforms and
 in the open field (90% exposure). It now has a covered neon arcade down each side, making three
 real lanes and widening it to 244. Base spawns sit behind a wall wider and taller than their
 line, and free-for-all spawns moved into pockets in the arcades' outer walls.
@@ -251,14 +263,14 @@ looks. Classic arena maps inspire archetypes only: layouts, themes and names are
 since recognizable copies of commercial maps carry IP risk and add nothing a fresh layout
 can't.
 
-| Map             | Role                                                      | Archetype                  | Modes                                       |
-| --------------- | --------------------------------------------------------- | -------------------------- | ------------------------------------------- |
-| Bastion         | The big 5v5 map: two fortresses, three lanes              | Classic CTF                | CTF, Team Deathmatch, Domination, Hardpoint |
-| Infernal Spire  | Lava hall: ring runway round the lake, climb the spire    | King of the hill           | Deathmatch, Team Deathmatch, Domination     |
-| Gridline        | Mid-size synthwave map built around a speed trench        | Speed lanes                | All five                                    |
-| Halcyon Station | Low-gravity station hall round an open reactor shaft      | Indoor low gravity         | All five                                    |
-| Skyreach        | Sky promenades round an open sky, the Crown in the middle | Quake 3's The Longest Yard | Deathmatch, Team Deathmatch, Domination     |
-| Foundry         | Open forge hall around a molten pit, rocket-jump tiers    | Rocket-jump arena          | Deathmatch, Team Deathmatch, Hardpoint      |
+| Map             | Role                                                        | Archetype                  | Modes                                       |
+| --------------- | ----------------------------------------------------------- | -------------------------- | ------------------------------------------- |
+| Bastion         | The big 5v5 map: two fortresses, three lanes                | Classic CTF                | CTF, Team Deathmatch, Domination, Hardpoint |
+| Infernal Spire  | Lava hall: ring runway round the lake, climb the spire      | King of the hill           | Deathmatch, Team Deathmatch, Domination     |
+| Gridline        | Synthwave field: speed trench, embankment runways, overpass | Speed lanes                | All five                                    |
+| Halcyon Station | Low-gravity station hall round an open reactor shaft        | Indoor low gravity         | All five                                    |
+| Skyreach        | Sky promenades round an open sky, the Crown in the middle   | Quake 3's The Longest Yard | Deathmatch, Team Deathmatch, Domination     |
+| Foundry         | Open forge hall around a molten pit, rocket-jump tiers      | Rocket-jump arena          | Deathmatch, Team Deathmatch, Hardpoint      |
 
 Every map is measured with `npm run preview` against the targets above before it ships, and
 checked in Studio with `/openness`.
