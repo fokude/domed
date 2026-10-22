@@ -79,9 +79,10 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 | Skyreach        | 44%      | 5%             | Rebuilt for instagib: promenade runways, team islands, open sky with monoliths (was 28% and 14%)       |
 | Foundry         | 37%      | 16%            | Rebuilt for instagib: one open hall, rocket-jump tiers, spawn rooms behind the walls (was 10% and 18%) |
 
-These were measured against the old 25% openness target. Free-for-all maps that scatter spawns
-everywhere score high on spawn exposure almost by design; openness is the clearer signal for
-them.
+All six were rebuilt to the instagib targets in October 2026; the old numbers in brackets
+were measured against the old 25% openness target. Spawn exposure now comes mostly from spots
+inside the spawn rooms themselves, which always see their own spawns, so smaller or fewer
+spawn rooms lower it more than anything in the arena does.
 
 **Bastion** was rebuilt for instagib in October 2026, last of the six. It had lane walls,
 gatehouse rooms breaking up the aqueduct, staggered pillars in a 26-wide canal, a sunken court
