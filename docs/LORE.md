@@ -29,7 +29,7 @@ and fun, never gore or grimness, which suits an arcade shooter and Roblox's youn
   silhouettes under a banner in the arena's color and a camera drone off every third stand; it
   all goes in the map's `Art` folder, so it's visual only. The ring started as 6 to 12 separate
   stands with gaps between them; the owner wanted the crowd to surround the entire map. A full
-  ring is a lot of parts (about 65 per stand, 36 stands on Infernal Spire, 82 on Bastion), so
+  ring is a lot of parts (about 65 per stand, 53 stands on Infernal Spire, 82 on Bastion), so
   watch frame rates on phones.
 - **The crowd reacts.** The crowd roars for the biggest moments: a GODLIKE streak, or a
   shutdown that ends someone's run. Ring-outs used to be the crowd-pleaser, and went with

@@ -75,7 +75,7 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 | Bastion         | 17%      | 9%             | Meets both targets                                                                                       |
 | Gridline        | 26%      | 21%            | Covered arcades down both sides; spawns in pockets (was 31% and 90%)                                     |
 | Halcyon Station | 31%      | 10%            | Spawn pockets and escape pods; the walkable tube roofs and balcony stay open by design (was 40% and 86%) |
-| Infernal Spire  | 19%      | 10%            | Gallery tunnel round the lake, spawn rooms, lava columns (was 72% and 99.6%)                             |
+| Infernal Spire  | 36%      | 10%            | Rebuilt for instagib: open octagonal hall, ring runway round the lava, spire tiers (was 19% and 10%)     |
 | Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map                                        |
 | Foundry         | 37%      | 16%            | Rebuilt for instagib: one open hall, rocket-jump tiers, spawn rooms behind the walls (was 10% and 18%)   |
 
@@ -83,7 +83,25 @@ These were measured against the old 25% openness target. Free-for-all maps that 
 everywhere score high on spawn exposure almost by design; openness is the clearer signal for
 them.
 
-**The Infernal Spire redesign** was the first map built with the preview loop. The original
+**Infernal Spire** was rebuilt for instagib in October 2026, second after Foundry. Its roofed
+gallery tunnel, 24 wide with sixteen pillars in it, was the most cramped space in the roster.
+Now the hall is an octagon of rust-red brick, open to the sky: a basalt ring 67 studs wide
+runs all the way round the lava lake as the speed runway (about 900 studs per lap), with a lip
+along the lava's edge. Four iron bridges, 30 wide, cross the lava on the diagonals to the
+spire. Tiers: the ring at 0; corner bastions and the spire's base at 10; four basalt columns
+in the lava and the spire's middle at 25 (vents lift players from the ring to the columns,
+and bone bridges run on to the spire); the crown at 40. The walls are 60 tall with an
+invisible barrier above.
+
+Spawns took two passes. A spawn room behind each of the four cardinal walls measured 22%
+exposure and 27% openness: the arena itself couldn't see in (baffle walls inside the doors,
+as on Foundry), but the rooms were a quarter of all sampled spots, and spots inside a spawn
+room see its spawns. Two rooms, north and south, holding the free-for-all spawns too as on
+Foundry, brought it to 10% and 36%. The rooms' roofs are steep gables so the sampler (and
+anyone who got up there) can't stand on them; a see-through flat roof was tried and let the
+columns see in.
+
+The previous version's history: **the Infernal Spire redesign** was the first map built with the preview loop. The original
 was an open lava lake with spawns on the open ring. Three iterations: spawn rooms behind
 the rampart and columns in the lava (openness 35%, but the renders showed the rooms had been
 built facing outward, sealing the spawns); turned around (spawn exposure 74%, since a wide
@@ -211,7 +229,7 @@ can't.
 | Map             | Role                                                   | Archetype                  | Modes                                       |
 | --------------- | ------------------------------------------------------ | -------------------------- | ------------------------------------------- |
 | Bastion         | The big 5v5 map: two fortresses, three lanes           | Classic CTF                | CTF, Team Deathmatch, Domination, Hardpoint |
-| Infernal Spire  | Circular arena: climb the central spire over lava      | King of the hill           | Deathmatch, Team Deathmatch, Domination     |
+| Infernal Spire  | Lava hall: ring runway round the lake, climb the spire | King of the hill           | Deathmatch, Team Deathmatch, Domination     |
 | Gridline        | Mid-size synthwave map built around a speed trench     | Speed lanes                | All five                                    |
 | Halcyon Station | Low-gravity station interiors: hangars, tubes, reactor | Indoor low gravity         | All five                                    |
 | Skyreach        | Floating sky islands linked by jump pads, air control  | Quake 3's The Longest Yard | Deathmatch, Team Deathmatch, Domination     |
