@@ -1,22 +1,24 @@
-// Two brutalist fortresses facing each other across a desert plaza at golden hour. Built for
-// 5v5 to the targets in docs/MAP_DESIGN.md: three lanes between the bases (an elevated
-// aqueduct broken by gatehouse rooms, a central plaza around a sunken court and a contested
-// tower, and a sunken canal), crossing points that form loops, and bases with a hidden spawn
-// room, an upper-floor flag room, and a roof.
+// Two brutalist fortresses facing each other across a desert plaza at golden hour: the big 5v5
+// map. Three lanes run between the fortresses: the aqueduct, a raised runway down the west side
+// that joins both ramparts; the open plaza in the middle, around the tower; and the canal, a
+// sunken channel down the east side. Each fortress is a rampart across the map with the flag on
+// top and two gates through it, a courtyard behind, and the spawn room behind the back wall.
+// Earlier versions are recorded in docs/MAP_DESIGN.md.
 //
-// Red's base is at +Z and Blue's at -Z; everything is mirrored between them.
+// Red's fortress is at +Z and Blue's at -Z; everything is mirrored between them.
 //
-// Heights: canal -10, court -6, ground 0, upper floors and aqueduct 18, roofs 36, tower 44.
+// Heights: canal -6, ground 0, bunkers 10, aqueduct and ramparts 18, tower 40.
 
 import { TeamId } from "shared/modes";
 import {
 	controlPointMarker,
 	cylinder,
 	flagBaseMarker,
+	gableRoof,
 	jumpPad,
 	onCircle,
+	outline,
 	perkMarker,
-	plank,
 	plateWithHoles,
 	ramp,
 	ring,
@@ -32,28 +34,41 @@ import {
 import { spectatorRing } from "./spectators";
 import { MapBuilder } from "./types";
 
-const HALF_WIDTH = 160;
-const LANE_WALL_X = 70;
-const LANES_END = 200; // where the lanes meet the forecourt in front of each base
-const BASE_FRONT = 220;
-const BASE_BACK = 320;
-const MAP_END = 332;
+const HALF_WIDTH = 150;
+const HALF_LENGTH = 300;
 
+const CANAL = -6;
 const GROUND = 0;
-const CANAL = -10;
-const COURT = -6;
-const UPPER = 18;
-const ROOF = 36;
-const TOWER = 44;
-const STOREY = 16; // wall height between floors
+const BUNKER = 10;
+const RAMPART = 18;
+const TOWER = 40;
+const BOUNDARY_HEIGHT = 40;
 
-const AQUEDUCT_X = -110;
-const AQUEDUCT_HALF = 11;
-const GATEHOUSES = [-110, 0, 110];
-const CANAL_X = 110;
-const CANAL_HALF = 13;
-const COURT_HALF = 50;
-const TOWER_HALF = 14;
+// The aqueduct: a solid raised runway along the west wall, from rampart to rampart.
+const AQUEDUCT_INNER = -100;
+// The canal along the east wall, with ramps up to the ground at each end.
+const CANAL_INNER = 100;
+const CANAL_HALF_LENGTH = 145;
+const CANAL_RAMP_END = 170;
+// Each rampart runs the width of the map, with a gate through it either side of the flag.
+const RAMPART_FRONT = 230;
+const RAMPART_BACK = 262;
+const GATES: [number, number][] = [
+	[-72, -48],
+	[48, 72],
+];
+const GATE_HEIGHT = 14;
+const FLAG_Z = 246;
+const TOWER_HALF = 15;
+// Spawn rooms behind the fortresses' back walls, entered from the courtyards.
+const ROOM_DEPTH = 40;
+const ROOM_HALF_WIDTH = 110;
+const ROOM_HEIGHT = 24;
+const DOOR_HEIGHT = 18;
+const DOORS: [number, number][] = [
+	[-90, -70],
+	[70, 90],
+];
 
 const Sandstone: Style = { color: Color3.fromRGB(205, 170, 120), material: Enum.Material.Sandstone };
 const Concrete: Style = { color: Color3.fromRGB(188, 178, 162), material: Enum.Material.Concrete };
@@ -70,273 +85,248 @@ const Pad: Style = { color: Color3.fromRGB(255, 140, 40), material: Enum.Materia
 const Barrier: Style = { color: new Color3(), transparency: 1 };
 const Backdrop: Style = { color: Color3.fromRGB(196, 150, 100), material: Enum.Material.Sandstone, collide: false };
 
-// Signed range [a, b] along Z as [low, high].
-function zRange(a: number, b: number): [number, number] {
-	return [math.min(a, b), math.max(a, b)];
-}
-
+// Paving everywhere, with the canal cut out of the east side.
 function buildGround(map: Model) {
-	const thickness = 12;
-	const laneLength = BASE_FRONT * 2;
-	// West strip under the aqueduct, and the two strips either side of the canal.
-	slab(map, new Vector3(-115, GROUND, 0), new Vector3(90, thickness, laneLength), Sandstone, "Ground");
-	slab(map, new Vector3(83.5, GROUND, 0), new Vector3(27, thickness, laneLength), Sandstone, "Ground");
-	slab(map, new Vector3(141.5, GROUND, 0), new Vector3(37, thickness, laneLength), Sandstone, "Ground");
-	// Plaza, around the sunken court.
-	for (const side of [-1, 1]) {
-		const length = BASE_FRONT - COURT_HALF;
-		slab(
-			map,
-			new Vector3(0, GROUND, side * (COURT_HALF + length / 2)),
-			new Vector3(LANE_WALL_X * 2, thickness, length),
-			Paving,
-			"Plaza",
-		);
-		slab(
-			map,
-			new Vector3(side * 60, GROUND, 0),
-			new Vector3(LANE_WALL_X - COURT_HALF, thickness, COURT_HALF * 2),
-			Paving,
-			"Plaza",
-		);
-	}
+	plateWithHoles(
+		map,
+		GROUND,
+		-HALF_WIDTH,
+		HALF_WIDTH,
+		-HALF_LENGTH,
+		HALF_LENGTH,
+		[[CANAL_INNER, HALF_WIDTH, -CANAL_RAMP_END, CANAL_RAMP_END]],
+		Paving,
+	);
 }
 
+// Boundary walls round the map, with the spawn room doors in the end walls, and invisible
+// barriers above.
 function buildBoundary(map: Model) {
-	const top = 40;
 	for (const side of [-1, 1]) {
-		const sideWall = new Vector3(4, top + 12, MAP_END * 2 + 8);
-		const endWall = new Vector3(HALF_WIDTH * 2 + 8, top + 12, 4);
-		slab(map, new Vector3(side * (HALF_WIDTH + 2), top, 0), sideWall, DarkConcrete, "Boundary");
-		slab(map, new Vector3(0, top, side * (MAP_END + 2)), endWall, DarkConcrete, "Boundary");
-		const sideBarrier = new Vector3(4, 300, MAP_END * 2 + 8);
-		const endBarrier = new Vector3(HALF_WIDTH * 2 + 8, 300, 4);
-		scenery(slab(map, new Vector3(side * (HALF_WIDTH + 2), top + 300, 0), sideBarrier, Barrier, "Barrier"));
-		scenery(slab(map, new Vector3(0, top + 300, side * (MAP_END + 2)), endBarrier, Barrier, "Barrier"));
+		const x = side * (HALF_WIDTH + 2);
+		slab(
+			map,
+			new Vector3(x, BOUNDARY_HEIGHT, 0),
+			new Vector3(4, BOUNDARY_HEIGHT + 12, HALF_LENGTH * 2 + 8),
+			DarkConcrete,
+			"Boundary",
+		);
+		scenery(
+			slab(
+				map,
+				new Vector3(x, BOUNDARY_HEIGHT + 300, 0),
+				new Vector3(4, 300, HALF_LENGTH * 2 + 8),
+				Barrier,
+				"Barrier",
+			),
+		);
+
+		const z = side * (HALF_LENGTH + 2);
+		wallWithGaps(map, true, z, -HALF_WIDTH - 4, HALF_WIDTH + 4, DOORS, -12, BOUNDARY_HEIGHT + 12, DarkConcrete, 4);
+		for (const [a, b] of DOORS) {
+			slab(
+				map,
+				new Vector3((a + b) / 2, BOUNDARY_HEIGHT, z),
+				new Vector3(b - a, BOUNDARY_HEIGHT - DOOR_HEIGHT, 4),
+				DarkConcrete,
+				"Lintel",
+			);
+		}
+		scenery(
+			slab(
+				map,
+				new Vector3(0, BOUNDARY_HEIGHT + 300, z),
+				new Vector3(HALF_WIDTH * 2 + 8, 300, 4),
+				Barrier,
+				"Barrier",
+			),
+		);
 	}
 }
 
-// Walls between the lanes, open at three crossings that tie the lanes into loops.
-function buildLaneWalls(map: Model) {
-	const crossings: [number, number][] = [
-		[-122, -98],
-		[-15, 15],
-		[98, 122],
-	];
-	for (const side of [-1, 1]) {
-		wallWithGaps(map, false, side * LANE_WALL_X, -LANES_END, LANES_END, crossings, GROUND, 14, DarkConcrete);
+// West lane: the aqueduct, a raised runway 50 wide from one rampart to the other. Copper
+// channels run along its top; pads lift players up from the plaza.
+function buildAqueduct(map: Model) {
+	const width = HALF_WIDTH + AQUEDUCT_INNER;
+	const x = -HALF_WIDTH + width / 2;
+	slab(map, new Vector3(x, RAMPART, 0), new Vector3(width, RAMPART, RAMPART_FRONT * 2), Concrete, "Aqueduct");
+	slab(
+		map,
+		new Vector3(AQUEDUCT_INNER - 0.5, RAMPART + 0.1, 0),
+		new Vector3(1, 0.1, RAMPART_FRONT * 2),
+		Copper,
+		"AqueductEdge",
+	);
+	// Arches cut in relief along the inner face.
+	for (let z = -200; z <= 200; z += 40) {
+		slab(map, new Vector3(AQUEDUCT_INNER + 0.2, 12, z), new Vector3(0.6, 10, 20), DarkConcrete, "Arch");
+	}
+	for (const zSide of [-1, 1]) {
+		jumpPad(map, new Vector3(-80, GROUND, zSide * 60), new Vector3(-118, RAMPART, zSide * 60), 6, Pad);
 	}
 }
 
-// East lane: a sunken channel with staggered pillars, crossed by bridges at the crossings.
+// East lane: the canal, a sunken channel 50 wide, shallow enough to jump out of anywhere, with
+// ramps at both ends.
 function buildCanal(map: Model) {
-	slab(map, new Vector3(CANAL_X, CANAL, 0), new Vector3(CANAL_HALF * 2, 2, LANES_END * 2), Water, "CanalFloor");
+	const width = HALF_WIDTH - CANAL_INNER;
+	const x = CANAL_INNER + width / 2;
+	slab(map, new Vector3(x, CANAL, 0), new Vector3(width, 2, CANAL_HALF_LENGTH * 2), Water, "Canal");
 	for (const side of [-1, 1]) {
 		ramp(
 			map,
-			new Vector3(CANAL_X, CANAL, side * LANES_END),
-			new Vector3(CANAL_X, GROUND, side * BASE_FRONT),
-			CANAL_HALF * 2,
+			new Vector3(x, CANAL, side * CANAL_HALF_LENGTH),
+			new Vector3(x, GROUND, side * CANAL_RAMP_END),
+			width,
 			Sandstone,
 		);
-		const edge = new Vector3(CANAL_X + side * (CANAL_HALF - 0.2), 0.05, 0);
-		slab(map, edge, new Vector3(0.4, 0.1, LANES_END * 2), Copper, "CanalEdge");
 	}
-
-	const pillars: [number, number][] = [
-		[-6, 40],
-		[6, 75],
-		[-6, 145],
-		[6, 175],
-	];
-	for (const side of [-1, 1]) {
-		for (const [offset, z] of pillars) {
-			slab(
-				map,
-				new Vector3(CANAL_X + offset * side, 2, side * z),
-				new Vector3(10, 12, 4),
-				DarkConcrete,
-				"Pillar",
-			);
-		}
-	}
-	for (const z of [-110, 0, 110]) {
-		slab(map, new Vector3(CANAL_X, 0.5, z), new Vector3(CANAL_HALF * 2 + 4, 1, 10), Concrete, "Bridge");
-	}
-}
-
-// West lane: an elevated speed runway. Gatehouse rooms break it into stretches of about 100
-// studs so it never becomes one long sightline.
-function buildAqueduct(map: Model) {
-	const deckLength = BASE_FRONT * 2;
-	slab(map, new Vector3(AQUEDUCT_X, UPPER, 0), new Vector3(AQUEDUCT_HALF * 2, 2, deckLength), Concrete, "Aqueduct");
-	for (const side of [-1, 1]) {
-		const edge = new Vector3(AQUEDUCT_X + side * (AQUEDUCT_HALF + 0.2), UPPER + 0.3, 0);
-		slab(map, edge, new Vector3(0.4, 0.6, deckLength), Copper, "AqueductEdge");
-	}
-	for (let z = -BASE_FRONT + 10; z < BASE_FRONT; z += 30) {
-		for (const x of [AQUEDUCT_X - 9, AQUEDUCT_X + 9]) {
-			slab(map, new Vector3(x, UPPER - 2, z), new Vector3(3, UPPER - 2, 3), DarkConcrete, "Arch");
-		}
-	}
-
-	for (const gz of GATEHOUSES) {
-		const [x1, x2] = [AQUEDUCT_X - 18, AQUEDUCT_X + 18];
-		slab(map, new Vector3(AQUEDUCT_X, UPPER, gz), new Vector3(36, 2, 30), Concrete, "GatehouseFloor");
-		for (const face of [-1, 1]) {
-			wallWithGaps(
-				map,
-				true,
-				gz + face * 15,
-				x1,
-				x2,
-				[[AQUEDUCT_X - 7, AQUEDUCT_X + 7]],
-				UPPER,
-				STOREY,
-				DarkConcrete,
-			);
-		}
-		for (const x of [x1, x2]) {
-			wallWithGaps(map, false, x, gz - 15, gz + 15, [[gz - 6, gz + 6]], UPPER, STOREY, DarkConcrete);
-		}
-		slab(map, new Vector3(AQUEDUCT_X, ROOF, gz), new Vector3(36, 2, 30), Concrete, "GatehouseRoof");
-		slab(map, new Vector3(AQUEDUCT_X, ROOF + 0.3, gz), new Vector3(36.4, 0.6, 30.4), Copper, "GatehouseTrim");
-	}
-
-	// Pads up onto the middle gatehouse roof, which bridges to the tower.
-	for (const side of [-1, 1]) {
-		jumpPad(map, new Vector3(AQUEDUCT_X, UPPER, side * 32), new Vector3(AQUEDUCT_X, ROOF, side * 8), 8, Pad);
-	}
-	const bridgeStart = new Vector3(AQUEDUCT_X + 18, ROOF, 0);
-	plank(map, bridgeStart, new Vector3(-TOWER_HALF, TOWER, 0), 8, 1.5, Concrete, "SkyBridge");
-
-	// On-ramps from the ground, angled so they feed into the flow rather than across it.
-	for (const side of [-1, 1]) {
-		for (const z of [60, 170]) {
-			ramp(
-				map,
-				new Vector3(-LANE_WALL_X - 2, GROUND, side * (z - 25)),
-				new Vector3(AQUEDUCT_X + AQUEDUCT_HALF + 0.5, UPPER, side * z),
-				10,
-				Sandstone,
-			);
-		}
-	}
-}
-
-// Center lane: a paved bowl around a sunken court, with the tower as the contested high point.
-// The tower has four routes up: two pads in the court, the sky bridge, and the east ramp.
-function buildPlaza(map: Model) {
-	slab(map, new Vector3(0, COURT, 0), new Vector3(COURT_HALF * 2, 2, COURT_HALF * 2), Paving, "Court");
-	for (const side of [-1, 1]) {
-		for (const x of [-30, 30]) {
-			ramp(map, new Vector3(x, COURT, side * 30), new Vector3(x, GROUND, side * COURT_HALF), 12, Paving);
-		}
-		jumpPad(map, new Vector3(0, COURT, side * 30), new Vector3(0, TOWER, side * 8), 8, Pad);
-	}
-
-	const towerSize = new Vector3(TOWER_HALF * 2, TOWER - COURT, TOWER_HALF * 2);
-	slab(map, new Vector3(0, TOWER, 0), towerSize, DarkConcrete, "Tower");
 	slab(
 		map,
-		new Vector3(0, TOWER + 0.3, 0),
-		towerSize.mul(new Vector3(1, 0, 1)).add(new Vector3(0.4, 0.6, 0.4)),
+		new Vector3(CANAL_INNER + 0.2, GROUND + 0.1, 0),
+		new Vector3(0.4, 0.1, CANAL_RAMP_END * 2),
 		Copper,
-		"TowerTrim",
+		"CanalEdge",
 	);
-	for (const x of [-1, 1]) {
-		for (const z of [-1, 1]) {
-			const corner = new Vector3(x * (TOWER_HALF - 1.5), TOWER + 12, z * (TOWER_HALF - 1.5));
-			slab(map, corner, new Vector3(3, 12, 3), DarkConcrete, "Spire");
-			slab(map, corner.add(new Vector3(0, 0.6, 0)), new Vector3(3.4, 0.6, 3.4), Copper, "SpireCap");
-		}
-	}
-	ramp(map, new Vector3(LANE_WALL_X + 14, GROUND, 0), new Vector3(TOWER_HALF, TOWER, 0), 10, Concrete);
-
-	for (const side of [-1, 1]) {
-		for (const x of [-35, 35]) {
-			const monolith = new Vector3(x, 26, side * 95);
-			slab(map, monolith, new Vector3(8, 26, 8), DarkConcrete, "Monolith");
-			slab(map, monolith.add(new Vector3(0, 0.6, 0)), new Vector3(8.4, 0.6, 8.4), Copper, "MonolithCap");
-		}
-		slab(map, new Vector3(0, 5, side * 150), new Vector3(30, 5, 3), DarkConcrete, "Plinth");
-	}
+	slab(
+		map,
+		new Vector3(CANAL_INNER + 0.5, GROUND, 0),
+		new Vector3(1, GROUND - CANAL, CANAL_RAMP_END * 2),
+		Sandstone,
+		"CanalWall",
+	);
 }
 
-function buildBase(map: Model, team: TeamId, sign: number) {
+// Center lane: the open plaza, with the tower in the middle (the high point, reached by pads or
+// a rocket jump off its walls) and four bunkers as cover and the first step up.
+function buildPlaza(map: Model) {
+	slab(map, new Vector3(0, TOWER, 0), new Vector3(TOWER_HALF * 2, TOWER, TOWER_HALF * 2), Sandstone, "Tower");
+	outline(map, new Vector3(0, TOWER, 0), TOWER_HALF * 2, TOWER_HALF * 2, Copper);
+	for (const side of [-1, 1]) {
+		jumpPad(map, new Vector3(side * 32, GROUND, 0), new Vector3(side * 6, TOWER, 0), 8, Pad);
+		for (const zSide of [-1, 1]) {
+			slab(map, new Vector3(side * 50, BUNKER, zSide * 110), new Vector3(34, BUNKER, 24), Concrete, "Bunker");
+			outline(map, new Vector3(side * 50, BUNKER, zSide * 110), 34, 24, Copper);
+		}
+	}
+	ring(map, new Vector3(0, GROUND + 0.1, 0), 40, 1, 0.2, 32, Copper, "PlazaRing");
+}
+
+// A fortress: the rampart across the map with the flag on top and two gates through it, ramps
+// up from the field and the courtyard, and the spawn room behind the back wall.
+function buildFortress(map: Model, team: TeamId, sign: number) {
 	const glow = teamGlow(team);
 	const z = (distance: number) => sign * distance;
-	const doorways: [number, number][] = [
-		[AQUEDUCT_X - 15, AQUEDUCT_X + 15],
-		[-15, 15],
-		[CANAL_X - 15, CANAL_X + 15],
-	];
-	const depth = MAP_END - BASE_FRONT;
-	const floorCenter = new Vector3(0, GROUND, z(BASE_FRONT + depth / 2));
-	slab(map, floorCenter, new Vector3(HALF_WIDTH * 2, 12, depth), Concrete, "BaseFloor");
+	const depth = RAMPART_BACK - RAMPART_FRONT;
+	const mid = z((RAMPART_FRONT + RAMPART_BACK) / 2);
 
-	// Ground floor: a front hall, and a spawn room behind it with two exits.
-	wallWithGaps(map, true, z(BASE_FRONT + 1), -HALF_WIDTH, HALF_WIDTH, doorways, GROUND, STOREY, DarkConcrete);
-	wallWithGaps(map, true, z(BASE_BACK + 1), -HALF_WIDTH, HALF_WIDTH, [], GROUND, STOREY, DarkConcrete);
-	wallWithGaps(
+	// The rampart: solid between the gates, bridged over them.
+	const cuts = [-HALF_WIDTH];
+	for (const [a, b] of GATES) cuts.push(a, b);
+	cuts.push(HALF_WIDTH);
+	for (let k = 0; k < cuts.size(); k += 2) {
+		const [from, to] = [cuts[k], cuts[k + 1]];
+		slab(
+			map,
+			new Vector3((from + to) / 2, RAMPART, mid),
+			new Vector3(to - from, RAMPART + 6, depth),
+			Concrete,
+			"Rampart",
+		);
+	}
+	for (const [a, b] of GATES) {
+		slab(
+			map,
+			new Vector3((a + b) / 2, RAMPART, mid),
+			new Vector3(b - a, RAMPART - GATE_HEIGHT, depth),
+			Concrete,
+			"GateBridge",
+		);
+		slab(
+			map,
+			new Vector3((a + b) / 2, GATE_HEIGHT - 0.5, z(RAMPART_FRONT - 0.2)),
+			new Vector3(b - a, 0.6, 0.4),
+			glow,
+			"GateGlow",
+		);
+	}
+	slab(
 		map,
-		true,
-		z(280),
-		-HALF_WIDTH,
-		HALF_WIDTH,
-		[
-			[-68, -52],
-			[52, 68],
-		],
-		GROUND,
-		STOREY,
-		DarkConcrete,
+		new Vector3(0, RAMPART + 0.1, z(RAMPART_FRONT + 0.5)),
+		new Vector3(HALF_WIDTH * 2, 0.1, 1),
+		glow,
+		"RampartEdge",
 	);
-	for (const x of [-95, -30, 30, 95]) {
-		slab(map, new Vector3(x, STOREY, z(250)), new Vector3(6, STOREY, 6), DarkConcrete, "Column");
+
+	// Ways up: a ramp near the canal, pads in front of the flag, and ramps from the courtyard.
+	// The aqueduct joins the rampart's west end.
+	ramp(
+		map,
+		new Vector3(100, GROUND, z(RAMPART_FRONT - 30)),
+		new Vector3(100, RAMPART, z(RAMPART_FRONT)),
+		24,
+		Concrete,
+	);
+	for (const side of [-1, 1]) {
+		jumpPad(
+			map,
+			new Vector3(side * 25, GROUND, z(RAMPART_FRONT - 18)),
+			new Vector3(side * 25, RAMPART, z(FLAG_Z)),
+			6,
+			Pad,
+		);
+		ramp(
+			map,
+			new Vector3(side * 115, GROUND, z(HALF_LENGTH - 4)),
+			new Vector3(side * 115, RAMPART, z(RAMPART_BACK)),
+			20,
+			Concrete,
+		);
 	}
 
-	// Upper floor and roof, with stairwells: hall to upper floor, upper floor to roof.
-	const [hallLow, hallHigh] = zRange(z(230), z(270));
-	const stairHoles: [number, number, number, number][] = [-60, 60].map((x) => [x - 10, x + 10, hallLow, hallHigh]);
-	const [roofLow, roofHigh] = zRange(z(270), z(300));
-	const roofHoles: [number, number, number, number][] = [-125, 125].map((x) => [x - 15, x + 15, roofLow, roofHigh]);
-	const [baseLow, baseHigh] = zRange(z(BASE_FRONT), z(BASE_BACK));
-	plateWithHoles(map, UPPER, -HALF_WIDTH, HALF_WIDTH, baseLow, baseHigh, stairHoles, Concrete);
-	plateWithHoles(map, ROOF, -HALF_WIDTH, HALF_WIDTH, baseLow, baseHigh, roofHoles, Concrete);
-	for (const x of [-60, 60]) {
-		ramp(map, new Vector3(x, GROUND, z(230)), new Vector3(x, UPPER, z(270)), 12, Concrete);
-	}
-	for (const x of [-125, 125]) {
-		ramp(map, new Vector3(x, UPPER, z(300)), new Vector3(x, ROOF, z(270)), 12, Concrete);
-	}
-
-	wallWithGaps(map, true, z(BASE_FRONT + 1), -HALF_WIDTH, HALF_WIDTH, doorways, UPPER, STOREY, DarkConcrete);
-	wallWithGaps(map, true, z(BASE_BACK + 1), -HALF_WIDTH, HALF_WIDTH, [], UPPER, STOREY, DarkConcrete);
-
-	// Flag room at the back of the upper floor, with three entrances.
-	wallWithGaps(map, true, z(270), -40, 40, [[-8, 8]], UPPER, STOREY, DarkConcrete);
-	for (const x of [-40, 40]) {
-		wallWithGaps(map, false, x, z(270), z(BASE_BACK), [[z(285), z(300)]], UPPER, STOREY, DarkConcrete);
-	}
-	const flagSpot = new Vector3(0, UPPER + 0.5, z(300));
+	const flagSpot = new Vector3(0, RAMPART + 0.5, z(FLAG_Z));
 	cylinder(map, flagSpot, 0.5, 10, DarkConcrete, "FlagDais");
 	ring(map, flagSpot.add(new Vector3(0, 0.1, 0)), 4.6, 0.6, 0.2, 20, glow, "DaisRing");
 	flagBaseMarker(map, flagSpot, team);
+	slab(map, new Vector3(0, 30, z(HALF_LENGTH - 0.2)), new Vector3(HALF_WIDTH * 2, 0.6, 0.4), glow, "TeamStripe");
 
-	// Roof parapet, team trim on the front face, and pads from the forecourt up to the roof.
-	wallWithGaps(map, true, z(BASE_FRONT + 1), -HALF_WIDTH, HALF_WIDTH, [], ROOF, 3, DarkConcrete);
-	wallWithGaps(map, true, z(BASE_BACK + 1), -HALF_WIDTH, HALF_WIDTH, [], ROOF, 3, DarkConcrete);
-	for (const height of [UPPER, ROOF]) {
-		const trim = new Vector3(0, height + 0.3, z(BASE_FRONT - 0.2));
-		slab(map, trim, new Vector3(HALF_WIDTH * 2, 0.6, 0.4), glow, "TeamTrim");
+	// The spawn room behind the back wall, with a baffle inside each door and a steep roof.
+	const zMid = z(HALF_LENGTH + 4 + ROOM_DEPTH / 2);
+	const zBack = z(HALF_LENGTH + 4 + ROOM_DEPTH);
+	slab(map, new Vector3(0, GROUND, zMid), new Vector3(ROOM_HALF_WIDTH * 2, 2, ROOM_DEPTH + 4), Paving, "SpawnFloor");
+	wallWithGaps(map, true, zBack, -ROOM_HALF_WIDTH, ROOM_HALF_WIDTH, [], -2, ROOM_HEIGHT + 2, DarkConcrete, 4);
+	for (const side of [-1, 1]) {
+		wallWithGaps(
+			map,
+			false,
+			side * ROOM_HALF_WIDTH,
+			z(HALF_LENGTH),
+			zBack,
+			[],
+			-2,
+			ROOM_HEIGHT + 2,
+			DarkConcrete,
+			4,
+		);
 	}
-	for (const x of [-40, 40]) {
-		jumpPad(map, new Vector3(x, GROUND, z(208)), new Vector3(x, ROOF, z(232)), 12, Pad);
+	gableRoof(map, new CFrame(0, ROOM_HEIGHT, zMid), ROOM_HALF_WIDTH * 2 + 4, ROOM_DEPTH + 8, 25, Sandstone);
+	for (const [a, b] of DOORS) {
+		slab(
+			map,
+			new Vector3((a + b) / 2, DOOR_HEIGHT, z(HALF_LENGTH + 16)),
+			new Vector3(b - a + 20, DOOR_HEIGHT, 2),
+			DarkConcrete,
+			"DoorBaffle",
+		);
 	}
+	slab(map, new Vector3(0, ROOM_HEIGHT - 1, zMid), new Vector3(ROOM_HALF_WIDTH * 2 - 10, 0.4, 1), glow, "RoomLight");
 
-	for (const x of [-110, -70, -30, 30, 70, 110]) {
-		spawnMarker(map, new Vector3(x, GROUND, z(305)), new Vector3(x, GROUND, 0), team);
+	const row = zBack - sign * 6;
+	for (const x of [-15, -5, 5, 15]) {
+		spawnMarker(map, new Vector3(x, GROUND, row), new Vector3(x > 0 ? 80 : -80, GROUND, z(HALF_LENGTH)), team);
+	}
+	for (const side of [-1, 1]) {
+		spawnMarker(map, new Vector3(side * 55, GROUND, row), new Vector3(side * 80, GROUND, z(HALF_LENGTH)), team);
 	}
 }
 
@@ -375,35 +365,34 @@ export const Bastion: MapBuilder = {
 			music: "",
 		});
 
-		// Domination points, on the center line so neither side is closer.
-		controlPointMarker(map, new Vector3(AQUEDUCT_X, UPPER, 0), "A", 12, "Domination");
-		controlPointMarker(map, new Vector3(0, TOWER, 0), "B", 10, "Domination");
-		controlPointMarker(map, new Vector3(CANAL_X, CANAL, 0), "C", 12, "Domination");
-		// Hardpoints: larger zones with cover, rotating center first and then alternating sides.
-		controlPointMarker(map, new Vector3(0, COURT, 0), "1", 30, "Hardpoint");
-		controlPointMarker(map, new Vector3(AQUEDUCT_X, UPPER, 110), "2", 15, "Hardpoint");
-		controlPointMarker(map, new Vector3(CANAL_X, CANAL, -110), "3", 16, "Hardpoint");
-		controlPointMarker(map, new Vector3(AQUEDUCT_X, UPPER, -110), "4", 15, "Hardpoint");
-		controlPointMarker(map, new Vector3(CANAL_X, CANAL, 110), "5", 16, "Hardpoint");
-
-		// Perk orbs: strong perks at contested spots, team-side perks in mirrored pairs.
-		perkMarker(map, new Vector3(0, TOWER, 0), "Overcharge");
-		perkMarker(map, new Vector3(AQUEDUCT_X, UPPER, 0), "Radar");
-		perkMarker(map, new Vector3(CANAL_X, CANAL, 0), "SuperJump");
-		perkMarker(map, new Vector3(0, GROUND, 125), "Shield");
-		perkMarker(map, new Vector3(0, GROUND, -125), "Shield");
-
 		buildGround(map);
 		buildBoundary(map);
-		buildLaneWalls(map);
-		buildCanal(map);
 		buildAqueduct(map);
+		buildCanal(map);
 		buildPlaza(map);
-		buildBase(map, "Red", 1);
-		buildBase(map, "Blue", -1);
+		buildFortress(map, "Red", 1);
+		buildFortress(map, "Blue", -1);
 		buildBackdrop(map);
 		// The crowd floats above the desert, ringing both fortresses.
 		spectatorRing(map, Vector3.zero, 400, 70, Color3.fromRGB(255, 140, 40));
+
+		// Domination points, on the center line so neither side is closer.
+		controlPointMarker(map, new Vector3(-125, RAMPART, 0), "A", 14, "Domination");
+		controlPointMarker(map, new Vector3(0, TOWER, 0), "B", 12, "Domination");
+		controlPointMarker(map, new Vector3(125, CANAL, 0), "C", 14, "Domination");
+		// Hardpoints: the tower first, then the side lanes, alternating ends.
+		controlPointMarker(map, new Vector3(0, TOWER, 0), "1", 14, "Hardpoint");
+		controlPointMarker(map, new Vector3(-125, RAMPART, 110), "2", 16, "Hardpoint");
+		controlPointMarker(map, new Vector3(125, CANAL, -110), "3", 16, "Hardpoint");
+		controlPointMarker(map, new Vector3(-125, RAMPART, -110), "4", 16, "Hardpoint");
+		controlPointMarker(map, new Vector3(125, CANAL, 110), "5", 16, "Hardpoint");
+
+		// Perk orbs: strong perks at contested spots, team-side perks in mirrored pairs.
+		perkMarker(map, new Vector3(0, TOWER, 0), "Overcharge");
+		perkMarker(map, new Vector3(-125, RAMPART, 0), "Radar");
+		perkMarker(map, new Vector3(125, CANAL, 0), "SuperJump");
+		perkMarker(map, new Vector3(0, GROUND, 150), "Shield");
+		perkMarker(map, new Vector3(0, GROUND, -150), "Shield");
 
 		setMapLighting(map, {
 			clockTime: 17.2,

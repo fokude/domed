@@ -72,7 +72,7 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 
 | Map             | Openness | Spawn exposure | Notes                                                                                                  |
 | --------------- | -------- | -------------- | ------------------------------------------------------------------------------------------------------ |
-| Bastion         | 17%      | 9%             | Meets both targets                                                                                     |
+| Bastion         | 37%      | 6%             | Rebuilt for instagib: aqueduct, plaza and canal lanes between rampart fortresses (was 17% and 9%)      |
 | Gridline        | 36%      | 12%            | Rebuilt for instagib: speed trench, banked embankment runways, overpass (was 26% and 21%)              |
 | Halcyon Station | 36%      | 14%            | Rebuilt for instagib: one hall round the reactor shaft, side-lane runways (was 31% and 10%)            |
 | Infernal Spire  | 36%      | 10%            | Rebuilt for instagib: open octagonal hall, ring runway round the lava, spire tiers (was 19% and 10%)   |
@@ -82,6 +82,18 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 These were measured against the old 25% openness target. Free-for-all maps that scatter spawns
 everywhere score high on spawn exposure almost by design; openness is the clearer signal for
 them.
+
+**Bastion** was rebuilt for instagib in October 2026, last of the six. It had lane walls,
+gatehouse rooms breaking up the aqueduct, staggered pillars in a 26-wide canal, a sunken court
+and two-storey fortresses with corridors and flag rooms: the most walls of any map. Now it is
+300 by 600 with three open lanes: the aqueduct, a solid runway 50 wide at 18 down the west
+side, joining both ramparts; the plaza in the middle, open but for the tower (the high point
+at 40, reached by pads or a rocket jump off its walls) and four bunkers at 10; and the canal,
+50 wide and 6 deep down the east side, shallow enough to jump out of anywhere. Each fortress is
+a rampart across the map at 18 with the flag on top, two gates through it, ramps up from the
+field and the courtyard behind, and the spawn room behind the back wall as on Foundry. The
+flags are 492 studs apart, the longest route in the roster but still short of the CTF target
+(see DOMED scale). It measured 37% open and 6% exposure on the first pass.
 
 **Infernal Spire** was rebuilt for instagib in October 2026, second after Foundry. Its roofed
 gallery tunnel, 24 wide with sixteen pillars in it, was the most cramped space in the roster.
