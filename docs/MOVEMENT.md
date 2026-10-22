@@ -124,7 +124,14 @@ frame. In the air they set velocity directly.
 speed and adds its horizontal push to the player's momentum. The loader computes each pad's
 push from its target part and the map's gravity (see MAPPING.md).
 
-**Field of view** widens with speed, by up to `speedFovBoost`.
+**Field of view** is 70 degrees vertical (`baseFov`, Roblox's default, about 102 degrees across
+at 16:9) and widens with speed by up to 5 more (`speedFovBoost`). It was 80 widening by up to 12
+(about 112 to 122 across). The owner found the world felt far too big and the character tiny:
+a wide view shrinks the middle of the screen and stretches the edges, and it was widest at top
+speed. For comparison, Quake's and CS's default of 90 degrees across at 4:3 is about 74
+vertical. Maps and speeds are also large for the character's size (the world was built around
+45 studs/s walking); see MAP_DESIGN.md before building more height into maps. Untested in
+Studio.
 
 ## Engine quirks
 

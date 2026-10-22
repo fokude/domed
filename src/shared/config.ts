@@ -31,9 +31,9 @@ export const MovementConfig = {
 	rocketJumpRadius: 20,
 	rocketJumpSpeedDecay: 100,
 
-	// Roblox FieldOfView is vertical; 80 is roughly 110 horizontal at 16:9.
-	baseFov: 80,
-	speedFovBoost: 12,
+	// Roblox FieldOfView is vertical; 70 is about 102 horizontal at 16:9. See docs/MOVEMENT.md.
+	baseFov: 70,
+	speedFovBoost: 5,
 };
 
 export const XpConfig = {
