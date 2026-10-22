@@ -76,7 +76,7 @@ Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`
 | Gridline        | 26%      | 21%            | Covered arcades down both sides; spawns in pockets (was 31% and 90%)                                   |
 | Halcyon Station | 36%      | 14%            | Rebuilt for instagib: one hall round the reactor shaft, side-lane runways (was 31% and 10%)            |
 | Infernal Spire  | 36%      | 10%            | Rebuilt for instagib: open octagonal hall, ring runway round the lava, spire tiers (was 19% and 10%)   |
-| Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map                                      |
+| Skyreach        | 44%      | 5%             | Rebuilt for instagib: promenade runways, team islands, open sky with monoliths (was 28% and 14%)       |
 | Foundry         | 37%      | 16%            | Rebuilt for instagib: one open hall, rocket-jump tiers, spawn rooms behind the walls (was 10% and 18%) |
 
 These were measured against the old 25% openness target. Free-for-all maps that scatter spawns
@@ -117,7 +117,19 @@ end to end, and a battlement roof reached through skylights above the pads (a ne
 Rust-red brick and iron grating replaced plain basalt. It measures 19% open: a little under the
 target, which suits a map built around a tunnel.
 
-**Skyreach** took four passes. First pass: 38% open and 61% spawn exposure, since the spawn
+**Skyreach** was rebuilt for instagib in October 2026. Its islands were 34 to 48 studs
+across with colonnades, parapets and ruined walls on them, joined by 6-stud bridges: too
+small to land a rocket jump at speed. Now two promenades, 50 by 280, run down the east and
+west sides as the runways, lipped on their outer edges and open to the sky on the inner.
+Each team's island (140 by 94, at 10) joins both promenades by 24-wide bridges, so the outside
+is one loop. Over the open sky in the middle sit four mid islands (44 by 44, at 28) and the
+Crown (at 48), reached by pads and rocket jumps. Each team's temple is on its island's back
+edge, walled at the front and sides and open at the back onto a terrace, so its spawns can
+only be seen from behind it (5% exposure, from the terrace and the temple itself). With
+nothing but the islands, the map measured 58% open, too open even for an open-air map; four
+floating monoliths over the sky, clear of every lane, brought it to 44%.
+
+The previous version's history: **Skyreach** took four passes. First pass: 38% open and 61% spawn exposure, since the spawn
 temples' screens were narrower than the spawns behind them. Wider temples and screens, an
 obelisk on the Crown and bigger monoliths brought it to 33% and 31%; the exposure plan showed
 the raised mid islands looking into the temples past the screens, so the temples got solid
@@ -239,14 +251,14 @@ looks. Classic arena maps inspire archetypes only: layouts, themes and names are
 since recognizable copies of commercial maps carry IP risk and add nothing a fresh layout
 can't.
 
-| Map             | Role                                                   | Archetype                  | Modes                                       |
-| --------------- | ------------------------------------------------------ | -------------------------- | ------------------------------------------- |
-| Bastion         | The big 5v5 map: two fortresses, three lanes           | Classic CTF                | CTF, Team Deathmatch, Domination, Hardpoint |
-| Infernal Spire  | Lava hall: ring runway round the lake, climb the spire | King of the hill           | Deathmatch, Team Deathmatch, Domination     |
-| Gridline        | Mid-size synthwave map built around a speed trench     | Speed lanes                | All five                                    |
-| Halcyon Station | Low-gravity station hall round an open reactor shaft   | Indoor low gravity         | All five                                    |
-| Skyreach        | Floating sky islands linked by jump pads, air control  | Quake 3's The Longest Yard | Deathmatch, Team Deathmatch, Domination     |
-| Foundry         | Open forge hall around a molten pit, rocket-jump tiers | Rocket-jump arena          | Deathmatch, Team Deathmatch, Hardpoint      |
+| Map             | Role                                                      | Archetype                  | Modes                                       |
+| --------------- | --------------------------------------------------------- | -------------------------- | ------------------------------------------- |
+| Bastion         | The big 5v5 map: two fortresses, three lanes              | Classic CTF                | CTF, Team Deathmatch, Domination, Hardpoint |
+| Infernal Spire  | Lava hall: ring runway round the lake, climb the spire    | King of the hill           | Deathmatch, Team Deathmatch, Domination     |
+| Gridline        | Mid-size synthwave map built around a speed trench        | Speed lanes                | All five                                    |
+| Halcyon Station | Low-gravity station hall round an open reactor shaft      | Indoor low gravity         | All five                                    |
+| Skyreach        | Sky promenades round an open sky, the Crown in the middle | Quake 3's The Longest Yard | Deathmatch, Team Deathmatch, Domination     |
+| Foundry         | Open forge hall around a molten pit, rocket-jump tiers    | Rocket-jump arena          | Deathmatch, Team Deathmatch, Hardpoint      |
 
 Every map is measured with `npm run preview` against the targets above before it ships, and
 checked in Studio with `/openness`.

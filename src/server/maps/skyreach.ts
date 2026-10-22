@@ -1,19 +1,19 @@
 // Skyreach: floating marble ruins in the upper atmosphere of a gas giant at sunrise, the
-// tournament's open-air arena. Built around air control in the spirit of Quake 3's floating
-// arenas (an archetype, not a copy): four low islands at the compass points where players
-// spawn, four higher islands on the diagonals, and the Crown, a contested platform in the
-// middle reached only by jump pads. Floating monoliths break the sightlines across open sky.
-// Falling means a long drop into the clouds. Lower gravity rewards air strafing.
+// tournament's open-air arena, in the spirit of Quake 3's floating arenas (an archetype, not a
+// copy). Two long promenades down the east and west sides are the speed runways; each team's
+// island sits at one end, with a temple on its back edge where players spawn; wide bridges join
+// the islands to the promenades in a loop. Over the open sky in the middle, four mid islands
+// and the Crown, a contested platform reached by jump pads and rocket jumps. Falling means a
+// long drop into the clouds. Lower gravity rewards air strafing.
 //
-// Heights: low islands 10, mid islands 30, the Crown 56. North (angle 0) is Red's side and
-// south is Blue's; west and east are shared.
+// Heights: promenades 0, team islands 10, mid islands 28, the Crown 48. Red's island is north
+// (-Z), Blue's south (+Z).
 
 import {
 	block,
 	controlPointMarker,
 	cylinder,
 	jumpPad,
-	onCircle,
 	perkMarker,
 	plank,
 	pointLight,
@@ -45,191 +45,256 @@ const Cloud: Style = {
 };
 const Barrier: Style = { color: new Color3(), transparency: 1 };
 
-const CENTER = Vector3.zero;
-const QUARTER = math.pi / 2;
-const EIGHTH = math.pi / 4;
+const GLOW = Color3.fromRGB(120, 230, 230);
 
-const LOW = 10;
-const MID = 30;
-const CROWN = 56;
-const LOW_RADIUS = 112;
-const MID_RADIUS = 78;
-const LOW_SIZE = new Vector3(48, 6, 40);
-const MID_SIZE = 34;
-const CROWN_DIAMETER = 40;
-const MONOLITH_RADIUS = 48;
-const CARDINALS = [0, QUARTER, 2 * QUARTER, 3 * QUARTER];
-const DIAGONALS = CARDINALS.map((angle) => angle + EIGHTH);
-
-function at(radius: number, angle: number, height: number): Vector3 {
-	return onCircle(CENTER, radius, angle).add(new Vector3(0, height, 0));
-}
-
-// A frame at `radius` and `angle`, with +Z pointing toward the center.
-function ringFrame(radius: number, angle: number, height: number): CFrame {
-	return new CFrame(CENTER).mul(CFrame.Angles(0, angle, 0)).mul(new CFrame(0, height, -radius));
-}
+const PROMENADE = 0;
+const ISLAND = 10;
+const MID = 28;
+const CROWN = 48;
+// Promenades: 50 wide, 280 long.
+const PROMENADE_X = 135;
+const PROMENADE_HALF_WIDTH = 25;
+const PROMENADE_HALF_LENGTH = 140;
+// Team islands: 140 wide, from the front edge back to the temple's terrace.
+const ISLAND_HALF_WIDTH = 70;
+const ISLAND_FRONT = 110;
+const ISLAND_BACK = 204;
+// The temple on each team island's back edge: front wall, side walls and roof, open at the back
+// onto a terrace, so its spawns can only be seen from behind it.
+const TEMPLE_FRONT = 160;
+const TEMPLE_BACK = 184;
+const TEMPLE_HALF_WIDTH = 30;
+const TEMPLE_HEIGHT = 16;
+const BRIDGE_Z = 130;
+const BRIDGE_WIDTH = 24;
+const MID_X = 70;
+const MID_Z = 55;
+const MID_SIZE = 44;
+const CROWN_DIAMETER = 44;
 
 // An island: a marble top over a tapering rock underside, so it reads as floating.
-function island(arena: Model, top: Vector3, size: Vector3, frame: CFrame, name: string) {
-	block(arena, size, frame.Rotation.add(top.sub(new Vector3(0, size.Y / 2, 0))), Marble, name);
-	block(
-		arena,
-		new Vector3(size.X + 1, 0.6, size.Z + 1),
-		frame.Rotation.add(top.sub(new Vector3(0, 0.6, 0))),
-		Gold,
-		"Trim",
-	);
+function island(arena: Model, top: Vector3, size: Vector3, name: string) {
+	slab(arena, top, size, Marble, name);
+	slab(arena, top.sub(new Vector3(0, size.Y - 0.6, 0)), new Vector3(size.X + 1, 0.6, size.Z + 1), Gold, "Trim");
 	for (let layer = 1; layer <= 3; layer++) {
 		const shrink = layer * 0.22;
-		const depth = size.Y + layer * 6;
-		block(
+		slab(
 			arena,
+			top.sub(new Vector3(0, size.Y + (layer - 1) * 6, 0)),
 			new Vector3(size.X * (1 - shrink), 6, size.Z * (1 - shrink)),
-			frame.Rotation.add(top.sub(new Vector3(0, depth, 0))),
 			Stone,
 			"IslandRock",
 		);
 	}
 }
 
-// A small temple on each low island where players spawn. Its front is solid, so nothing in
-// the arena can see in; the doors are in the side walls, one each side, and each spawn faces
-// its door.
-function spawnTemple(arena: Model, angle: number, team: "Red" | "Blue" | undefined) {
-	const frame = ringFrame(LOW_RADIUS + 8, angle, LOW);
-	const onTemple = (x: number, y: number, z: number) => frame.mul(new CFrame(x, y, z));
-	const width = 36;
-	const depth = 18;
-	const height = 14;
-	const door = 8;
-	for (const z of [-depth / 2, depth / 2]) {
-		block(arena, new Vector3(width, height, 2), onTemple(0, height / 2, z), Marble, "TempleWall");
-	}
-	for (const side of [-1, 1]) {
-		// Side wall from the back to the doorway, which is at the front corner.
-		const wallLength = depth - door;
-		block(
-			arena,
-			new Vector3(2, height, wallLength),
-			onTemple((side * (width - 2)) / 2, height / 2, -depth / 2 + wallLength / 2),
-			Marble,
-			"TempleWall",
-		);
-		cylinder(arena, onTemple(side * 9, height, depth / 2 + 2).Position, height, 3, Gold, "TempleColumn");
-		const exit = onTemple(side * (width / 2 + 6), 0, depth / 2 - door / 2).Position;
-		spawnMarker(arena, onTemple(side * 7, 0, -2).Position, exit, team);
-	}
-	block(arena, new Vector3(width + 2, 2, depth + 2), onTemple(0, height + 1, 0), Marble, "TempleRoof");
-	const light = block(arena, new Vector3(1, 1, 1), onTemple(0, height - 2, 0), Glow, "TempleLight");
-	pointLight(light, Color3.fromRGB(255, 220, 170), 24, 1.2);
+// A low marble lip along an edge, so a missed strafe on a runway doesn't end in the void.
+function lip(arena: Model, from: Vector3, to: Vector3) {
+	const middle = from.add(to).div(2);
+	const size = new Vector3(math.max(math.abs(to.X - from.X), 2), 2, math.max(math.abs(to.Z - from.Z), 2));
+	slab(arena, middle.add(new Vector3(0, 2, 0)), size, Marble, "Lip");
 }
 
-function buildLowIslands(arena: Model) {
-	CARDINALS.forEach((angle, i) => {
-		const frame = ringFrame(LOW_RADIUS, angle, 0);
-		island(arena, at(LOW_RADIUS, angle, LOW), LOW_SIZE, frame, "LowIsland");
-		// North is Red's, south is Blue's; west and east are shared.
-		spawnTemple(arena, angle, i === 0 ? "Red" : i === 2 ? "Blue" : undefined);
-
-		// Jump pads from the inner corners up to both neighboring mid islands.
-		for (const side of [-1, 1]) {
+// The east and west promenades, lipped on their outer edges and open to the sky on the inner.
+function buildPromenades(arena: Model) {
+	for (const side of [-1, 1]) {
+		const x = side * PROMENADE_X;
+		island(
+			arena,
+			new Vector3(x, PROMENADE, 0),
+			new Vector3(PROMENADE_HALF_WIDTH * 2, 6, PROMENADE_HALF_LENGTH * 2),
+			"Promenade",
+		);
+		const outer = x + side * (PROMENADE_HALF_WIDTH - 1);
+		lip(
+			arena,
+			new Vector3(outer, PROMENADE, -PROMENADE_HALF_LENGTH),
+			new Vector3(outer, PROMENADE, PROMENADE_HALF_LENGTH),
+		);
+		for (const z of [-PROMENADE_HALF_LENGTH + 1, PROMENADE_HALF_LENGTH - 1]) {
+			lip(
+				arena,
+				new Vector3(x - PROMENADE_HALF_WIDTH, PROMENADE, z),
+				new Vector3(x + PROMENADE_HALF_WIDTH, PROMENADE, z),
+			);
+		}
+		// Gold columns along the outer lip: landmarks at speed, and nothing in the lane.
+		for (const z of [-100, -50, 0, 50, 100]) {
+			cylinder(arena, new Vector3(outer + side * 2, 24, z), 22, 3, Gold, "Column");
+			const flame = block(arena, new Vector3(2, 2, 2), new CFrame(outer + side * 2, 25, z), Glow, "ColumnLight");
+			pointLight(flame, GLOW, 30, 1);
+		}
+		// Pads from the promenade's middle up to the mid islands either side.
+		for (const zSide of [-1, 1]) {
 			jumpPad(
 				arena,
-				at(LOW_RADIUS - 14, angle + side * 0.16, LOW),
-				at(MID_RADIUS, angle + side * EIGHTH, MID),
+				new Vector3(x - side * 12, PROMENADE, zSide * MID_Z),
+				new Vector3(side * (MID_X + 6), MID, zSide * MID_Z),
 				8,
 				Pad,
 			);
 		}
-		// A ruined wall on the island's inner edge, between the pads: cover from the Crown and
-		// the far islands.
-		const inner = ringFrame(LOW_RADIUS - 13, angle, LOW);
-		block(arena, new Vector3(14, 10, 3), inner.mul(new CFrame(0, 5, 0)), Marble, "RuinWall");
-		block(arena, new Vector3(4, 6, 3), inner.mul(new CFrame(9, 3, 0)), Marble, "RuinWall");
-		// A narrow ramp-bridge to the next mid island clockwise: a walking route up, so the mid
-		// islands don't depend on pads alone.
-		plank(
-			arena,
-			at(LOW_RADIUS - 6, angle + 0.22, LOW),
-			at(MID_RADIUS + 10, angle + EIGHTH - 0.12, MID),
-			6,
-			1.5,
-			Gold,
-			"SkyBridge",
-		);
-	});
-}
-
-// The mid islands, each with a broken colonnade for cover and a pad up to the Crown.
-function buildMidIslands(arena: Model) {
-	for (const angle of DIAGONALS) {
-		const frame = ringFrame(MID_RADIUS, angle, 0);
-		island(arena, at(MID_RADIUS, angle, MID), new Vector3(MID_SIZE, 5, MID_SIZE), frame, "MidIsland");
-		const onIsland = (x: number, z: number) => frame.mul(new CFrame(x, MID, z));
-		// Colonnade: four columns and a lintel on the outer side, and a low wall on the inner
-		// side facing the Crown.
-		for (const x of [-12, -4, 4, 12]) {
-			cylinder(arena, onIsland(x, -10).Position.add(new Vector3(0, 12, 0)), 12, 3, Marble, "Column");
-		}
-		block(arena, new Vector3(30, 2, 4), onIsland(0, -10).mul(new CFrame(0, 13, 0)), Marble, "Lintel");
-		block(arena, new Vector3(16, 5, 2), onIsland(0, 10).mul(new CFrame(0, 2.5, 0)), Marble, "Parapet");
-		jumpPad(arena, onIsland(0, 4).Position, at(10, angle, CROWN), 10, Pad);
 	}
 }
 
-// The Crown: a round platform at the top, with a gold ring of short pillars for cover.
+// A team's island: a wide front deck, the temple, the terrace behind it, and bridges down to
+// both promenades.
+function buildTeamIsland(arena: Model, sign: number, team: "Red" | "Blue") {
+	const z = (distance: number) => sign * distance;
+	const depth = ISLAND_BACK - ISLAND_FRONT;
+	island(
+		arena,
+		new Vector3(0, ISLAND, z((ISLAND_FRONT + ISLAND_BACK) / 2)),
+		new Vector3(ISLAND_HALF_WIDTH * 2, 6, depth),
+		"TeamIsland",
+	);
+
+	// Lips on the back and sides, open where the bridges leave.
+	lip(
+		arena,
+		new Vector3(-ISLAND_HALF_WIDTH, ISLAND, z(ISLAND_BACK - 1)),
+		new Vector3(ISLAND_HALF_WIDTH, ISLAND, z(ISLAND_BACK - 1)),
+	);
+	for (const side of [-1, 1]) {
+		const x = side * (ISLAND_HALF_WIDTH - 1);
+		lip(arena, new Vector3(x, ISLAND, z(ISLAND_FRONT)), new Vector3(x, ISLAND, z(BRIDGE_Z - BRIDGE_WIDTH / 2)));
+		lip(arena, new Vector3(x, ISLAND, z(BRIDGE_Z + BRIDGE_WIDTH / 2)), new Vector3(x, ISLAND, z(ISLAND_BACK)));
+		plank(
+			arena,
+			new Vector3(side * (ISLAND_HALF_WIDTH - 2), ISLAND, z(BRIDGE_Z)),
+			new Vector3(side * (PROMENADE_X - PROMENADE_HALF_WIDTH + 2), PROMENADE, z(BRIDGE_Z)),
+			BRIDGE_WIDTH,
+			2,
+			Gold,
+			"SkyBridge",
+		);
+		// Pads at the front corners, up to the mid islands.
+		jumpPad(
+			arena,
+			new Vector3(side * 45, ISLAND, z(ISLAND_FRONT + 12)),
+			new Vector3(side * MID_X, MID, z(MID_Z + 6)),
+			8,
+			Pad,
+		);
+	}
+
+	// The temple.
+	const templeMid = (TEMPLE_FRONT + TEMPLE_BACK) / 2;
+	const templeDepth = TEMPLE_BACK - TEMPLE_FRONT;
+	const wallTop = ISLAND + TEMPLE_HEIGHT;
+	slab(
+		arena,
+		new Vector3(0, wallTop, z(TEMPLE_FRONT + 1)),
+		new Vector3(TEMPLE_HALF_WIDTH * 2, TEMPLE_HEIGHT, 2),
+		Marble,
+		"TempleWall",
+	);
+	for (const side of [-1, 1]) {
+		slab(
+			arena,
+			new Vector3(side * (TEMPLE_HALF_WIDTH - 1), wallTop, z(templeMid)),
+			new Vector3(2, TEMPLE_HEIGHT, templeDepth),
+			Marble,
+			"TempleWall",
+		);
+		cylinder(
+			arena,
+			new Vector3(side * (TEMPLE_HALF_WIDTH - 1), wallTop, z(TEMPLE_BACK + 1)),
+			TEMPLE_HEIGHT,
+			3,
+			Gold,
+			"TempleColumn",
+		);
+	}
+	slab(
+		arena,
+		new Vector3(0, wallTop + 2, z(templeMid)),
+		new Vector3(TEMPLE_HALF_WIDTH * 2 + 4, 2, templeDepth + 4),
+		Marble,
+		"TempleRoof",
+	);
+	const light = block(arena, new Vector3(1, 1, 1), new CFrame(0, wallTop - 2, z(templeMid)), Glow, "TempleLight");
+	pointLight(light, Color3.fromRGB(255, 220, 170), 30, 1.2);
+
+	// Spawns face out of the open back, toward the terrace and the way round either side.
+	for (const x of [-15, -5, 5, 15]) {
+		spawnMarker(
+			arena,
+			new Vector3(x, ISLAND, z(TEMPLE_FRONT + 8)),
+			new Vector3(x * 4, ISLAND, z(ISLAND_BACK)),
+			team,
+		);
+	}
+	for (const side of [-1, 1]) {
+		spawnMarker(
+			arena,
+			new Vector3(side * 22, ISLAND, z(TEMPLE_FRONT + 14)),
+			new Vector3(side * 60, ISLAND, z(ISLAND_BACK)),
+		);
+	}
+}
+
+// The mid islands over the open sky, each with a pad up to the Crown.
+function buildMidIslands(arena: Model) {
+	for (const xSide of [-1, 1]) {
+		for (const zSide of [-1, 1]) {
+			const top = new Vector3(xSide * MID_X, MID, zSide * MID_Z);
+			island(arena, top, new Vector3(MID_SIZE, 5, MID_SIZE), "MidIsland");
+			jumpPad(
+				arena,
+				top.add(new Vector3(-xSide * 12, 0, -zSide * 12)),
+				new Vector3(xSide * 8, CROWN, zSide * 8),
+				10,
+				Pad,
+			);
+		}
+	}
+}
+
+// The Crown: a round platform at the top, with a tall obelisk in the middle as the map's
+// landmark. Fights circle it, and it blocks the sightline straight across the center.
 function buildCrown(arena: Model) {
 	cylinder(arena, new Vector3(0, CROWN, 0), 4, CROWN_DIAMETER, Marble, "Crown");
 	cylinder(arena, new Vector3(0, CROWN - 4, 0), 10, CROWN_DIAMETER - 12, Stone, "CrownRock");
 	cylinder(arena, new Vector3(0, CROWN - 14, 0), 14, CROWN_DIAMETER - 24, Stone, "CrownRock");
-	for (let i = 0; i < 6; i++) {
-		const angle = (i / 6) * 2 * math.pi + EIGHTH / 2;
-		cylinder(arena, at(CROWN_DIAMETER / 2 - 4, angle, CROWN + 4), 4, 3, Gold, "CrownPillar");
-	}
-	// A tall obelisk in the middle: fights on the Crown circle it, and it blocks sightlines
-	// across the center of the map.
 	block(
 		arena,
 		new Vector3(8, 26, 8),
-		new CFrame(0, CROWN + 13, 0).mul(CFrame.Angles(0, EIGHTH, 0)),
+		new CFrame(0, CROWN + 13, 0).mul(CFrame.Angles(0, math.pi / 4, 0)),
 		Stone,
 		"Obelisk",
 	);
 	const crest = block(
 		arena,
 		new Vector3(8.4, 2, 8.4),
-		new CFrame(0, CROWN + 22, 0).mul(CFrame.Angles(0, EIGHTH, 0)),
+		new CFrame(0, CROWN + 22, 0).mul(CFrame.Angles(0, math.pi / 4, 0)),
 		Glow,
 		"ObeliskCrest",
 	);
-	pointLight(crest, Color3.fromRGB(120, 230, 230), 50, 2);
-	const beacon = cylinder(arena, new Vector3(0, CROWN + 0.2, 0), 0.2, 8, Glow, "CrownBeacon");
-	pointLight(beacon, Color3.fromRGB(120, 230, 230), 40, 2);
+	pointLight(crest, GLOW, 50, 2);
 }
 
-// Floating monoliths between the Crown and the mid islands, breaking sightlines across the
-// middle of the map. Each slowly tilted, as if drifting.
+// Floating monoliths over the open sky between the Crown and the islands, breaking the
+// sightlines across the middle without standing in any lane. Each slightly tilted, as if
+// drifting.
 function buildMonoliths(arena: Model) {
-	CARDINALS.forEach((angle, i) => {
-		const position = at(MONOLITH_RADIUS, angle, 34 + (i % 2) * 6);
+	const spots: [Vector3, number][] = [
+		[new Vector3(-80, 22, 0), 0],
+		[new Vector3(80, 22, 0), 0],
+		[new Vector3(0, 22, -80), math.pi / 2],
+		[new Vector3(0, 22, 80), math.pi / 2],
+	];
+	spots.forEach(([position, turn], i) => {
+		const frame = new CFrame(position).mul(CFrame.Angles(0, turn, 0));
 		block(
 			arena,
-			new Vector3(18, 40, 7),
-			new CFrame(position)
-				.mul(CFrame.Angles(0, angle, 0))
-				.mul(CFrame.Angles(0.08, 0, 0.12 * (i % 2 === 0 ? 1 : -1))),
+			new Vector3(8, 44, 36),
+			frame.mul(CFrame.Angles(0.06 * (i % 2 === 0 ? 1 : -1), 0, 0.08)),
 			Stone,
 			"Monolith",
 		);
-		const rune = block(
-			arena,
-			new Vector3(1.2, 24, 6.4),
-			new CFrame(position).mul(CFrame.Angles(0, angle, 0)),
-			Glow,
-			"MonolithRune",
-		);
-		pointLight(rune, Color3.fromRGB(120, 230, 230), 20, 1);
+		const rune = block(arena, new Vector3(8.4, 28, 1.2), frame, Glow, "MonolithRune");
+		pointLight(rune, GLOW, 24, 1);
 	});
 }
 
@@ -238,13 +303,14 @@ function buildSky(arena: Model) {
 	for (let i = 0; i < 10; i++) {
 		const angle = (i / 10) * 2 * math.pi;
 		const radius = 60 + (i % 3) * 70;
-		scenery(slab(arena, at(radius, angle, -60 - (i % 4) * 6), new Vector3(140, 8, 100), Cloud, "Cloud"));
+		const position = new Vector3(math.sin(angle) * radius, -60 - (i % 4) * 6, -math.cos(angle) * radius);
+		scenery(slab(arena, position, new Vector3(140, 8, 100), Cloud, "Cloud"));
 	}
 	scenery(slab(arena, new Vector3(0, -90, 0), new Vector3(1200, 2, 1200), Cloud, "CloudSea"));
-	const walls = new Vector3(0, 150, 0);
-	for (const angle of CARDINALS) {
-		const wall = block(arena, new Vector3(400, 300, 4), ringFrame(190, angle, walls.Y), Barrier, "Barrier");
-		wall.CanQuery = false;
+	// Invisible walls round the play space, so nobody rocket jumps away into the sky.
+	for (const side of [-1, 1]) {
+		scenery(block(arena, new Vector3(4, 300, 470), new CFrame(side * 200, 150, 0), Barrier, "Barrier"));
+		scenery(block(arena, new Vector3(404, 300, 4), new CFrame(0, 150, side * 235), Barrier, "Barrier"));
 	}
 }
 
@@ -263,26 +329,29 @@ export const Skyreach: MapBuilder = {
 			music: "",
 		});
 
-		buildLowIslands(arena);
+		buildPromenades(arena);
+		buildTeamIsland(arena, -1, "Red");
+		buildTeamIsland(arena, 1, "Blue");
 		buildMidIslands(arena);
 		buildCrown(arena);
 		buildMonoliths(arena);
 		buildSky(arena);
-		spectatorRing(arena, CENTER, 175, 50, Color3.fromRGB(230, 180, 70));
+		spectatorRing(arena, Vector3.zero, 320, 50, Color3.fromRGB(230, 180, 70));
 
-		// Domination: west island, the Crown, east island; equally far from both teams.
-		controlPointMarker(arena, at(LOW_RADIUS, QUARTER, LOW), "A", 12, "Domination");
-		controlPointMarker(arena, new Vector3(0, CROWN, 0), "B", 10, "Domination");
-		controlPointMarker(arena, at(LOW_RADIUS, 3 * QUARTER, LOW), "C", 12, "Domination");
+		// Domination: the west promenade, the Crown, the east promenade; equally far from both
+		// teams.
+		controlPointMarker(arena, new Vector3(-PROMENADE_X, PROMENADE, 0), "A", 14, "Domination");
+		controlPointMarker(arena, new Vector3(0, CROWN, 0), "B", 12, "Domination");
+		controlPointMarker(arena, new Vector3(PROMENADE_X, PROMENADE, 0), "C", 14, "Domination");
 
-		// Perks: Overcharge on the Crown; the rest in pairs placed symmetrically.
-		perkMarker(arena, new Vector3(0, CROWN, 6), "Overcharge");
-		perkMarker(arena, at(MID_RADIUS, DIAGONALS[0], MID), "Shield");
-		perkMarker(arena, at(MID_RADIUS, DIAGONALS[2], MID), "Shield");
-		perkMarker(arena, at(MID_RADIUS, DIAGONALS[1], MID), "Radar");
-		perkMarker(arena, at(MID_RADIUS, DIAGONALS[3], MID), "Radar");
-		perkMarker(arena, at(LOW_RADIUS - 12, QUARTER, LOW), "SuperJump");
-		perkMarker(arena, at(LOW_RADIUS - 12, 3 * QUARTER, LOW), "SuperJump");
+		// Perks: Overcharge on the Crown; the rest in pairs placed point-symmetrically.
+		perkMarker(arena, new Vector3(0, CROWN, 10), "Overcharge");
+		perkMarker(arena, new Vector3(MID_X, MID, -MID_Z), "Shield");
+		perkMarker(arena, new Vector3(-MID_X, MID, MID_Z), "Shield");
+		perkMarker(arena, new Vector3(-MID_X, MID, -MID_Z), "Radar");
+		perkMarker(arena, new Vector3(MID_X, MID, MID_Z), "Radar");
+		perkMarker(arena, new Vector3(-PROMENADE_X, PROMENADE, 90), "SuperJump");
+		perkMarker(arena, new Vector3(PROMENADE_X, PROMENADE, -90), "SuperJump");
 
 		setMapLighting(arena, {
 			clockTime: 6.4,
