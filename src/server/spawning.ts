@@ -5,6 +5,7 @@
 import { getLiveRoot } from "shared/characters";
 import { MatchConfig, MovementConfig } from "shared/config";
 import { DEPLOYED_ATTRIBUTE, getMatchState } from "shared/matchState";
+import { forgetAvatar, loadStandardCharacter, prefetchAvatar } from "./avatars";
 import { recordDeath } from "./progression";
 import { endStreak } from "./streaks";
 import { incrementStat } from "./stats";
@@ -111,9 +112,7 @@ function onCharacterAdded(player: Player, character: Model) {
 		}
 		onDeath(player, character);
 		task.delay(respawnTime, () => {
-			if (spawningOpen && deployed.has(player) && player.Parent && player.Character === character) {
-				player.LoadCharacter();
-			}
+			loadStandardCharacter(player, () => spawningOpen && deployed.has(player) && player.Character === character);
 		});
 	});
 }
@@ -124,13 +123,8 @@ export function deploy(player: Player) {
 	player.SetAttribute(DEPLOYED_ATTRIBUTE, true);
 	onDeploy(player);
 	const wait = (leftAt.get(player) ?? -math.huge) + respawnTime - os.clock();
-	if (wait <= 0) {
-		player.LoadCharacter();
-		return;
-	}
-	task.delay(wait, () => {
-		if (spawningOpen && deployed.has(player) && player.Parent) player.LoadCharacter();
-	});
+	const stillDeployed = () => spawningOpen && deployed.has(player);
+	task.delay(math.max(0, wait), () => loadStandardCharacter(player, stillDeployed));
 }
 
 // Takes one player out of the match and back to the menu. A living character dies, so the menu
@@ -178,8 +172,10 @@ export function returnAllToMenu() {
 export function forgetPlayer(player: Player) {
 	deployed.delete(player);
 	leftAt.delete(player);
+	forgetAvatar(player);
 }
 
 export function watchCharacters(player: Player) {
+	prefetchAvatar(player);
 	player.CharacterAdded.Connect((character) => onCharacterAdded(player, character));
 }

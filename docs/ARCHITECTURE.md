@@ -31,6 +31,7 @@ respectively. Gameplay tuning lives in `src/shared/config.ts`.
 | `combat.ts`           | Validating railgun shots, and kills                                                      |
 | `streaks.ts`          | Kill streaks, broadcast to everyone when they get big or end                             |
 | `spawning.ts`         | Deploying players, spawn positions, respawns, spawn protection                           |
+| `avatars.ts`          | Loading every player's character at the standard size and body shape                     |
 | `hazards.ts`          | Lava and falling out of the map                                                          |
 | `movementCheck.ts`    | Flagging and kicking speed hacks and teleports                                           |
 | `perks.ts`            | Perk orbs, granting effects, shields and the shield rule (also used by dummies)          |
@@ -142,6 +143,16 @@ reach players who join mid-match, which one-off remote events would miss.
 
 Characters never load on their own (`CharacterAutoLoads` is off). `server/spawning.ts`
 decides who is deployed, where they spawn, and when they respawn.
+
+Every character loads at the same size and body shape (`server/avatars.ts`). Players keep their
+clothes, accessories, face and skin colours, but scales and body parts are Roblox's defaults,
+the same as bots. Why: with one-hit kills a short or thin avatar is a smaller target, and the
+owner found the world felt out of scale with the character; maps should read the same for
+everyone. Roblox's per-game avatar settings can do this in Studio, but code keeps it in the
+repo. Accessories still count as hits on the part they're attached to (see Hit detection), so a
+big accessory is a bigger target; revisit if that's abused. The game's avatar type in Studio
+(Game Settings > Avatar) should be R15 so R6 avatars don't get a different body. Untested in
+Studio.
 
 ## Game modes
 
