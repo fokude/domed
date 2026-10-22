@@ -95,6 +95,24 @@ export function ramp(parent: Instance, low: Vector3, high: Vector3, width: numbe
 	);
 }
 
+// A steep gabled roof with its eaves at `base` and its ridge along X: `depth` is along Z.
+// Too steep to stand on, so neither players nor the openness checks treat it as floor.
+export function gableRoof(
+	parent: Instance,
+	base: CFrame,
+	width: number,
+	depth: number,
+	rise: number,
+	style: Style,
+	name = "Roof",
+) {
+	const half = depth / 2;
+	const size = new Vector3(width, rise, half);
+	// A wedge slopes down toward its front (-Z), so the +Z half is turned round.
+	wedge(parent, size, base.mul(new CFrame(0, rise / 2, -half / 2)), style, name);
+	wedge(parent, size, base.mul(new CFrame(0, rise / 2, half / 2)).mul(CFrame.Angles(0, math.pi, 0)), style, name);
+}
+
 // Thin walkway between two top-surface points; it tilts if they differ in height.
 export function plank(
 	parent: Instance,

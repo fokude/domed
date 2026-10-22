@@ -1,18 +1,23 @@
-// A white, sterile space station under the stars, in low gravity. Two hangar bays at opposite
-// ends connect to a central reactor atrium by an open bridge and two glass-roofed tubes.
-// Falling off means drifting into space. Every spawn is in a pocket: behind a wall at the back
-// of each bay, or in escape pods off the tubes; cargo stacks where the bridge meets each bay
-// break the straight line between them. Red's bay is at +Z, Blue's at -Z.
+// A white, sterile space station under the stars, in low gravity. One long hall under a glass
+// roof, with windows onto space down both sides. In the middle, the reactor rises out of an
+// open shaft to space: two bridges cross the shaft, a balcony rings it, and the reactor's cap
+// is the high point. Side lanes down the windows are the speed runways, cargo modules break up
+// the floor between them, and each end is a hangar bay with its flag on a raised dock. Players
+// spawn in rooms behind the end walls. Falling into the shaft means drifting into space. Red's
+// bay is at +Z, Blue's at -Z. Earlier versions are recorded in docs/MAP_DESIGN.md.
+//
+// Heights: deck 0, docks 10, cargo modules 18, balcony 22, reactor cap 45, glass roof 74.
+// Low gravity (120) makes every jump about 1.6 times higher.
 
 import { TeamId } from "shared/modes";
 import {
-	controlPointMarker,
 	cylinder,
 	flagBaseMarker,
+	gableRoof,
 	jumpPad,
-	onCircle,
+	outline,
 	perkMarker,
-	plank,
+	plateWithHoles,
 	pointLight,
 	ramp,
 	ring,
@@ -22,242 +27,199 @@ import {
 	spawnMarker,
 	Style,
 	teamGlow,
+	wallWithGaps,
+	controlPointMarker,
 } from "./kit";
 import { spectatorRing } from "./spectators";
 import { MapBuilder } from "./types";
-
-const ATRIUM_RADIUS = 48;
-const BALCONY_RADIUS = 34;
-const BALCONY_HEIGHT = 16;
-const TUBE_X = 40;
-const TUBE_HEIGHT = 12;
-const BAY_HALF_WIDTH = 55;
-const BAY_HEIGHT = 30;
 
 const Hull: Style = { color: Color3.fromRGB(235, 238, 242), material: Enum.Material.SmoothPlastic };
 const Panel: Style = { color: Color3.fromRGB(200, 205, 212), material: Enum.Material.SmoothPlastic };
 const Trim: Style = { color: Color3.fromRGB(60, 66, 76), material: Enum.Material.Metal };
 const Glass: Style = { color: Color3.fromRGB(200, 230, 255), material: Enum.Material.Glass, transparency: 0.55 };
-const Accent: Style = { color: Color3.fromRGB(90, 230, 220), material: Enum.Material.Neon, collide: false };
+const Accent: Style = {
+	color: Color3.fromRGB(90, 230, 220),
+	material: Enum.Material.Neon,
+	collide: false,
+	castShadow: false,
+};
 const Reactor: Style = { color: Color3.fromRGB(180, 240, 255), material: Enum.Material.Neon };
 const Pad: Style = { color: Color3.fromRGB(90, 230, 220), material: Enum.Material.Neon };
 
 const ACCENT_LIGHT = Color3.fromRGB(150, 240, 235);
 
-function buildShuttle(map: Model, x: number, sign: number) {
-	const z = (distance: number) => sign * distance;
-	slab(map, new Vector3(x, 8, z(152)), new Vector3(12, 8, 24), Hull, "ShuttleBody");
-	ramp(map, new Vector3(x, 0, z(132)), new Vector3(x, 8, z(140)), 12, Hull);
-	slab(map, new Vector3(x, 9.5, z(144)), new Vector3(8, 1.5, 6), Glass, "Cockpit");
-	slab(map, new Vector3(x, 3, z(154)), new Vector3(30, 1, 10), Panel, "Wings");
-	const engine = slab(map, new Vector3(x, 6, z(164.2)), new Vector3(8, 4, 0.4), Accent, "Engine");
-	pointLight(engine, ACCENT_LIGHT, 20, 2);
+const X_EDGE = 140;
+const Z_EDGE = 200;
+const WALL_HEIGHT = 74;
+const DOCK = 10;
+const CARGO = 18;
+const BALCONY = 22;
+const CAP = 45;
+// The reactor shaft: a square hole in the deck, open to space.
+const SHAFT_HALF = 50;
+const BRIDGE_X = 32;
+const BRIDGE_WIDTH = 24;
+const BALCONY_WIDTH = 16;
+const FLAG_Z = 175;
+// Spawn rooms behind the end walls, this deep, entered through two doors behind the side lanes.
+const ROOM_DEPTH = 40;
+const ROOM_HALF_WIDTH = 110;
+const ROOM_HEIGHT = 24;
+const DOOR_HEIGHT = 18;
+const DOORS: [number, number][] = [
+	[-100, -80],
+	[80, 100],
+];
+
+function stripLight(map: Model, top: Vector3, size: Vector3, range = 40) {
+	const strip = slab(map, top, size, Accent, "Light");
+	pointLight(strip, ACCENT_LIGHT, range, 1.2);
 }
 
+// Deck, side walls with long windows onto space, end walls with the spawn room doors, and the
+// glass roof that keeps players in.
+function buildShell(map: Model) {
+	plateWithHoles(
+		map,
+		0,
+		-X_EDGE,
+		X_EDGE,
+		-Z_EDGE,
+		Z_EDGE,
+		[[-SHAFT_HALF, SHAFT_HALF, -SHAFT_HALF, SHAFT_HALF]],
+		Hull,
+	);
+	for (const side of [-1, 1]) {
+		const x = side * (X_EDGE + 2);
+		slab(map, new Vector3(x, 10, 0), new Vector3(4, 10, Z_EDGE * 2), Hull, "SideWall");
+		slab(map, new Vector3(x, 60, 0), new Vector3(1, 50, Z_EDGE * 2), Glass, "Window");
+		slab(map, new Vector3(x, WALL_HEIGHT, 0), new Vector3(4, WALL_HEIGHT - 60, Z_EDGE * 2), Hull, "SideWall");
+		slab(map, new Vector3(side * (X_EDGE - 0.1), 10.2, 0), new Vector3(0.2, 0.4, Z_EDGE * 2), Accent, "Stripe");
+
+		wallWithGaps(map, true, side * (Z_EDGE + 2), -X_EDGE - 4, X_EDGE + 4, DOORS, 0, WALL_HEIGHT, Hull, 4);
+		for (const [a, b] of DOORS) {
+			slab(
+				map,
+				new Vector3((a + b) / 2, WALL_HEIGHT, side * (Z_EDGE + 2)),
+				new Vector3(b - a, WALL_HEIGHT - DOOR_HEIGHT, 4),
+				Hull,
+				"Lintel",
+			);
+		}
+		for (const x of [-100, 0, 100]) {
+			stripLight(map, new Vector3(x, 45, side * (Z_EDGE - 0.3)), new Vector3(20, 0.6, 0.4), 60);
+		}
+	}
+	slab(map, new Vector3(0, WALL_HEIGHT + 2, 0), new Vector3(X_EDGE * 2 + 8, 2, Z_EDGE * 2 + 8), Glass, "GlassRoof");
+}
+
+// The reactor shaft: bridges across it, a lip round its edge, the reactor rising out of it with
+// its cap as the high point, and the balcony ringing it.
+function buildReactor(map: Model) {
+	for (const side of [-1, 1]) {
+		slab(map, new Vector3(side * BRIDGE_X, 0, 0), new Vector3(BRIDGE_WIDTH, 2, SHAFT_HALF * 2), Panel, "Bridge");
+		stripLight(map, new Vector3(side * BRIDGE_X, 0.1, 0), new Vector3(2, 0.2, SHAFT_HALF * 2 - 4), 30);
+		jumpPad(map, new Vector3(side * BRIDGE_X, 0, 0), new Vector3(side * 6, CAP, 0), 10, Pad);
+	}
+
+	// A glass lip round the shaft, open where the bridges meet the deck.
+	const bridgeEdge = BRIDGE_X + BRIDGE_WIDTH / 2;
+	const bridgeInner = BRIDGE_X - BRIDGE_WIDTH / 2;
+	for (const side of [-1, 1]) {
+		slab(map, new Vector3(side * SHAFT_HALF, 2, 0), new Vector3(1, 2, SHAFT_HALF * 2), Glass, "ShaftLip");
+		for (const [a, b] of [
+			[-SHAFT_HALF, -bridgeEdge],
+			[-bridgeInner, bridgeInner],
+			[bridgeEdge, SHAFT_HALF],
+		]) {
+			slab(map, new Vector3((a + b) / 2, 2, side * SHAFT_HALF), new Vector3(b - a, 2, 1), Glass, "ShaftLip");
+		}
+	}
+
+	const core = cylinder(map, new Vector3(0, CAP - 3, 0), CAP + 97, 14, Reactor, "ReactorCore");
+	pointLight(core, ACCENT_LIGHT, 80, 3);
+	cylinder(map, new Vector3(0, CAP - 3, 0), CAP + 97, 22, Glass, "ReactorShell");
+	cylinder(map, new Vector3(0, CAP, 0), 3, 30, Trim, "ReactorCap");
+	ring(map, new Vector3(0, CAP + 0.1, 0), 13.5, 1, 0.2, 24, Accent, "CapRing");
+
+	// The balcony: a square ring over the shaft's edge, on four corner pylons.
+	const reach = SHAFT_HALF + BALCONY_WIDTH / 2;
+	for (const side of [-1, 1]) {
+		slab(
+			map,
+			new Vector3(0, BALCONY, side * reach),
+			new Vector3(reach * 2 + BALCONY_WIDTH, 2, BALCONY_WIDTH),
+			Panel,
+			"Balcony",
+		);
+		slab(map, new Vector3(side * reach, BALCONY, 0), new Vector3(BALCONY_WIDTH, 2, reach * 2), Panel, "Balcony");
+		for (const zSide of [-1, 1]) {
+			slab(
+				map,
+				new Vector3(side * reach, BALCONY - 2, zSide * reach),
+				new Vector3(8, BALCONY - 2, 8),
+				Trim,
+				"Pylon",
+			);
+		}
+	}
+	outline(map, new Vector3(0, BALCONY, 0), (reach + BALCONY_WIDTH / 2) * 2, (reach + BALCONY_WIDTH / 2) * 2, Accent);
+}
+
+// Cargo modules: four big blocks between the shaft and the bays, the floor's cover and the step
+// up to the balcony. Their roofs are standable.
+function buildCargo(map: Model) {
+	for (const x of [-80, 80]) {
+		for (const z of [-105, 105]) {
+			slab(map, new Vector3(x, CARGO, z), new Vector3(30, CARGO, 40), Panel, "CargoModule");
+			outline(map, new Vector3(x, CARGO, z), 30, 40, Accent);
+		}
+	}
+}
+
+// A hangar bay at one end: the team's flag on a raised dock in the middle, ramps up from both
+// sides, and its spawn room behind the end wall.
 function buildBay(map: Model, team: TeamId, sign: number) {
 	const glow = teamGlow(team);
 	const z = (distance: number) => sign * distance;
 
-	slab(map, new Vector3(0, 0, z(145)), new Vector3(BAY_HALF_WIDTH * 2, 3, 50), Hull, "BayDeck");
-
-	// Back wall with a wide window onto space.
-	const wallZ = z(172);
-	slab(map, new Vector3(0, 8, wallZ), new Vector3(114, 8, 4), Hull, "BayWall");
-	slab(map, new Vector3(0, BAY_HEIGHT, wallZ), new Vector3(114, 8, 4), Hull, "BayWall");
+	slab(map, new Vector3(0, DOCK, z(FLAG_Z)), new Vector3(44, DOCK, 30), Panel, "Dock");
+	outline(map, new Vector3(0, DOCK, z(FLAG_Z)), 44, 30, glow);
 	for (const side of [-1, 1]) {
-		slab(map, new Vector3(side * 43.5, 22, wallZ), new Vector3(27, 14, 4), Hull, "BayWall");
+		ramp(map, new Vector3(side * 46, 0, z(FLAG_Z)), new Vector3(side * 22, DOCK, z(FLAG_Z)), 14, Panel);
 	}
-	slab(map, new Vector3(0, 22, wallZ), new Vector3(60, 14, 1), Glass, "Window");
-	slab(map, new Vector3(0, 8.2, z(169.9)), new Vector3(110, 0.3, 0.2), glow, "WallStripe");
-
-	for (const side of [-1, 1]) {
-		const wallX = side * (BAY_HALF_WIDTH + 2);
-		slab(map, new Vector3(wallX, BAY_HEIGHT, z(145)), new Vector3(4, BAY_HEIGHT, 54), Hull, "BayWall");
-		slab(
-			map,
-			new Vector3(side * (BAY_HALF_WIDTH - 0.1), 10, z(145)),
-			new Vector3(0.2, 0.5, 50),
-			glow,
-			"WallStripe",
-		);
-		slab(map, new Vector3(side * 36.5, BAY_HEIGHT + 3, z(145)), new Vector3(37, 3, 54), Panel, "Ceiling");
-	}
-	slab(map, new Vector3(0, BAY_HEIGHT + 3, z(145)), new Vector3(36, 1, 54), Glass, "Skylight");
-
-	const flagSpot = new Vector3(0, 0.5, z(135));
-	cylinder(map, flagSpot, 0.5, 10, Panel, "FlagDais");
+	const flagSpot = new Vector3(0, DOCK, z(FLAG_Z));
 	ring(map, flagSpot.add(new Vector3(0, 0.1, 0)), 4.6, 0.6, 0.2, 20, glow, "DaisRing");
 	flagBaseMarker(map, flagSpot, team);
+	slab(map, new Vector3(0, 30, z(Z_EDGE - 0.2)), new Vector3(120, 0.6, 0.4), glow, "TeamStripe");
 
-	buildShuttle(map, -34, sign);
-	slab(map, new Vector3(30, 4, z(146)), new Vector3(6, 4, 6), Panel, "Crate");
-	slab(map, new Vector3(38, 4, z(152)), new Vector3(6, 4, 6), Panel, "Crate");
-	slab(map, new Vector3(34, 8, z(149)), new Vector3(5, 4, 5), Panel, "Crate");
-
-	// Spawn pocket: a wall across the back of the bay, wider than the spawn line, with the way
-	// out at each end. Spawns face their nearest exit.
-	slab(map, new Vector3(0, 14, z(158)), new Vector3(56, 14, 2), Hull, "SpawnWall");
-	slab(map, new Vector3(0, 14.2, z(158) - sign * 1.1), new Vector3(56, 0.4, 0.2), glow, "SpawnWallStripe");
-	for (const x of [-16, -8, 0, 8, 16]) {
-		spawnMarker(map, new Vector3(x, 0, z(166)), new Vector3(x >= 0 ? 40 : -40, 0, z(166)), team);
+	// The spawn room behind the end wall, with a baffle inside each door so the hall can't see
+	// in, and a steep roof.
+	const zMid = z(Z_EDGE + 4 + ROOM_DEPTH / 2);
+	const zBack = z(Z_EDGE + 4 + ROOM_DEPTH);
+	slab(map, new Vector3(0, 0, zMid), new Vector3(ROOM_HALF_WIDTH * 2, 2, ROOM_DEPTH + 4), Hull, "SpawnFloor");
+	wallWithGaps(map, true, zBack, -ROOM_HALF_WIDTH, ROOM_HALF_WIDTH, [], 0, ROOM_HEIGHT, Hull, 4);
+	for (const side of [-1, 1]) {
+		wallWithGaps(map, false, side * ROOM_HALF_WIDTH, z(Z_EDGE), zBack, [], 0, ROOM_HEIGHT, Hull, 4);
 	}
-
-	// A cargo stack where the bridge arrives, breaking the straight line down the bridge into
-	// the bay and giving cover in front of the flag.
-	slab(map, new Vector3(0, 8, z(124)), new Vector3(16, 8, 6), Panel, "CargoStack");
-	slab(map, new Vector3(-3, 13, z(124)), new Vector3(8, 5, 5), Panel, "CargoStack");
-}
-
-// An escape pod off the middle of a tube: a small room with its door onto the tube and a
-// spawn tucked beside the door, out of sight of the tube.
-function buildEscapePod(map: Model, side: number, sign: number) {
-	const z = sign * 75;
-	const podX = side * (TUBE_X + 15);
-	slab(map, new Vector3(podX, 0, z), new Vector3(14, 2, 18), Hull, "PodFloor");
-	slab(map, new Vector3(podX, TUBE_HEIGHT + 0.6, z), new Vector3(14, 0.6, 18), Panel, "PodRoof");
-	slab(map, new Vector3(podX + side * 7, TUBE_HEIGHT, z), new Vector3(1, TUBE_HEIGHT, 18), Hull, "PodWall");
-	for (const edge of [-1, 1]) {
-		slab(map, new Vector3(podX, TUBE_HEIGHT, z + edge * 9), new Vector3(14, TUBE_HEIGHT, 1), Hull, "PodWall");
-	}
-	const light = slab(map, new Vector3(podX, TUBE_HEIGHT - 0.1, z), new Vector3(2, 0.2, 10), Accent, "PodLight");
-	pointLight(light, ACCENT_LIGHT, 16, 1);
-	// Beside the door, not in line with it, so the tube can't see in.
-	spawnMarker(map, new Vector3(podX, 0, z + 6), new Vector3(side * TUBE_X, 0, z));
-}
-
-function buildConnectors(map: Model) {
-	for (const sign of [-1, 1]) {
-		const z = (distance: number) => sign * distance;
-
-		// Open-air bridge down the middle, with gaps in the railing.
-		slab(map, new Vector3(0, 0, z(82)), new Vector3(14, 2, 76), Hull, "Bridge");
-		for (const side of [-1, 1]) {
-			for (const along of [55, 80, 105]) {
-				slab(map, new Vector3(side * 7.5, 3, z(along)), new Vector3(0.5, 3, 10), Glass, "Railing");
-			}
-		}
-
-		// Cover on the bridge, offset to alternate sides.
-		for (const [along, side] of [
-			[65, -1],
-			[95, 1],
-		] as [number, number][]) {
-			slab(map, new Vector3(side * 3, 7, z(along)), new Vector3(6, 7, 2), Panel, "BridgeCover");
-		}
-
-		// Enclosed side tubes: glass on the space side, a walkable glass roof.
-		for (const side of [-1, 1]) {
-			const x = side * TUBE_X;
-			slab(map, new Vector3(x, 0, z(75)), new Vector3(14, 2, 100), Hull, "TubeFloor");
-			slab(map, new Vector3(x, 0, z(20)), new Vector3(14, 2, 12), Hull, "TubeFloor");
-			slab(
-				map,
-				new Vector3(x - side * 7.5, TUBE_HEIGHT, z(75)),
-				new Vector3(1, TUBE_HEIGHT, 100),
-				Hull,
-				"TubeWall",
-			);
-			// Glass on the space side, broken by the door to an escape pod at the middle.
-			for (const [from, to] of [
-				[25, 69],
-				[81, 125],
-			]) {
-				slab(
-					map,
-					new Vector3(x + side * 7.5, TUBE_HEIGHT, z((from + to) / 2)),
-					new Vector3(1, TUBE_HEIGHT, to - from),
-					Glass,
-					"TubeWindow",
-				);
-			}
-			buildEscapePod(map, side, sign);
-			// Bulkheads half-closing the tube on alternate sides, so it can't be watched end to end.
-			for (const [along, half] of [
-				[45, -1],
-				[105, 1],
-			] as [number, number][]) {
-				slab(
-					map,
-					new Vector3(x + half * 3.5, TUBE_HEIGHT, z(along)),
-					new Vector3(7, TUBE_HEIGHT, 1.5),
-					Hull,
-					"Bulkhead",
-				);
-			}
-			slab(map, new Vector3(x, TUBE_HEIGHT + 0.6, z(75)), new Vector3(16, 0.6, 100), Glass, "TubeRoof");
-			const strip = slab(
-				map,
-				new Vector3(x, TUBE_HEIGHT - 0.1, z(75)),
-				new Vector3(2, 0.2, 96),
-				Accent,
-				"TubeLight",
-			);
-			pointLight(strip, ACCENT_LIGHT, 30, 1);
-		}
-	}
-}
-
-function buildAtrium(map: Model) {
-	cylinder(map, Vector3.zero, 3, ATRIUM_RADIUS * 2, Hull, "Atrium");
-	ring(map, new Vector3(0, 0.1, 0), ATRIUM_RADIUS - 1, 0.6, 0.2, 32, Accent, "AtriumRing");
-
-	cylinder(map, new Vector3(0, 1, 0), 1, 20, Trim, "ReactorBase");
-	const core = cylinder(map, new Vector3(0, 40, 0), 39, 8, Reactor, "ReactorCore");
-	pointLight(core, ACCENT_LIGHT, 60, 3);
-	cylinder(map, new Vector3(0, 40, 0), 39, 14, Glass, "ReactorShell");
-
-	const balconyTop = new Vector3(0, BALCONY_HEIGHT, 0);
-	ring(map, balconyTop, BALCONY_RADIUS, 10, 1.5, 24, Panel, "Balcony");
-	ring(map, balconyTop.add(new Vector3(0, 3, 0)), BALCONY_RADIUS - 4.5, 0.5, 3, 24, Glass, "BalconyRailing");
-	for (let i = 0; i < 8; i++) {
-		const angle = (i / 8) * 2 * math.pi + math.pi / 8;
+	gableRoof(map, new CFrame(0, ROOM_HEIGHT, zMid), ROOM_HALF_WIDTH * 2 + 4, ROOM_DEPTH + 8, 25, Panel);
+	for (const [a, b] of DOORS) {
 		slab(
 			map,
-			onCircle(new Vector3(0, BALCONY_HEIGHT - 1.5, 0), BALCONY_RADIUS, angle),
-			new Vector3(2, 14.5, 2),
-			Trim,
-			"BalconySupport",
+			new Vector3((a + b) / 2, DOOR_HEIGHT, z(Z_EDGE + 16)),
+			new Vector3(b - a + 20, DOOR_HEIGHT, 2),
+			Hull,
+			"DoorBaffle",
 		);
 	}
+	for (const x of [-60, 0, 60]) stripLight(map, new Vector3(x, ROOM_HEIGHT - 1, zMid), new Vector3(10, 0.4, 2), 36);
 
-	for (let i = 0; i < 4; i++) {
-		const angle = math.pi / 4 + (i * math.pi) / 2;
-		jumpPad(map, onCircle(Vector3.zero, 20, angle), onCircle(balconyTop, BALCONY_RADIUS, angle), 8, Pad);
+	const row = zBack - sign * 6;
+	for (const x of [-15, -5, 5, 15]) {
+		spawnMarker(map, new Vector3(x, 0, row), new Vector3(x > 0 ? 90 : -90, 0, z(Z_EDGE)), team);
 	}
-
-	// Coolant pylons around the reactor, breaking the straight lines across the atrium.
-	for (let i = 0; i < 4; i++) {
-		const pylon = slab(
-			map,
-			onCircle(new Vector3(0, 12, 0), 27, (i * math.pi) / 2),
-			new Vector3(5, 12, 5),
-			Trim,
-			"Pylon",
-		);
-		const glow = slab(
-			map,
-			onCircle(new Vector3(0, 12.2, 0), 27, (i * math.pi) / 2),
-			new Vector3(5.4, 0.4, 5.4),
-			Accent,
-			"PylonCap",
-		);
-		pointLight(glow, ACCENT_LIGHT, 18, 1);
-		pylon.Name = "Pylon";
-	}
-
-	// Short gangways from the balcony down onto the tube roofs.
-	for (const x of [-1, 1]) {
-		for (const z of [-1, 1]) {
-			plank(
-				map,
-				new Vector3(x * 30.4, BALCONY_HEIGHT, z * 22.8),
-				new Vector3(x * TUBE_X, TUBE_HEIGHT + 0.6, z * 30),
-				4,
-				1,
-				Panel,
-				"Gangway",
-			);
-		}
+	for (const side of [-1, 1]) {
+		spawnMarker(map, new Vector3(side * 60, 0, row), new Vector3(side * 90, 0, z(Z_EDGE)));
 	}
 }
 
@@ -270,37 +232,40 @@ export const HalcyonStation: MapBuilder = {
 			modes: ["CTF", "Deathmatch", "TeamDeathmatch", "Domination", "Hardpoint"],
 			gravity: 120,
 			killHeight: -60,
+			// The glass roof isn't playable space.
+			playableTop: CAP + 2,
 			themeColor: Color3.fromRGB(90, 230, 220),
 			// Music: cold, spacious ambient electronic with a steady pulse. Pick a licensed Creator
 			// Store track (see docs/FEEDBACK.md).
 			music: "",
 		});
 
-		// Domination points, on the center line so neither side is closer.
-		controlPointMarker(map, new Vector3(-30, 0, 0), "A", 9, "Domination");
-		controlPointMarker(map, Vector3.zero, "B", 18, "Domination");
-		controlPointMarker(map, new Vector3(30, 0, 0), "C", 9, "Domination");
-		// Hardpoints: larger zones with cover, rotating center first and then alternating sides.
-		controlPointMarker(map, Vector3.zero, "1", 22, "Hardpoint");
-		controlPointMarker(map, new Vector3(-40, 0, 75), "2", 14, "Hardpoint");
-		controlPointMarker(map, new Vector3(40, 0, -75), "3", 14, "Hardpoint");
-		controlPointMarker(map, new Vector3(-40, 0, -75), "4", 14, "Hardpoint");
-		controlPointMarker(map, new Vector3(40, 0, 75), "5", 14, "Hardpoint");
-
-		// Perk orbs: strong perks at contested spots, team-side perks in mirrored pairs.
-		perkMarker(map, new Vector3(-20, 0, 0), "Overcharge");
-		perkMarker(map, new Vector3(20, 0, 0), "Radar");
-		perkMarker(map, new Vector3(0, 0, 80), "SuperJump");
-		perkMarker(map, new Vector3(0, 0, -80), "SuperJump");
-		perkMarker(map, new Vector3(-TUBE_X, 0, 75), "Shield");
-		perkMarker(map, new Vector3(TUBE_X, 0, -75), "Shield");
-
+		buildShell(map);
+		buildReactor(map);
+		buildCargo(map);
 		buildBay(map, "Red", 1);
 		buildBay(map, "Blue", -1);
-		buildConnectors(map);
-		buildAtrium(map);
 		// The crowd floats outside the station's windows.
-		spectatorRing(map, Vector3.zero, 220, 20, Color3.fromRGB(90, 230, 220));
+		spectatorRing(map, Vector3.zero, 290, 40, Color3.fromRGB(90, 230, 220));
+
+		// Domination points, on the center line so neither side is closer.
+		controlPointMarker(map, new Vector3(-120, 0, 0), "A", 14, "Domination");
+		controlPointMarker(map, new Vector3(0, CAP, 0), "B", 12, "Domination");
+		controlPointMarker(map, new Vector3(120, 0, 0), "C", 14, "Domination");
+		// Hardpoints: the reactor cap first, then the side lanes, alternating ends.
+		controlPointMarker(map, new Vector3(0, CAP, 0), "1", 14, "Hardpoint");
+		controlPointMarker(map, new Vector3(-120, 0, 100), "2", 16, "Hardpoint");
+		controlPointMarker(map, new Vector3(120, 0, -100), "3", 16, "Hardpoint");
+		controlPointMarker(map, new Vector3(-120, 0, -100), "4", 16, "Hardpoint");
+		controlPointMarker(map, new Vector3(120, 0, 100), "5", 16, "Hardpoint");
+
+		// Perk orbs: strong perks at contested spots, team-side perks in mirrored pairs.
+		perkMarker(map, new Vector3(0, CAP, 0), "Overcharge");
+		perkMarker(map, new Vector3(SHAFT_HALF + BALCONY_WIDTH / 2, BALCONY, 0), "Radar");
+		perkMarker(map, new Vector3(0, 0, 125), "SuperJump");
+		perkMarker(map, new Vector3(0, 0, -125), "SuperJump");
+		perkMarker(map, new Vector3(-120, 0, 40), "Shield");
+		perkMarker(map, new Vector3(120, 0, -40), "Shield");
 
 		setMapLighting(map, {
 			clockTime: 0,

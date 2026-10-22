@@ -70,14 +70,14 @@ across every floor). `npm run preview -- <MapId>` measures the same thing offlin
 
 Offline, from `npm run preview` (approximate; confirm in Studio with `/openness`):
 
-| Map             | Openness | Spawn exposure | Notes                                                                                                    |
-| --------------- | -------- | -------------- | -------------------------------------------------------------------------------------------------------- |
-| Bastion         | 17%      | 9%             | Meets both targets                                                                                       |
-| Gridline        | 26%      | 21%            | Covered arcades down both sides; spawns in pockets (was 31% and 90%)                                     |
-| Halcyon Station | 31%      | 10%            | Spawn pockets and escape pods; the walkable tube roofs and balcony stay open by design (was 40% and 86%) |
-| Infernal Spire  | 36%      | 10%            | Rebuilt for instagib: open octagonal hall, ring runway round the lava, spire tiers (was 19% and 10%)     |
-| Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map                                        |
-| Foundry         | 37%      | 16%            | Rebuilt for instagib: one open hall, rocket-jump tiers, spawn rooms behind the walls (was 10% and 18%)   |
+| Map             | Openness | Spawn exposure | Notes                                                                                                  |
+| --------------- | -------- | -------------- | ------------------------------------------------------------------------------------------------------ |
+| Bastion         | 17%      | 9%             | Meets both targets                                                                                     |
+| Gridline        | 26%      | 21%            | Covered arcades down both sides; spawns in pockets (was 31% and 90%)                                   |
+| Halcyon Station | 36%      | 14%            | Rebuilt for instagib: one hall round the reactor shaft, side-lane runways (was 31% and 10%)            |
+| Infernal Spire  | 36%      | 10%            | Rebuilt for instagib: open octagonal hall, ring runway round the lava, spire tiers (was 19% and 10%)   |
+| Skyreach        | 28%      | 14%            | Open-air sky islands; a little above target, by nature of the map                                      |
+| Foundry         | 37%      | 16%            | Rebuilt for instagib: one open hall, rocket-jump tiers, spawn rooms behind the walls (was 10% and 18%) |
 
 These were measured against the old 25% openness target. Free-for-all maps that scatter spawns
 everywhere score high on spawn exposure almost by design; openness is the clearer signal for
@@ -152,7 +152,20 @@ in the open field (90% exposure). It now has a covered neon arcade down each sid
 real lanes and widening it to 244. Base spawns sit behind a wall wider and taller than their
 line, and free-for-all spawns moved into pockets in the arcades' outer walls.
 
-**Halcyon Station**'s spawns lined each hangar bay facing straight down the open center bridge
+**Halcyon Station** was rebuilt for instagib in October 2026. Its tubes were 14 studs wide
+with bulkheads in them, the bridge 14 wide with cover on it, and the bays 110 wide: far too
+tight for low-gravity rocket jumps. Now it's one hall, 280 by 400, under a glass roof at 74
+with windows onto space down both sides. In the middle, a 100-stud shaft open to space, with
+the reactor rising out of it: two 24-wide bridges cross the shaft, a balcony rings it at 22,
+and the reactor's cap at 45 is the high point (pads from the bridges, or a rocket jump from
+the balcony). Low gravity makes a rocket jump climb about 34 studs, so tiers are further
+apart than on full-gravity maps. Four cargo modules (roofs at 18) are the floor's cover;
+40-stud side lanes down the windows run the full 400 as runways. Each end is a hangar bay
+with the flag on a raised dock and the spawn room behind the end wall, entered past baffles
+as on Foundry. Cargo modules 36 by 50 measured 34% open; 30 by 40 measure 36%. The flags are
+350 studs apart, as before; CTF route lengths are still to be revisited (see DOMED scale).
+
+The previous version's history: **Halcyon Station**'s spawns lined each hangar bay facing straight down the open center bridge
 into the other bay (86% exposure). Bay spawns now sit in a pocket behind a wall wider than
 their line; cargo stacks where the bridge meets each bay break the 348-stud straight line; and
 free-for-all spawns moved from the open balcony into escape pods off the glass tubes (10%).
@@ -231,7 +244,7 @@ can't.
 | Bastion         | The big 5v5 map: two fortresses, three lanes           | Classic CTF                | CTF, Team Deathmatch, Domination, Hardpoint |
 | Infernal Spire  | Lava hall: ring runway round the lake, climb the spire | King of the hill           | Deathmatch, Team Deathmatch, Domination     |
 | Gridline        | Mid-size synthwave map built around a speed trench     | Speed lanes                | All five                                    |
-| Halcyon Station | Low-gravity station interiors: hangars, tubes, reactor | Indoor low gravity         | All five                                    |
+| Halcyon Station | Low-gravity station hall round an open reactor shaft   | Indoor low gravity         | All five                                    |
 | Skyreach        | Floating sky islands linked by jump pads, air control  | Quake 3's The Longest Yard | Deathmatch, Team Deathmatch, Domination     |
 | Foundry         | Open forge hall around a molten pit, rocket-jump tiers | Rocket-jump arena          | Deathmatch, Team Deathmatch, Hardpoint      |
 
